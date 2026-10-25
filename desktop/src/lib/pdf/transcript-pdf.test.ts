@@ -106,6 +106,13 @@ describe('transcript pdf', () => {
 		expect(readsInOrder(text, ENGLISH[0].text)).toBe(true)
 	}, 30_000)
 
+	// Regression: a font without Cyrillic kept only the low byte of each code point ("блин" -> "1;8=").
+	it('renders Cyrillic text intact', async () => {
+		const segments: Segment[] = [{ start: 0, stop: 3000, text: 'Привет, блин! Ёжик съел яблоко.', speaker: 0 }]
+		const text = await extractText(await renderPdf(segments, 'ltr'))
+		expect(readsInOrder(text, segments[0].text)).toBe(true)
+	}, 30_000)
+
 	it('keeps the fonts embedded, so the text is real rather than an image', async () => {
 		const pdf = await renderPdf(HEBREW, 'rtl')
 		expect(Buffer.from(pdf).subarray(0, 5).toString()).toBe('%PDF-')
