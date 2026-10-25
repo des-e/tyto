@@ -733,5 +733,12 @@
 	"whatsNew": "What's new",
 	"basedOnVibe": "Based on Vibe (MIT) — thanks to its author",
 	"diarizeDownloadFailed": "Couldn't download the speaker separation model — turn speakers on later in settings",
-	"diarizeModelMissing": "Speaker separation model not found — turn speakers on again in settings"
+	"diarizeModelMissing": "Speaker separation model not found — turn speakers on again in settings",
+	"playFromTime": "Play from {time}",
+	"topicsTab": "Topics",
+	"topicsComingSoon": "Topics with timecodes are coming later",
+	"transcriptTabs": "Document view",
+	"meetingLanguage": "Meeting language",
+	"filesStayLocal": "Files never leave your computer",
+	"closeSearch": "Close search"
 }

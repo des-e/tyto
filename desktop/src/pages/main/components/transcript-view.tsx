@@ -1,12 +1,14 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { defaultRangeExtractor, useVirtualizer, type Range as VirtualRange } from '@tanstack/react-virtual'
-import { ArrowDownToLine, AudioLines, Play } from 'lucide-react'
+import { ArrowDownToLine, AudioLines } from 'lucide-react'
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { m } from '~/paraglide/messages.js'
 import { getLocale, getTextDirection } from '~/paraglide/runtime.js'
 import { Button } from '~/components/ui/button'
 import { formatTimestamp, type Segment, type SpeakerNames } from '~/lib/transcript'
 import { cn } from '~/lib/style'
+import { seriesStarts } from '~/lib/tyto/group-replicas'
+import { ScriptLine } from '~/lib/tyto/script-line'
 import { usePreferenceProvider } from '~/providers/preference'
 import { useSession } from '../session'
 import type { Job } from '../hooks/use-transcribe-queue'
@@ -222,6 +224,9 @@ interface SegmentBlockProps {
 	editable: boolean
 	editing: EditTarget | null
 	active: boolean
+	/** opens a run of one speaker's lines (lib/tyto/group-replicas) */
+	seriesStart: boolean
+	first: boolean
 	options: TranscriptViewOptions
 	speakerNames?: SpeakerNames
 	/** Every speaker index the transcript knows, so a line can be moved to one of them. */
@@ -242,6 +247,8 @@ const SegmentBlock = memo(function SegmentBlock({
 	editable,
 	editing,
 	active,
+	seriesStart,
+	first,
 	options,
 	speakerNames,
 	speakers,
@@ -276,93 +283,61 @@ const SegmentBlock = memo(function SegmentBlock({
 
 	const timestamp = formatTimestamp(segment.start, false, '', false)
 
+	// Tyto: the line renders as a script row (lib/tyto/script-line.tsx); the name shows once per series.
+	const speakerLabel = options.showSpeakers ? (
+		<SpeakerLabel
+			speaker={segment.speaker}
+			speakers={speakers}
+			speakerNames={speakerNames}
+			editable={editable}
+			onRename={onRenameSpeaker}
+			onAssign={(speaker) => onAssignSpeaker(index, speaker)}
+		/>
+	) : null
+
 	return (
-		<motion.div
-			data-segment-index={index}
-			initial={animate ? { opacity: 0, y: 4 } : false}
-			animate={{ opacity: 1, y: 0 }}
-			transition={{ duration: 0.15, ease: 'easeOut' }}
-			className={cn(
-				'group relative -mx-3 flex gap-3 rounded-xl px-3 py-2 transition-colors duration-150',
-				!active && editable && !isEditing && 'hover:bg-muted/40',
-			)}>
-			{/*
-			 * The line being spoken gets a wash that fades out along the text instead of a block of
-			 * colour with a hard edge — it reads as lighting rather than selection, and it can cross-fade.
-			 */}
-			<span
-				aria-hidden
-				className={cn(
-					'pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-r from-foreground/[0.07] via-foreground/[0.04] to-transparent transition-opacity duration-500 ease-out rtl:bg-gradient-to-l',
-					active ? 'opacity-100' : 'opacity-0',
-				)}
-			/>
-
-			{/* Gutter: the timestamp doubles as the play button, so playing a line is one click. */}
-			<button
-				type="button"
-				onClick={seek}
-				aria-label={m.playFromHere()}
-				title={timestamp}
-				className={cn(
-					'group/play relative z-10 mt-[3px] flex h-5 shrink-0 cursor-pointer items-center justify-end rounded-sm font-mono text-[11px] tracking-tight tabular-nums transition-colors duration-150 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/80',
-					options.showTimestamps ? 'w-[52px]' : 'w-4',
-					active ? 'text-primary' : 'text-muted-foreground hover:text-foreground',
-				)}>
-				{options.showTimestamps && <span className="transition-opacity duration-150 group-hover/play:opacity-0">{timestamp}</span>}
-				<Play
-					aria-hidden
-					className={cn(
-						'h-3 w-3 fill-current transition-opacity duration-150',
-						options.showTimestamps ? 'absolute end-0 opacity-0 group-hover/play:opacity-100' : 'opacity-0 group-hover:opacity-100',
-					)}
+		<ScriptLine
+			index={index}
+			time={timestamp}
+			showTime={options.showTimestamps}
+			active={active}
+			seriesStart={seriesStart}
+			first={first}
+			animate={animate}
+			onSeek={seek}
+			header={seriesStart ? speakerLabel : null}
+			aside={!seriesStart && editable && !isEditing ? speakerLabel : null}>
+			{editing ? (
+				<SegmentEditor
+					initialText={text}
+					caret={editing.caret}
+					textSizeClassName={textSizeClass[options.textSize]}
+					onCommit={(next, then) => onCommit(index, next, then)}
+					onCancel={onCancel}
+					onMove={(direction, caret) => onMove(index, direction, caret)}
 				/>
-			</button>
-
-			<div className="relative min-w-0 flex-1">
-				{options.showSpeakers && (
-					<SpeakerLabel
-						speaker={segment.speaker}
-						speakers={speakers}
-						speakerNames={speakerNames}
-						editable={editable}
-						onRename={onRenameSpeaker}
-						onAssign={(speaker) => onAssignSpeaker(index, speaker)}
-					/>
-				)}
-
-				{editing ? (
-					<SegmentEditor
-						initialText={text}
-						caret={editing.caret}
-						textSizeClassName={textSizeClass[options.textSize]}
-						onCommit={(next, then) => onCommit(index, next, then)}
-						onCancel={onCancel}
-						onMove={(direction, caret) => onMove(index, direction, caret)}
-					/>
-				) : (
-					<span
-						ref={textRef}
-						role={editable ? 'textbox' : undefined}
-						tabIndex={editable ? 0 : undefined}
-						onClick={editable ? beginEditFromPointer : undefined}
-						onKeyDown={(event) => {
-							if (!editable) return
-							if (event.key === 'Enter') {
-								event.preventDefault()
-								onStartEdit(index, 'end')
-							}
-						}}
-						className={cn(
-							'block whitespace-pre-wrap text-foreground',
-							textSizeClass[options.textSize],
-							editable && 'cursor-text rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60',
-						)}>
-						<Highlight text={text} query={query} />
-					</span>
-				)}
-			</div>
-		</motion.div>
+			) : (
+				<span
+					ref={textRef}
+					role={editable ? 'textbox' : undefined}
+					tabIndex={editable ? 0 : undefined}
+					onClick={editable ? beginEditFromPointer : undefined}
+					onKeyDown={(event) => {
+						if (!editable) return
+						if (event.key === 'Enter') {
+							event.preventDefault()
+							onStartEdit(index, 'end')
+						}
+					}}
+					className={cn(
+						'block whitespace-pre-wrap text-foreground',
+						textSizeClass[options.textSize],
+						editable && 'cursor-text rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60',
+					)}>
+					<Highlight text={text} query={query} />
+				</span>
+			)}
+		</ScriptLine>
 	)
 })
 
@@ -404,6 +379,7 @@ export default function TranscriptView({
 		if (!query) return all
 		return all.filter(({ segment }) => segment.text.toLowerCase().includes(query.toLowerCase()))
 	}, [job.segments, query])
+	const starts = useMemo(() => seriesStarts(visible.map((entry) => entry.segment)), [visible])
 
 	const editingVisibleIndex = useMemo(() => (editing ? visible.findIndex((entry) => entry.index === editing.index) : -1), [editing, visible])
 	const extractRange = useCallback(
@@ -619,7 +595,7 @@ export default function TranscriptView({
 	return (
 		<div className="relative h-full min-h-0">
 			<div ref={scrollRef} onScroll={onScroll} className="transcript-editor h-full min-h-0 overflow-x-hidden overflow-y-auto">
-				<div dir={preference.textAreaDirection} className="mx-auto w-full max-w-[86ch] px-8 py-10 xl:max-w-[96ch]">
+				<div dir={preference.textAreaDirection} className="tyto-script-doc mx-auto w-full max-w-[86ch] px-8 py-10 xl:max-w-[96ch]">
 					<ProjectNameEditor
 						name={job.name}
 						disabled={job.status === 'queued' || job.status === 'running'}
@@ -672,6 +648,8 @@ export default function TranscriptView({
 										editable={editable}
 										editing={editing?.index === index ? editing : null}
 										active={activeIndex === index}
+										seriesStart={starts[virtualRow.index] ?? true}
+										first={virtualRow.index === 0}
 										options={options}
 										speakerNames={job.speakerNames}
 										speakers={speakers}

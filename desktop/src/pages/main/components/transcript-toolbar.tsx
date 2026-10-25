@@ -10,6 +10,7 @@ import { Spinner } from '~/components/ui/spinner'
 import { Switch } from '~/components/ui/switch'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip'
 import { cn } from '~/lib/style'
+import { TranscriptTabs } from '~/lib/tyto/transcript-tabs'
 import type { TextFormat } from '~/components/format-select'
 import type { Job } from '../hooks/use-transcribe-queue'
 import type { TranscriptTab, TranscriptTextSize, TranscriptViewOptions } from '../hooks/use-transcript-view'
@@ -34,7 +35,7 @@ function ViewOptions({ options }: { options: TranscriptViewOptions }) {
 			<Tooltip>
 				<TooltipTrigger asChild>
 					<PopoverTrigger asChild>
-						<Button variant="ghost" size="sm" className="rounded-full px-3 text-[13px] font-medium" aria-label={m.viewOptions()}>
+						<Button variant="ghost" size="md" iconOnly aria-label={m.viewOptions()}>
 							<Settings2 className="h-3.5 w-3.5" />
 						</Button>
 					</PopoverTrigger>
@@ -138,7 +139,7 @@ function SummaryMenu({ job, tab, setTab }: { job: Job | null; tab: TranscriptTab
 				<Tooltip>
 					<TooltipTrigger asChild>
 						<PopoverTrigger asChild>
-							<Button variant="ghost" size="sm" className="rounded-full px-3 text-[13px] font-medium" aria-label={actionLabel}>
+							<Button variant="ghost" size="sm" aria-label={actionLabel}>
 								{summarizing ? <Spinner className="h-3.5 w-3.5" /> : <NotebookPen className="h-3.5 w-3.5" />}
 								{actionLabel}
 							</Button>
@@ -302,7 +303,7 @@ export default function TranscriptToolbar({
 								placeholder={m.searchTranscript()}
 								className="h-9 w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
 							/>
-							<Button variant="ghost" size="iconSm" onClick={closeSearch} className="rounded-full">
+							<Button variant="ghost" size="sm" iconOnly aria-label={m.closeSearch()} onClick={closeSearch}>
 								<X className="h-4 w-4" />
 							</Button>
 						</motion.div>
@@ -314,11 +315,12 @@ export default function TranscriptToolbar({
 							exit={{ opacity: 0, y: -4 }}
 							transition={{ duration: 0.15, ease: 'easeOut' }}
 							className="flex w-full items-center gap-1">
+							<TranscriptTabs tab={tab} setTab={setTab} summaryReady={Boolean(job?.summary)} />
 							{queue.jobs.length > 1 ? (
 								/* A batch: the same word, with everything that writes files behind it. */
 								<DropdownMenu>
 									<DropdownMenuTrigger asChild>
-										<Button variant="ghost" size="sm" className="rounded-full px-3 text-[13px] font-medium">
+										<Button variant="secondary" size="sm">
 											<Download className="h-3.5 w-3.5" />
 											{m.exportDialogTitle()}
 											<ChevronDown className="h-3 w-3 opacity-70" />
@@ -345,23 +347,13 @@ export default function TranscriptToolbar({
 									</DropdownMenuContent>
 								</DropdownMenu>
 							) : (
-								<Button
-									variant="ghost"
-									size="sm"
-									onClick={openExport}
-									disabled={!hasExportContent}
-									className="rounded-full px-3 text-[13px] font-medium">
+								<Button variant="secondary" size="sm" onClick={openExport} disabled={!hasExportContent}>
 									<Download className="h-3.5 w-3.5" />
 									{m.exportDialogTitle()}
 								</Button>
 							)}
 
-							<Button
-								variant="ghost"
-								size="sm"
-								onClick={() => setSearching(true)}
-								disabled={!hasText}
-								className="rounded-full px-3 text-[13px] font-medium">
+							<Button variant="ghost" size="md" iconOnly aria-label={m.searchTranscript()} onClick={() => setSearching(true)} disabled={!hasText}>
 								<Search className="h-3.5 w-3.5" />
 							</Button>
 
@@ -375,12 +367,11 @@ export default function TranscriptToolbar({
 										variant="ghost"
 										size="sm"
 										onClick={queue.cancelAll}
-										disabled={queue.isAborting}
-										className={cn('rounded-full px-3 text-[13px] font-medium text-muted-foreground hover:text-destructive')}>
+										disabled={queue.isAborting}>
 										{queue.isAborting ? m.aborting() : m.cancel()}
 									</Button>
 								)}
-								<Button variant="ghost" size="sm" onClick={startNew} className="rounded-full px-3 text-[13px] font-medium">
+								<Button variant="ghost" size="sm" onClick={startNew}>
 									<Plus className="h-3.5 w-3.5" />
 									{m.newSession()}
 								</Button>

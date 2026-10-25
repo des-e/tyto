@@ -472,3 +472,377 @@ svg.lucide {
 		transform: translateX(50%);
 	}
 }
+
+/*
+ * Transcript as a script (lib/tyto/script-line.tsx, difference 6). The time sits in a 64 px gutter,
+ * 12 px from the text, and shows «▶ 01:32» on hover. The name is shown once per series; lines of one
+ * speaker are 4 px apart (the list gap), a new speaker starts 20 + 4 px lower. The current line gets a
+ * 2 px rule at its start edge. No grey plates.
+ */
+.tyto-script-doc > :is(button, input, p),
+.tyto-script-doc > .animate-pulse {
+	margin-inline-start: 76px;
+	max-width: calc(100% - 76px);
+}
+
+.tyto-script-line {
+	position: relative;
+	display: grid;
+	grid-template-columns: 64px minmax(0, 1fr);
+	column-gap: var(--tyto-sp-12);
+}
+
+.tyto-script-line[data-gap='speaker'] {
+	padding-top: 20px;
+}
+
+.tyto-script-gutter {
+	display: flex;
+	justify-content: flex-end;
+	align-items: flex-start;
+}
+
+.tyto-script-time {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--tyto-sp-4);
+	height: 20px;
+	margin-top: 3px;
+	padding: 0 var(--tyto-sp-2);
+	border-radius: var(--tyto-r-xs);
+	font-size: 12px;
+	line-height: 1;
+	font-variant-numeric: tabular-nums;
+	color: var(--muted-foreground);
+	cursor: pointer;
+	user-select: none;
+	transition: color 150ms var(--tyto-ease);
+}
+
+/* With a name above the line, the time lines up with the name instead. */
+.tyto-script-line:has(.tyto-script-who > *) .tyto-script-time {
+	margin-top: 0;
+}
+
+.tyto-script-time:focus-visible {
+	outline: 2px solid var(--foreground);
+	outline-offset: 2px;
+}
+
+.tyto-script-play {
+	width: 11px;
+	height: 11px;
+	fill: currentColor;
+	stroke: none;
+	opacity: 0;
+	transition: opacity 150ms var(--tyto-ease);
+}
+
+.tyto-script-line:hover .tyto-script-time,
+.tyto-script-time:focus-visible,
+.tyto-script-line[data-active='true'] .tyto-script-time {
+	color: var(--foreground);
+}
+
+.tyto-script-line[data-active='true'] .tyto-script-time {
+	font-weight: 500;
+}
+
+.tyto-script-line:hover .tyto-script-play,
+.tyto-script-time:focus-visible .tyto-script-play {
+	opacity: 1;
+}
+
+.tyto-script-who {
+	display: flex;
+	margin-bottom: var(--tyto-sp-4);
+}
+
+.tyto-script-who:empty {
+	display: none;
+}
+
+.tyto-script-text {
+	position: relative;
+	max-width: 640px;
+}
+
+.tyto-script-text::before {
+	content: '';
+	position: absolute;
+	inset-inline-start: calc(-1 * var(--tyto-sp-12));
+	top: 5px;
+	bottom: 5px;
+	width: 2px;
+	border-radius: 2px;
+	background: var(--foreground);
+	opacity: 0;
+	transition: opacity 200ms var(--tyto-ease);
+}
+
+.tyto-script-line[data-active='true'] .tyto-script-text::before {
+	opacity: 1;
+}
+
+/* A line inside a series can still be moved to another speaker: the chip appears on hover only. */
+.tyto-script-aside {
+	position: absolute;
+	top: 0;
+	inset-inline-end: 0;
+	padding-inline-start: var(--tyto-sp-8);
+	background: var(--background);
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 150ms var(--tyto-ease);
+}
+
+.tyto-script-line:hover .tyto-script-aside,
+.tyto-script-aside:focus-within,
+.tyto-script-aside:has([data-state='open']) {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+/* Speaker name in front of the series (speaker-label.tsx). */
+.tyto-who {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--tyto-sp-8);
+	height: 20px;
+	font-size: 13.5px;
+	line-height: 20px;
+	font-weight: 600;
+	color: var(--foreground);
+}
+
+/* Speaker mark (difference 7): 18 px square, filled / outlined / grey, tells speakers apart without colour. */
+.tyto-speaker-mark {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	min-width: 18px;
+	height: 18px;
+	padding: 0 var(--tyto-sp-2);
+	border-radius: var(--tyto-r-xs);
+	font-size: 10.5px;
+	line-height: 1;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+	print-color-adjust: exact;
+	-webkit-print-color-adjust: exact;
+}
+
+.tyto-speaker-mark[data-tone='filled'] {
+	background: var(--foreground);
+	color: var(--background);
+}
+
+.tyto-speaker-mark[data-tone='outline'] {
+	border: 1.5px solid var(--foreground);
+	color: var(--foreground);
+}
+
+.tyto-speaker-mark[data-tone='grey'] {
+	background: var(--tyto-line2);
+	color: var(--foreground);
+}
+
+/*
+ * Text tabs «Текст / Сводка / Темы» (lib/tyto/transcript-tabs.tsx, difference 10): the full height of
+ * the toolbar, a 2 px rule under the active tab sitting on the toolbar's bottom line.
+ */
+.tyto-tabs {
+	display: flex;
+	align-self: stretch;
+	height: calc(var(--tyto-bar-h) - 1px);
+}
+
+.tyto-tab {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	height: 100%;
+	padding: 0 var(--tyto-sp-12);
+	border: 0;
+	background: none;
+	font-size: 13.5px;
+	color: var(--muted-foreground);
+	cursor: pointer;
+	transition: color 150ms var(--tyto-ease);
+}
+
+.tyto-tab:hover:not(:disabled) {
+	color: var(--foreground);
+}
+
+.tyto-tab[aria-selected='true'] {
+	color: var(--foreground);
+	font-weight: 500;
+}
+
+.tyto-tab[aria-selected='true']::after {
+	content: '';
+	position: absolute;
+	inset-inline: var(--tyto-sp-12);
+	bottom: -1px;
+	height: 2px;
+	border-radius: 2px;
+	background: var(--foreground);
+}
+
+.tyto-tab:disabled {
+	color: var(--tyto-disabled-fg);
+	cursor: not-allowed;
+}
+
+.tyto-tab:focus-visible {
+	outline: 2px solid var(--foreground);
+	outline-offset: -4px;
+	border-radius: var(--tyto-r-sm);
+}
+
+/*
+ * Empty main screen (lib/tyto/empty-screen.tsx, difference 9): no dashed card, the whole right-hand
+ * area takes the file. While a file is dragged over the window a quiet tint fills the area.
+ */
+.tyto-empty {
+	position: relative;
+	display: flex;
+	flex: 1;
+	min-height: 0;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: var(--tyto-sp-48) var(--tyto-sp-24) 64px;
+	text-align: center;
+	overflow-y: auto;
+}
+
+.tyto-empty > :not(.tyto-empty-drop, .tyto-empty-local) {
+	position: relative;
+}
+
+.tyto-empty-drop {
+	position: absolute;
+	inset: var(--tyto-sp-16);
+	border: 1px solid var(--tyto-line2);
+	border-radius: var(--tyto-r-lg);
+	background: color-mix(in srgb, var(--foreground) 5%, transparent);
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 200ms var(--tyto-ease);
+}
+
+.tyto-empty[data-dragging='true'] .tyto-empty-drop {
+	opacity: 1;
+}
+
+.tyto-empty-owl {
+	width: 44px;
+	height: 60px;
+	color: var(--foreground);
+}
+
+.tyto-empty-title {
+	margin: var(--tyto-sp-24) 0 var(--tyto-sp-8);
+	color: var(--foreground);
+}
+
+.tyto-empty-lead {
+	max-width: 420px;
+	margin: 0;
+	font-size: 14px;
+	line-height: 1.5;
+	color: var(--muted-foreground);
+}
+
+.tyto-empty-actions {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: var(--tyto-sp-8);
+	margin-top: var(--tyto-sp-24);
+}
+
+.tyto-empty-panel {
+	width: 100%;
+	max-width: 576px;
+	margin-top: var(--tyto-sp-24);
+	padding: var(--tyto-sp-16) var(--tyto-sp-24);
+	border: 1px solid var(--border);
+	border-radius: var(--tyto-r-lg);
+	text-align: start;
+}
+
+.tyto-empty-options {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	gap: var(--tyto-sp-4);
+	margin-top: var(--tyto-sp-24);
+	font-size: 13px;
+	color: var(--muted-foreground);
+}
+
+/* QuietRow's language pill and «Еще настройки» button read as links here, separated by a dot. */
+.tyto-empty-options > div {
+	gap: var(--tyto-sp-4);
+}
+
+.tyto-empty-options > div > div {
+	display: inline-flex;
+	align-items: center;
+	max-width: none;
+}
+
+.tyto-empty-options > div > div::after {
+	content: '·';
+	margin-inline-start: var(--tyto-sp-4);
+	color: var(--muted-foreground);
+}
+
+.tyto-empty-options :is(div, button)[class*='rounded-full'] {
+	width: auto;
+	height: auto;
+	padding: 0;
+	border: 0;
+	border-radius: var(--tyto-r-xs);
+	background: transparent;
+	color: var(--foreground);
+	font-size: 13px;
+	font-weight: 400;
+	text-decoration: underline;
+	text-decoration-color: var(--tyto-line2);
+	text-underline-offset: 3px;
+}
+
+.tyto-empty-options :is(div, button)[class*='rounded-full']:hover {
+	background: transparent;
+	color: var(--foreground);
+	text-decoration-color: currentColor;
+}
+
+.tyto-empty-options div[class*='rounded-full']:has(input) {
+	min-width: 180px;
+}
+
+.tyto-empty-options svg.lucide {
+	display: none;
+}
+
+.tyto-empty-local {
+	position: absolute;
+	bottom: var(--tyto-sp-24);
+	margin: 0;
+	font-size: 12px;
+	color: var(--muted-foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	:is(.tyto-script-time, .tyto-script-play, .tyto-script-text, .tyto-script-aside, .tyto-tab, .tyto-empty-drop),
+	.tyto-script-text::before {
+		transition: none;
+	}
+}

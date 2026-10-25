@@ -5,6 +5,7 @@ import { Input } from '~/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover'
 import { speakerName, type SpeakerNames } from '~/lib/transcript'
 import { cn } from '~/lib/style'
+import { SpeakerMark } from '~/lib/tyto/speaker-mark'
 
 interface SpeakerLabelProps {
 	/** This line's speaker; undefined when diarization left the line unattributed. */
@@ -19,7 +20,8 @@ interface SpeakerLabelProps {
 	onAssign: (speaker: number) => void
 }
 
-const chipClass = 'me-2 align-baseline text-[11px] font-semibold text-muted-foreground'
+// Tyto: name with a speaker mark, theme.css `.tyto-who`.
+const chipClass = 'tyto-who'
 const interactiveChipClass =
 	'-mx-1 cursor-pointer rounded-md px-1 transition-colors duration-150 hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/80'
 
@@ -42,7 +44,13 @@ export function SpeakerLabel({ speaker, speakers, speakerNames, editable, onRena
 	}, [current, open])
 
 	if (speaker == null && (!editable || speakers.length === 0)) return null
-	if (speaker != null && !editable) return <span className={chipClass}>{speakerName(speaker, label, speakerNames)}</span>
+	if (speaker != null && !editable)
+		return (
+			<span className={chipClass}>
+				<SpeakerMark speaker={speaker} name={speakerName(speaker, label, speakerNames)} />
+				{speakerName(speaker, label, speakerNames)}
+			</span>
+		)
 
 	function saveName() {
 		if (speaker != null) onRename(speaker, draft)
@@ -69,6 +77,7 @@ export function SpeakerLabel({ speaker, speakers, speakerNames, editable, onRena
 			<PopoverTrigger asChild>
 				{speaker != null ? (
 					<button type="button" title={m.renameSpeaker()} className={cn(chipClass, interactiveChipClass)}>
+						<SpeakerMark speaker={speaker} name={speakerName(speaker, label, speakerNames)} />
 						{speakerName(speaker, label, speakerNames)}
 					</button>
 				) : (

@@ -1,16 +1,15 @@
 import { listen } from '@tauri-apps/api/event'
 import { AnimatePresence, motion } from 'framer-motion'
-import { FolderOpen, Link2, Mic, Plus, Square, Upload, X } from 'lucide-react'
+import { Link2, Mic, Plus, Square, X } from 'lucide-react'
 import { siFacebook, siInstagram, siTiktok, siX, siYoutube } from 'simple-icons'
 import { useEffect, useRef, useState } from 'react'
 import { m } from '~/paraglide/messages.js'
 import AudioDeviceInput from '~/components/audio-device-input'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
-import { Spinner } from '~/components/ui/spinner'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip'
 import { cn } from '~/lib/style'
-import { OwlMark } from '~/lib/tyto/owl-mark'
+import { EmptyScreen } from '~/lib/tyto/empty-screen'
 import { parseMediaLinks } from '~/lib/ytdlp'
 import { useSession, type IdlePanel } from '../session'
 import QuietRow from './quiet-row'
@@ -78,28 +77,6 @@ function LevelMeter() {
 				/>
 			))}
 		</span>
-	)
-}
-
-/** One segment of the joined source switcher: icon-only keys, the active one reads as raised. */
-function Segment({ active, label, onClick, children }: { active?: boolean; label: string; onClick: () => void; children: React.ReactNode }) {
-	return (
-		<Tooltip>
-			<TooltipTrigger asChild>
-				<button
-					type="button"
-					aria-pressed={active}
-					aria-label={label}
-					onClick={onClick}
-					className={cn(
-						'inline-flex h-10 w-14 cursor-pointer items-center justify-center rounded-full transition-colors duration-150',
-						active ? 'tyto-selected' : 'text-muted-foreground hover:text-foreground',
-					)}>
-					{children}
-				</button>
-			</TooltipTrigger>
-			<TooltipContent side="bottom">{label}</TooltipContent>
-		</Tooltip>
 	)
 }
 
@@ -328,74 +305,16 @@ export default function IdleHero() {
 		if (next === 'link') void link.switchToLinkTab()
 	}
 
+	// Tyto: the empty screen layout lives in lib/tyto/empty-screen.tsx; the panels and the drop target stay upstream.
 	return (
-		// One optical column: pills, active source and quiet row all span max-w-xl with a 20px rhythm.
-		// The extra bottom padding lifts the column above the true centre — optically centred reads better.
-		<div className="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center gap-5 px-6 pt-4 pb-[30vh]">
-			<OwlMark className="mx-auto h-16 w-auto text-foreground" />
-			{/* Joined source switcher: one control, three keys; the active source replaces the drop area. */}
-			<div className="mx-auto inline-flex items-center gap-1 rounded-full border border-border bg-muted/60 p-1">
-				<Segment active={panel === 'none'} label={m.fromFile()} onClick={() => selectPanel('none')}>
-					<FolderOpen className="h-[18px] w-[18px]" />
-				</Segment>
-				<Segment active={panel === 'record'} label={m.record()} onClick={() => selectPanel('record')}>
-					<Mic className="h-[18px] w-[18px]" />
-				</Segment>
-				<Segment active={panel === 'link'} label={m.fromLink()} onClick={() => selectPanel('link')}>
-					<Link2 className="h-[18px] w-[18px]" />
-				</Segment>
-			</div>
-
-			{/* Fixed-height slot sized to the drop zone so switching sources never moves the pills or the quiet row. */}
-			<div className="flex min-h-[220px] w-full flex-col justify-center">
-				<AnimatePresence mode="wait" initial={false}>
-					{panel === 'none' ? (
-						<motion.button
-							key="drop"
-							type="button"
-							onClick={() => void browse()}
-							initial={{ opacity: 0, y: 6 }}
-							animate={{ opacity: 1, y: 0 }}
-							exit={{ opacity: 0, y: -6 }}
-							transition={{ duration: 0.18, ease: 'easeOut' }}
-							className={cn(
-								'group relative cursor-pointer overflow-hidden rounded-[1.25rem] border-2 border-dashed transition-colors duration-150',
-								dragging ? 'border-foreground/40' : 'border-border bg-muted/30 hover:border-foreground/25 hover:bg-muted/50',
-							)}>
-							{/* The aurora is drag feedback only — at rest the zone stays a quiet surface. */}
-							<div
-								className={cn(
-									'aurora pointer-events-none absolute inset-0 transition-opacity duration-200',
-									dragging ? 'opacity-100' : 'opacity-0',
-								)}
-							/>
-
-							<div className="relative flex flex-col items-center gap-3.5 px-8 py-12 text-center">
-								<span className="flex h-12 w-12 items-center justify-center rounded-full bg-background/70 text-foreground shadow-sm">
-									{collectingFolder ? <Spinner className="h-5 w-5" /> : <Upload className="h-5 w-5" />}
-								</span>
-								<div className="space-y-1">
-									<h1 className="text-xl font-semibold tracking-[-0.02em] text-foreground">{m.dropFilesHere()}</h1>
-									<p className="text-[13px] text-muted-foreground">{m.orClickToBrowse()}</p>
-								</div>
-							</div>
-						</motion.button>
-					) : (
-						<motion.div
-							key={panel}
-							initial={{ opacity: 0, y: 6 }}
-							animate={{ opacity: 1, y: 0 }}
-							exit={{ opacity: 0, y: -6 }}
-							transition={{ duration: 0.18, ease: 'easeOut' }}
-							// Same footprint as the drop zone so the composition stays anchored.
-							className="flex min-h-[220px] w-full flex-col justify-center rounded-[1.25rem] border border-border bg-muted/30 px-7">
-							{panel === 'record' ? <RecordPanel /> : <LinkPanel />}
-						</motion.div>
-					)}
-				</AnimatePresence>
-			</div>
-
-			<QuietRow />
-		</div>
+		<EmptyScreen
+			dragging={dragging}
+			collectingFolder={collectingFolder}
+			panel={panel}
+			onBrowse={() => void browse()}
+			onSelectPanel={selectPanel}
+			panelContent={panel === 'record' ? <RecordPanel /> : panel === 'link' ? <LinkPanel /> : null}
+			options={<QuietRow />}
+		/>
 	)
 }
