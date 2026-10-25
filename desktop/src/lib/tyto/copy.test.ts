@@ -15,6 +15,8 @@ const en = read('en-US')
 const COPY: Array<[string, string]> = [
 	['setup', 'Первый запуск'],
 	['downloadingModel', 'Готовим Tyto к работе'],
+	['downloadingDiarizeModel', 'Скачиваем модель для разделения по говорящим…'],
+	['downloading', 'Скачиваем… {progress}%'],
 	['thisHappensOnce', 'Это нужно один раз. Дальше Tyto работает без интернета.'],
 	['infoCancelDownload', 'Модель можно скачать позже в настройках или указать свой файл.'],
 	['noConnection', 'Нет подключения к интернету'],
@@ -95,6 +97,7 @@ const COPY: Array<[string, string]> = [
 	['aiProxyFormat', 'Формат'],
 	['aiProxyLabel', 'Прокси-сервис'],
 	['aiProxyNoAddress', 'Укажите адрес API'],
+	['aiProxyNoModel', 'Укажите модель'],
 	['aiInsecureAddress', 'Адрес без https: ключ будет передаваться незашифрованным'],
 ]
 

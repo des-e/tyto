@@ -58,8 +58,8 @@
 	"downloadModelsLink": "Скачать модели",
 	"downloadComplete": "Загрузка завершена",
 	"downloadDiarizeModel": "Для разделения по говорящим нужна модель (~25 МБ). Скачать сейчас?",
-	"downloading": "Загрузка... {progress}%",
-	"downloadingDiarizeModel": "Загрузка модели диаризации...",
+	"downloading": "Скачиваем… {progress}%",
+	"downloadingDiarizeModel": "Скачиваем модель для разделения по говорящим…",
 	"downloadingAiModels": "Загрузка AI моделей...",
 	"downloadingModel": "Готовим Tyto к работе",
 	"downloadingYtdlp": "Загрузка yt-dlp",
@@ -757,5 +757,6 @@
 	"aiProxyFormat": "Формат",
 	"aiProxyLabel": "Прокси-сервис",
 	"aiProxyNoAddress": "Укажите адрес API",
+	"aiProxyNoModel": "Укажите модель",
 	"aiInsecureAddress": "Адрес без https: ключ будет передаваться незашифрованным"
 }

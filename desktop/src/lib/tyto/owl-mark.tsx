@@ -1,4 +1,27 @@
-import { useId, type SVGProps } from 'react'
+import { useEffect, useId, useRef, useState, type SVGProps } from 'react'
+
+type OwlProps = SVGProps<SVGSVGElement> & { title?: string }
+
+/** Jobs finished in this session (not transcripts reopened from history). */
+function freshlyDone(jobs: { status: string; hydrated?: boolean }[]) {
+	return jobs.filter((job) => job.status === 'done' && !job.hydrated).length
+}
+
+/**
+ * The owl that blinks once each time a transcription finishes (difference 12). Mounting never
+ * blinks; each new finish remounts the mark so the one-shot animation runs again. Reduced motion
+ * keeps it static (theme.css).
+ */
+export function FinishBlinkOwl({ jobs, ...props }: OwlProps & { jobs: { status: string; hydrated?: boolean }[] }) {
+	const done = freshlyDone(jobs)
+	const previous = useRef(done)
+	const [blinks, setBlinks] = useState(0)
+	useEffect(() => {
+		if (done > previous.current) setBlinks((count) => count + 1)
+		previous.current = done
+	}, [done])
+	return <OwlMark key={blinks} blink={blinks > 0} {...props} />
+}
 
 /**
  * The Tyto owl (concept D, design/tyto/icon.svg) as an inline mark. The body is `currentColor` and
@@ -8,7 +31,7 @@ import { useId, type SVGProps } from 'react'
  * `blink` adds eyelids that close and open once on mount (theme.css `.tyto-owl-lid`, transform only,
  * static under reduced motion). Flip it to true when a transcript is ready; remount (`key`) to repeat.
  */
-export function OwlMark({ title, blink = false, ...props }: SVGProps<SVGSVGElement> & { title?: string; blink?: boolean }) {
+export function OwlMark({ title, blink = false, ...props }: OwlProps & { blink?: boolean }) {
 	const mask = `tyto-owl-${useId().replace(/:/g, '')}`
 	return (
 		<svg

@@ -47,8 +47,8 @@ function pieces(segments: Segment[], total: number): Piece[] {
  * Seek bar made of the transcript's replicas (difference 8): one piece per series of a speaker's lines,
  * in greys by speaker (the same three tones as the speaker marks), on both sides of the playhead:
  * unplayed tones step up from the track grey (`--tyto-track`, ≥ 3:1), played ones are darker and
- * further apart; the playhead marks the position. Pressing a piece jumps to its
- * start; dragging scrubs to the exact position. Arrows move 5 s, space plays and pauses.
+ * further apart; the playhead marks the position. Pressing jumps to the position under the
+ * cursor; dragging scrubs from there. Arrows move 5 s, space plays and pauses.
  */
 export function ReplicaTimeline({
 	segments,
@@ -107,9 +107,7 @@ export function ReplicaTimeline({
 			onPointerDown={(event) => {
 				if (!seekable || event.button !== 0) return
 				event.currentTarget.setPointerCapture?.(event.pointerId)
-				const piece = (event.target as Element).closest('[data-replica-start]')
-				if (piece) onSeek(Number(piece.getAttribute('data-replica-start')))
-				else seekToClientX(event.clientX)
+				seekToClientX(event.clientX)
 			}}
 			onPointerMove={(event) => {
 				if (!seekable || !event.currentTarget.hasPointerCapture?.(event.pointerId)) return

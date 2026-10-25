@@ -757,5 +757,6 @@
 	"aiProxyFormat": "Format",
 	"aiProxyLabel": "Proxy service",
 	"aiProxyNoAddress": "Enter the API address",
+	"aiProxyNoModel": "Enter the model",
 	"aiInsecureAddress": "The address is not https: the key will be sent unencrypted"
 }

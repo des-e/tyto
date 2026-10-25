@@ -257,9 +257,10 @@ class Claude implements AiClient {
 function proxyClient(connection: AiConnection): AiClient {
 	const base = connection.proxyBaseUrl?.trim() ?? ''
 	// Rejects on use, not here: the summaries hook builds its client during render.
-	if (!base) {
+	const missingField = !base ? m.aiProxyNoAddress() : !connection.model?.trim() ? m.aiProxyNoModel() : null
+	if (missingField) {
 		const missing = async (): Promise<string> => {
-			throw new Error(`${m.aiProxyLabel()}: ${m.aiProxyNoAddress()}`)
+			throw new Error(`${m.aiProxyLabel()}: ${missingField}`)
 		}
 		return { ask: missing, stream: missing }
 	}

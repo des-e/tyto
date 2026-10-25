@@ -128,6 +128,16 @@ describe('платформа proxy', () => {
 		expect(fetchMock).not.toHaveBeenCalled()
 	})
 
+	it('без модели не идёт в сеть, а просит указать модель', async () => {
+		for (const format of ['openai', 'claude'] as const) {
+			const result = await testConnection(proxy({ proxyBaseUrl: 'https://x.top/v1', proxyFormat: format, model: '   ' }))
+			expect(result).toEqual({ ok: false, error: `${m.aiProxyLabel()}: ${m.aiProxyNoModel()}` })
+		}
+		expect(m.aiProxyNoModel({}, { locale: 'ru-RU' })).toBe('Укажите модель')
+		expect(m.aiProxyNoModel({}, { locale: 'en-US' })).toBe('Enter the model')
+		expect(fetchMock).not.toHaveBeenCalled()
+	})
+
 	it('stream в формате claude читает content_block_delta', async () => {
 		fetchMock.mockResolvedValue(
 			sse([

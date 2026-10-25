@@ -22,7 +22,7 @@ import {
 import { openSettingsSection } from '~/lib/app'
 import { getVersionNumber } from '~/lib/logs'
 import { FEATURES } from '~/lib/tyto/features'
-import { OwlMark } from '~/lib/tyto/owl-mark'
+import { FinishBlinkOwl } from '~/lib/tyto/owl-mark'
 import { useMainAreaOffset } from '~/lib/tyto/main-area'
 import { groupRecents, recentMeta, recentsGroupLabel, useNow } from '~/lib/tyto/recents-groups'
 import { useRecordDuration } from '~/lib/tyto/recents-duration'
@@ -461,7 +461,7 @@ export default function RecentsSidebar() {
 			<div data-tauri-drag-region className="h-14 shrink-0" />
 			{/* Codex-style: the wordmark gets its own row under the titlebar strip. */}
 			<div className="flex items-center gap-2 px-4 pt-0.5 pb-2">
-				<OwlMark className="h-[18px] w-auto shrink-0 text-foreground" />
+				<FinishBlinkOwl jobs={queue.jobs} className="h-[18px] w-auto shrink-0 text-foreground" />
 				<span className="select-none text-[17px] font-semibold tracking-[-0.03em] text-foreground">{m.appTitle()}</span>
 			</div>
 			{/* Search on top (difference 5), whenever there is anything to search. */}

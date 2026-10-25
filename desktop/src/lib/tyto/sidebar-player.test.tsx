@@ -207,11 +207,18 @@ describe('плеер со шкалой реплик (отличие 8)', () => {
 		expect(last.style.left).toBe('75%')
 	})
 
-	it('клик по отрезку перематывает к его началу', () => {
+	it('клик по отрезку перематывает в точку под курсором, а не к началу серии', () => {
 		const onSeek = vi.fn()
-		render(<ReplicaTimeline segments={segments} duration={120} currentTime={0} seekable onSeek={onSeek} onToggle={vi.fn()} />)
-		fireEvent.pointerDown(document.querySelector('[data-replica-start="78"]')!, { button: 0, pointerId: 1 })
-		expect(onSeek).toHaveBeenCalledWith(78)
+		// One speaker: the whole bar is a single series starting at 00:00.
+		const single: Segment[] = [
+			{ start: 0, stop: 6000, text: 'а', speaker: 0 },
+			{ start: 6000, stop: 12000, text: 'б', speaker: 0 },
+		] as Segment[]
+		render(<ReplicaTimeline segments={single} duration={120} currentTime={0} seekable onSeek={onSeek} onToggle={vi.fn()} />)
+		const slider = screen.getByRole('slider')
+		slider.getBoundingClientRect = () => ({ left: 100, width: 400, top: 0, height: 8, right: 500, bottom: 8, x: 100, y: 0, toJSON: () => ({}) })
+		fireEvent.pointerDown(document.querySelector('[data-replica-start="0"]')!, { button: 0, pointerId: 1, clientX: 300 })
+		expect(onSeek).toHaveBeenCalledExactlyOnceWith(60)
 	})
 
 	it('стрелки перематывают на 5 с, пробел ставит на паузу', () => {
