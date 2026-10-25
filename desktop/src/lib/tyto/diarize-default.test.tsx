@@ -108,6 +108,38 @@ describe('setup: модель диаризации', () => {
 		expect(h.setDiarizeEnabled).toHaveBeenCalledWith(false)
 		expect(h.toastWarning).toHaveBeenCalledWith(m.diarizeDownloadFailed())
 	})
+	it('отмена во время загрузки диаризации: без отключения, toast и перехода на главный', async () => {
+		h.isModelFileUsable.mockResolvedValue(false)
+		let hook: ReturnType<typeof mount> | undefined
+		h.downloadModel.mockResolvedValueOnce('/models/main.bin').mockImplementationOnce(async () => {
+			hook?.result.current.cancelSetup()
+			return null
+		})
+		hook = mount()
+		await waitFor(() => expect(h.downloadModel).toHaveBeenCalledTimes(2))
+		await new Promise((resolve) => setTimeout(resolve, 20))
+		expect(h.setDiarizeEnabled).not.toHaveBeenCalled()
+		expect(h.toastWarning).not.toHaveBeenCalled()
+		expect(h.navigate).not.toHaveBeenCalledWith('/', expect.anything())
+		expect(h.navigate).toHaveBeenCalledWith('/#settings', expect.anything())
+	})
+
+	it('перед второй загрузкой прогресс сбрасывается в 0', async () => {
+		h.isModelFileUsable.mockResolvedValue(false)
+		let hook: ReturnType<typeof mount> | undefined
+		let seen: number | undefined
+		h.downloadModel.mockImplementationOnce(async () => {
+			hook!.result.current.downloadProgressRef.current = 100
+			return '/models/main.bin'
+		})
+		h.downloadModel.mockImplementationOnce(async () => {
+			seen = hook!.result.current.downloadProgressRef.current
+			return '/models/diar.gguf'
+		})
+		hook = mount()
+		await waitFor(() => expect(h.navigate).toHaveBeenCalledWith('/', expect.anything()))
+		expect(seen).toBe(0)
+	})
 })
 
 describe('очередь: защита от отсутствующей модели', () => {

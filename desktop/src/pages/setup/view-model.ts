@@ -17,6 +17,7 @@ export function viewModel() {
 	const [downloadProgress, setDownloadProgress] = useState(0)
 	const [isOnline, setIsOnline] = useState<boolean | null>(null)
 	const downloadProgressRef = useRef(0)
+	const cancelledRef = useRef(false)
 	const { setState: setErrorModal } = useContext(ErrorModalContext)
 	const navigate = useNavigate()
 	const preference = usePreferenceProvider()
@@ -77,10 +78,14 @@ export function viewModel() {
 			const modelsFolder = await invoke<string>('get_models_folder')
 			const path = await join(modelsFolder, config.diarizeModelFilename)
 			if (await utils.isModelFileUsable(path)) return true
+			// The first model finished at 100%; without a reset the bar would stay frozen there.
+			downloadProgressRef.current = 0
+			setDownloadProgress(0)
 			const result = await utils.downloadModel({ url: config.diarizeModelUrl, ...config.diarizeModelIntegrity }, { replacePath: path })
-			if (!result) throw new Error('diarization model download cancelled')
-			return true
+			// null means the user cancelled setup: cancelSetup already navigated away and nothing failed.
+			return Boolean(result)
 		} catch (error) {
+			if (cancelledRef.current) return false
 			console.error('[model] Diarization model download failed:', error)
 			preference.setDiarizeEnabled(false)
 			toast.warning(m.diarizeDownloadFailed())
@@ -130,6 +135,7 @@ export function viewModel() {
 						return
 					}
 					await ensureDiarizeModelOnSetup()
+					if (cancelledRef.current) return
 					navigate('/', { replace: true, state: { disableBack: true } })
 					return
 				} catch (err) {
@@ -158,6 +164,7 @@ export function viewModel() {
 
 	async function cancelSetup() {
 		// Cancel and go to settings
+		cancelledRef.current = true
 		preference.setSkippedSetup(true)
 		emit('abort_download')
 		navigate('/#settings', { replace: true, state: { disableBack: true } })
