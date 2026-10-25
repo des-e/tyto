@@ -243,8 +243,8 @@ export default function TranscriptExportDialog({
 	const timestampsRequired = format === 'srt' || format === 'vtt'
 	const selectedFormat = formats.find((option) => option.value === format)
 	const contentOptions: Array<{ value: TranscriptExportContent; label: string; disabled: boolean }> = [
-		{ value: 'transcript', label: m.exportTranscript(), disabled: false },
-		{ value: 'summary', label: m.exportSummary(), disabled: !hasSummary },
+		{ value: 'transcript', label: m.exportContentTranscript(), disabled: false },
+		{ value: 'summary', label: m.exportContentSummary(), disabled: !hasSummary },
 	]
 
 	return (
@@ -412,7 +412,7 @@ export default function TranscriptExportDialog({
 					)}
 					<Button type="button" onClick={() => void onSave()}>
 						<Download aria-hidden="true" />
-						{m.exportSave()}
+						{m.exportSave({ format: format.toUpperCase() })}
 					</Button>
 				</DialogFooter>
 			</DialogContent>
