@@ -4,7 +4,7 @@ import * as pathApi from '@tauri-apps/api/path'
 import * as dialog from '@tauri-apps/plugin-dialog'
 import * as fs from '@tauri-apps/plugin-fs'
 import { Download, MoreHorizontal, Plus, Search, Settings, Smartphone } from 'lucide-react'
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { m } from '~/paraglide/messages.js'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '~/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip'
@@ -20,19 +20,22 @@ import {
 } from '~/lib/transcripts-store'
 
 import { openSettingsSection } from '~/lib/app'
+import { getVersionNumber } from '~/lib/logs'
 import { FEATURES } from '~/lib/tyto/features'
 import { OwlMark } from '~/lib/tyto/owl-mark'
 import { useMainAreaOffset } from '~/lib/tyto/main-area'
+import { groupRecents, recentMeta, recentsGroupLabel } from '~/lib/tyto/recents-groups'
+import { useRecordDuration } from '~/lib/tyto/recents-duration'
 import { TOGGLE_SIDEBAR_EVENT } from '~/components/layout'
+import { Button } from '~/components/ui/button'
 import { getTextDirection } from '~/paraglide/runtime.js'
 import { UpdaterContext } from '~/providers/updater'
-import { Spinner } from '~/components/ui/spinner'
 import { useSession } from '../session'
 import RetranscribeDialog from './retranscribe-dialog'
 import type { Job } from '../hooks/use-transcribe-queue'
 
 /** Resize bounds: never narrower than the rows need, never much wider than the default. */
-const DEFAULT_WIDTH = 288
+const DEFAULT_WIDTH = 248
 const MIN_WIDTH = 248
 const MAX_WIDTH = 380
 /**
@@ -43,6 +46,8 @@ const MAX_WIDTH = 380
 const CLOSE_EDGE = 56
 /** A recent row is two lines of text plus its padding; the virtualizer measures the real height after mount. */
 const ROW_HEIGHT = 52
+/** A day label: 16 px above, 4 px below a 12 px line. */
+const LABEL_HEIGHT = 34
 const WIDTH_STORAGE_KEY = 'vibe_sidebar_width'
 
 function clampWidth(width: number) {
@@ -129,21 +134,6 @@ function useResizableWidth() {
 	return { width, dragging, handleProps: { onPointerDown, onPointerMove, onPointerUp: endDrag, onPointerCancel: endDrag, onDoubleClick } }
 }
 
-/** "just now" / "14m ago" / "3h ago" / "2d ago" / "Aug 19" / "Aug 19, 2024" */
-function relativeDate(date: Date) {
-	const time = date.getTime()
-	if (!time) return ''
-	const minutes = Math.floor((Date.now() - time) / 60_000)
-	if (minutes < 1) return m.justNow()
-	if (minutes < 60) return m.minutesAgo({ minutes: String(minutes) })
-	const hours = Math.floor(minutes / 60)
-	if (hours < 24) return m.hoursAgo({ hours: String(hours) })
-	const days = Math.floor(hours / 24)
-	if (days < 7) return m.daysAgo({ days: String(days) })
-	const sameYear = date.getFullYear() === new Date().getFullYear()
-	return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', ...(sameYear ? {} : { year: 'numeric' }) })
-}
-
 interface RowMenuState {
 	/** media to re-transcribe: the original file, else the project folder's copy; null when neither */
 	sourcePath: string | null
@@ -152,6 +142,7 @@ interface RowMenuState {
 
 function RecentRow({
 	entry,
+	now,
 	active,
 	disabled,
 	onOpen,
@@ -159,6 +150,7 @@ function RecentRow({
 	onRenamed,
 }: {
 	entry: TranscriptEntry
+	now: Date
 	active: boolean
 	disabled: boolean
 	onOpen: () => void
@@ -166,6 +158,7 @@ function RecentRow({
 	onRenamed: () => void
 }) {
 	const { queue } = useSession()
+	const duration = useRecordDuration(entry.path)
 	const [menu, setMenu] = useState<RowMenuState>({ sourcePath: null, sourceExists: false })
 	const [renaming, setRenaming] = useState(false)
 	const [retranscribing, setRetranscribing] = useState(false)
@@ -226,7 +219,7 @@ function RecentRow({
 
 	if (renaming) {
 		return (
-			<div className="flex items-center rounded-xl bg-muted px-2 py-1.5">
+			<div className="mb-0.5 flex items-center rounded-[var(--tyto-r-sm)] bg-muted px-1 py-1.5">
 				<input
 					autoFocus
 					value={draftName}
@@ -237,23 +230,18 @@ function RecentRow({
 					}}
 					onBlur={() => void commitRename()}
 					aria-label={m.transcriptName()}
-					className="h-7 w-full min-w-0 rounded-lg border border-ring/40 bg-background px-2 text-[13px] text-foreground outline-none"
+					className="h-7 w-full min-w-0 rounded-[var(--tyto-r-sm)] border border-ring/40 bg-background px-[7px] text-[13.5px] text-foreground outline-none"
 				/>
 			</div>
 		)
 	}
 
 	return (
-		<div className={cn('group relative flex items-center rounded-xl transition-colors duration-150', active ? 'tyto-selected' : 'hover:bg-muted/60')}>
+		<div className={cn('tyto-recent group', active && 'tyto-recent-selected')}>
 			<RetranscribeDialog open={retranscribing} onOpenChange={setRetranscribing} name={entry.name} onConfirm={retranscribe} />
-			<button
-				type="button"
-				onClick={onOpen}
-				disabled={disabled}
-				title={entry.name}
-				className="min-w-0 flex-1 cursor-pointer px-3 py-2 text-start disabled:cursor-default disabled:opacity-50">
-				<p className="truncate text-[13px] font-medium text-foreground">{entry.name}</p>
-				<p className="mt-0.5 truncate text-[11px] text-muted-foreground">{relativeDate(entry.createdAt)}</p>
+			<button type="button" onClick={onOpen} disabled={disabled} title={entry.name} className="tyto-recent-main">
+				<p className="tyto-recent-title truncate">{entry.name}</p>
+				<p className="tyto-recent-meta truncate">{recentMeta(entry.createdAt, now, duration)}</p>
 			</button>
 
 			<DropdownMenu
@@ -265,7 +253,7 @@ function RecentRow({
 						type="button"
 						aria-label={m.transcriptActions()}
 						className={cn(
-							'me-1.5 flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-opacity duration-150',
+							'me-1 flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-[var(--tyto-r-sm)] text-muted-foreground transition-opacity duration-150',
 							'opacity-0 group-hover:opacity-100 focus-visible:opacity-100 data-[state=open]:opacity-100 hover:text-foreground',
 						)}>
 						<MoreHorizontal className="h-4 w-4" />
@@ -295,57 +283,65 @@ function RecentRow({
 
 /** One job from the running session — it shows up the moment it is queued, not when it is saved. */
 function SessionRow({ job, active, onOpen }: { job: Job; active: boolean; onOpen: () => void }) {
-	const status =
-		job.status === 'running'
-			? `${m.transcribing()} ${Math.round(job.progress)}%`
-			: job.status === 'queued'
-				? m.queued()
-				: job.status === 'error'
-					? m.error()
-					: job.status === 'cancelled'
-						? m.cancel()
-						: ''
+	const percent = Math.round(job.progress)
+	const status = job.status === 'queued' ? m.queued() : job.status === 'error' ? m.error() : job.status === 'cancelled' ? m.cancel() : ''
 
 	return (
-		<div className={cn('group relative flex items-center rounded-xl transition-colors duration-150', active ? 'tyto-selected' : 'hover:bg-muted/60')}>
-			<button type="button" onClick={onOpen} title={job.name} className="min-w-0 flex-1 cursor-pointer px-3 py-2 text-start">
-				<p className="truncate text-[13px] font-medium text-foreground">{job.name}</p>
-				{status && (
-					<p className="mt-0.5 flex items-center gap-1.5 truncate text-[11px] text-muted-foreground">
-						{job.status === 'running' && <Spinner className="h-3 w-3" />}
-						{status}
-					</p>
+		<div className={cn('tyto-recent group', active && 'tyto-recent-selected')}>
+			<button type="button" onClick={onOpen} title={job.name} className="tyto-recent-main">
+				<p className="tyto-recent-title truncate">{job.name}</p>
+				{job.status === 'running' ? (
+					<div className="tyto-recent-run">
+						<span className="tyto-recent-meta">{m.transcribingPercent({ percent: String(percent) })}</span>
+						<div role="progressbar" aria-label={job.name} aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent} className="tyto-mini-progress">
+							<div style={{ transform: `scaleX(${Math.min(Math.max(percent, 0), 100) / 100})` }} />
+						</div>
+					</div>
+				) : (
+					status && <p className="tyto-recent-meta truncate">{status}</p>
 				)}
 			</button>
 		</div>
 	)
 }
 
+/** One line of the windowed list: a day label, a job of the open session, or a saved transcript. */
+type ListRow =
+	| { kind: 'label'; key: string; label: string }
+	| { kind: 'job'; key: string; job: Job }
+	| { kind: 'entry'; key: string; entry: TranscriptEntry }
+
 /**
  * The recents list, windowed: only the rows near the viewport are mounted, so a folder holding
  * hundreds of projects costs the same to render as one holding ten.
  */
 function RecentsList({
-	entries,
+	rows,
+	now,
 	activePath,
 	activeName,
+	selectedJobId,
 	disabled,
 	onOpen,
+	onSelectJob,
 	onChanged,
 }: {
-	entries: TranscriptEntry[]
+	rows: ListRow[]
+	now: Date
 	activePath: string | null
 	activeName: string | null
+	selectedJobId: string | null
 	disabled: boolean
 	onOpen: (entry: TranscriptEntry) => void
+	onSelectJob: (id: string) => void
 	onChanged: () => void
 }) {
 	const scrollRef = useRef<HTMLDivElement>(null)
 	const virtualizer = useVirtualizer({
-		count: entries.length,
+		count: rows.length,
 		getScrollElement: () => scrollRef.current,
-		estimateSize: () => ROW_HEIGHT,
-		getItemKey: (index) => entries[index]?.path ?? index,
+		estimateSize: (index) => (rows[index]?.kind === 'label' ? LABEL_HEIGHT : ROW_HEIGHT),
+		getItemKey: (index) => rows[index]?.key ?? index,
 		// A row grows when its name wraps, and shrinks while it is being renamed.
 		measureElement: (element) => element.getBoundingClientRect().height,
 		overscan: 8,
@@ -355,9 +351,28 @@ function RecentsList({
 		<div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-2 pb-3">
 			<div className="relative w-full" style={{ height: virtualizer.getTotalSize() }}>
 				{virtualizer.getVirtualItems().map((item) => {
-					const entry = entries[item.index]
-					if (!entry) return null
-					const active = entry.path === activePath
+					const row = rows[item.index]
+					if (!row) return null
+					let content: ReactNode
+					if (row.kind === 'label') {
+						content = <p className="tyto-group-label">{row.label}</p>
+					} else if (row.kind === 'job') {
+						content = <SessionRow job={row.job} active={row.job.id === selectedJobId} onOpen={() => onSelectJob(row.job.id)} />
+					} else {
+						const entry = row.entry
+						const active = entry.path === activePath
+						content = (
+							<RecentRow
+								entry={active && activeName ? { ...entry, name: activeName } : entry}
+								now={now}
+								active={active}
+								disabled={disabled}
+								onOpen={() => onOpen(entry)}
+								onDeleted={onChanged}
+								onRenamed={onChanged}
+							/>
+						)
+					}
 					return (
 						<div
 							key={item.key}
@@ -365,14 +380,7 @@ function RecentsList({
 							data-index={item.index}
 							className="absolute inset-x-0 top-0"
 							style={{ transform: `translateY(${item.start}px)` }}>
-							<RecentRow
-								entry={active && activeName ? { ...entry, name: activeName } : entry}
-								active={active}
-								disabled={disabled}
-								onOpen={() => onOpen(entry)}
-								onDeleted={onChanged}
-								onRenamed={onChanged}
-							/>
+							{content}
 						</div>
 					)
 				})}
@@ -404,11 +412,36 @@ export default function RecentsSidebar() {
 	// finished with saving switched off) — without them a new transcription looks like it went nowhere.
 	const liveJobs = useMemo(() => queue.jobs.filter((job) => !job.savedPath && !job.hydrated), [queue.jobs])
 
-	const filtered = useMemo(() => {
+	// Day groups are relative to the moment the list was last (re)built.
+	const now = useMemo(() => new Date(), [entries, liveJobs])
+
+	// One flat list for the virtualizer: a label row before each day group. Jobs of the open session
+	// are happening now, so they head «Сегодня».
+	const rows = useMemo(() => {
 		const needle = query.trim().toLowerCase()
-		if (!needle) return entries
-		return entries.filter((entry) => entry.name.toLowerCase().includes(needle))
-	}, [entries, query])
+		const matches = (name: string) => !needle || name.toLowerCase().includes(needle)
+		const items: ({ job: Job } | { entry: TranscriptEntry })[] = [
+			...liveJobs.filter((job) => matches(job.name)).map((job) => ({ job })),
+			...entries.filter((entry) => matches(entry.name)).map((entry) => ({ entry })),
+		]
+		const result: ListRow[] = []
+		for (const group of groupRecents(items, (item) => ('job' in item ? now : item.entry.createdAt), now)) {
+			result.push({ kind: 'label', key: `label:${group.key}`, label: recentsGroupLabel(group.key) })
+			for (const item of group.items) {
+				if ('job' in item) result.push({ kind: 'job', key: `job:${item.job.id}`, job: item.job })
+				else result.push({ kind: 'entry', key: item.entry.path, entry: item.entry })
+			}
+		}
+		return result
+	}, [entries, liveJobs, now, query])
+
+	const [version, setVersion] = useState('')
+	useEffect(() => {
+		getVersionNumber().then(
+			(value) => setVersion(typeof value === 'string' ? value : ''),
+			() => setVersion(''),
+		)
+	}, [])
 
 	const activePath = queue.selectedJob?.savedPath ?? null
 
@@ -431,19 +464,10 @@ export default function RecentsSidebar() {
 				<OwlMark className="h-[18px] w-auto shrink-0 text-foreground" />
 				<span className="select-none text-[17px] font-semibold tracking-[-0.03em] text-foreground">{m.appTitle()}</span>
 			</div>
-			<div className="px-2">
-				<button
-					type="button"
-					onClick={startNew}
-					className="flex w-full cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-[13px] font-medium text-foreground transition-colors duration-150 hover:bg-muted/60">
-					<Plus className="h-4 w-4 text-muted-foreground" strokeWidth={1.75} />
-					{m.newTranscription()}
-				</button>
-			</div>
-
-			{entries.length > 8 && (
-				<div className="relative mt-2 px-3">
-					<Search className="pointer-events-none absolute start-6 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+			{/* Search on top (difference 5), whenever there is anything to search. */}
+			{(entries.length > 0 || liveJobs.length > 0) && (
+				<div className="relative px-2 pb-2">
+					<Search className="pointer-events-none absolute start-4 top-4 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
 					<input
 						autoComplete="off"
 						autoCorrect="off"
@@ -452,57 +476,51 @@ export default function RecentsSidebar() {
 						value={query}
 						onChange={(event) => setQuery(event.target.value)}
 						placeholder={m.searchRecents()}
-						className="h-8 w-full rounded-full border border-border bg-transparent ps-7 pe-3 text-[13px] text-foreground outline-none placeholder:text-muted-foreground focus:border-ring/40"
+						aria-label={m.searchRecents()}
+						className="h-8 w-full rounded-[var(--tyto-r-sm)] border border-border bg-background ps-[29px] pe-2 text-[13px] text-foreground outline-none placeholder:text-muted-foreground focus-visible:border-foreground"
 					/>
 				</div>
 			)}
+			<div className="px-2">
+				<Button variant="secondary" size="sm" onClick={startNew} className="w-full justify-start gap-2 px-2">
+					<Plus className="text-muted-foreground" />
+					{m.newTranscription()}
+				</Button>
+			</div>
 
-			{liveJobs.length > 0 && (
-				<>
-					<p className="px-4 pt-4 pb-2 text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase">{m.inProgress()}</p>
-					<div className="px-2">
-						{liveJobs.map((job) => (
-							<SessionRow key={job.id} job={job} active={job.id === queue.selectedId} onOpen={() => queue.selectJob(job.id)} />
-						))}
-					</div>
-				</>
-			)}
-
-			<p className="px-4 pt-4 pb-2 text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase">{m.recents()}</p>
-
-			{filtered.length === 0 ? (
+			{rows.length === 0 ? (
 				<div className="min-h-0 flex-1 overflow-y-auto px-2 pb-3">
-					<p className="px-3 py-2 text-[13px] text-muted-foreground">{entries.length === 0 ? m.noRecentTranscripts() : m.noMatches()}</p>
+					<p className="px-2 py-4 text-[13px] text-muted-foreground">{entries.length === 0 && liveJobs.length === 0 ? m.noRecentTranscripts() : m.noMatches()}</p>
 				</div>
 			) : (
 				<RecentsList
-					entries={filtered}
+					rows={rows}
+					now={now}
 					activePath={activePath}
 					activeName={queue.selectedJob?.name ?? null}
+					selectedJobId={queue.selectedId}
 					// Loading another transcript mid-run would fight the queue for the view.
 					disabled={queue.running}
 					onOpen={(entry) => void open(entry)}
+					onSelectJob={(id) => queue.selectJob(id)}
 					onChanged={refresh}
 				/>
 			)}
 
-			{/* Footer, ChatGPT-style: Settings row with a small update badge when one is waiting. */}
-			<div className="mt-auto border-t border-border/60 p-2">
-				<div className="flex items-center gap-1">
-					<button
-						type="button"
-						onClick={() => openSettingsSection('')}
-						className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 text-[13px] font-medium text-foreground transition-colors duration-150 hover:bg-muted/60">
-						<Settings className="h-4 w-4 text-muted-foreground" strokeWidth={1.75} />
+			{/* Footer: «Настройки» and the version on the bottom strip shared with the player (.tyto-bar). */}
+			<div className="tyto-bar px-2">
+				<div className="flex min-w-0 flex-1 items-center gap-1">
+					<Button variant="ghost" size="sm" onClick={() => openSettingsSection('')} className="gap-2 px-2">
+						<Settings className="text-muted-foreground" />
 						{m.settings()}
-					</button>
+					</Button>
 					{FEATURES.phone && <Tooltip>
 						<TooltipTrigger asChild>
 							<button
 								type="button"
 								aria-label={m.phone()}
 								onClick={() => openSettingsSection('phone')}
-								className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-xl transition-colors duration-150 hover:bg-muted/60">
+								className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-[var(--tyto-r-md)] transition-colors duration-150 hover:bg-muted/60">
 								<Smartphone className="h-4 w-4 text-muted-foreground" strokeWidth={1.75} />
 							</button>
 						</TooltipTrigger>
@@ -515,13 +533,14 @@ export default function RecentsSidebar() {
 									type="button"
 									aria-label={m.updateVersion()}
 									onClick={updateApp}
-									className="me-1 flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground transition-opacity duration-150 hover:opacity-90">
+									className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-[var(--tyto-r-sm)] bg-primary text-primary-foreground transition-opacity duration-150 hover:opacity-90">
 									<Download className="h-3.5 w-3.5" />
 								</button>
 							</TooltipTrigger>
 							<TooltipContent side="top">{m.updateVersion()}</TooltipContent>
 						</Tooltip>
 					)}
+					{version && <span className="tyto-sidebar-version">{version}</span>}
 				</div>
 			</div>
 

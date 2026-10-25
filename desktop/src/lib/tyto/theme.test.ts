@@ -131,6 +131,22 @@ describe('tyto theme tokens', () => {
 		}
 	})
 
+	it('progress tracks (--tyto-track) keep >= 3:1 against the page and the sidebar in both themes (WCAG 1.4.11)', () => {
+		for (const theme of [light, dark]) {
+			expect(contrast(theme['tyto-track'], theme.background)).toBeGreaterThanOrEqual(3)
+			expect(contrast(theme['tyto-track'], theme.sidebar)).toBeGreaterThanOrEqual(3)
+			// The filled part stays distinct from the track.
+			expect(contrast(theme['tyto-track'], theme.foreground)).toBeGreaterThanOrEqual(3)
+		}
+	})
+
+	it('setup progress bar and waiting step circle use the shared track token', () => {
+		const setup = read('lib/tyto/setup-steps.tsx')
+		expect(setup).toContain('bg-[var(--tyto-track)]')
+		expect(setup).toContain('border-[var(--tyto-track)]')
+		expect(setup).not.toMatch(/\bbg-border\b/)
+	})
+
 	it('is loaded after the upstream globals so its tokens win', () => {
 		const bootstrap = read('bootstrap.tsx')
 		const globals = bootstrap.indexOf("import './globals.css'")

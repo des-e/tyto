@@ -117,7 +117,7 @@ function Step({
 		<li data-testid={`setup-step-${n}`} data-state={state} className={`grid grid-cols-[24px_1fr_auto] items-start gap-3 p-4 ${n > 1 ? 'border-t border-border' : ''}`}>
 			<span
 				className={`flex size-6 items-center justify-center rounded-full border text-[12px] font-medium tabular-nums ${
-					state === 'waiting' ? 'border-[var(--tyto-line2)] text-muted-foreground' : 'border-foreground text-foreground'
+					state === 'waiting' ? 'border-[var(--tyto-track)] text-muted-foreground' : 'border-foreground text-foreground'
 				}`}>
 				{state === 'done' ? <Check className="size-3.5" aria-label={m.setupStepDone()} /> : n}
 			</span>
@@ -134,7 +134,7 @@ function Step({
 						aria-valuemin={0}
 						aria-valuemax={100}
 						aria-valuenow={Math.round(fraction * 100)}
-						className="h-[3px] overflow-hidden rounded-[2px] bg-border">
+						className="h-[3px] overflow-hidden rounded-[2px] bg-[var(--tyto-track)]">
 						<div
 							className="h-full w-full origin-left bg-foreground transition-transform duration-200 ease-[var(--tyto-ease)] motion-reduce:transition-none"
 							style={{ transform: `scaleX(${fraction})` }}

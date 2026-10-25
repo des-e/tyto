@@ -10,7 +10,7 @@ import { Button } from '~/components/ui/button'
 import { PlaybackRateButton } from '~/components/playback-rate-button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip'
 import { usePlaybackRate } from '~/lib/playback-rate'
-import { cn } from '~/lib/style'
+import { PlayerClock, ReplicaTimeline } from '~/lib/tyto/replica-timeline'
 import type { NamedPath } from '~/lib/types'
 import type { Job } from '../hooks/use-transcribe-queue'
 
@@ -34,14 +34,6 @@ export interface PlayerTimeDetail {
 	playing: boolean
 }
 
-/** mm:ss, or --:-- when the media has no usable duration (streams, failed metadata). */
-function formatTime(seconds: number) {
-	if (!Number.isFinite(seconds) || seconds < 0) return '--:--'
-	const total = Math.floor(seconds)
-	const minutes = Math.floor(total / 60)
-	return `${minutes}:${String(total % 60).padStart(2, '0')}`
-}
-
 /** Containing folder of a path, for both posix and windows separators. */
 function dirname(path: string) {
 	const index = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\'))
@@ -56,7 +48,6 @@ function extension(path: string) {
 
 export default function PlayerBar({ job }: { job: Job }) {
 	const audioRef = useRef<HTMLAudioElement | null>(null)
-	const trackRef = useRef<HTMLDivElement>(null)
 	const [playing, setPlaying] = useState(false)
 	const [currentTime, setCurrentTime] = useState(0)
 	const [duration, setDuration] = useState(Number.NaN)
@@ -182,26 +173,6 @@ export default function PlayerBar({ job }: { job: Job }) {
 		}
 	}, [broadcast, toggle])
 
-	const seekToClientX = useCallback(
-		(clientX: number) => {
-			const track = trackRef.current
-			if (!track) return
-			const rect = track.getBoundingClientRect()
-			if (rect.width === 0) return
-			const ratio = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1)
-			seekTo(ratio * duration)
-		},
-		[duration, seekTo],
-	)
-
-	async function revealInFolder() {
-		try {
-			await invoke('open_path', { path: dirname(sourcePath) })
-		} catch {
-			toast.error(m.couldNotOpenFolder(), { position: 'bottom-center' })
-		}
-	}
-
 	async function saveACopy() {
 		const ext = extension(sourcePath)
 		try {
@@ -229,97 +200,26 @@ export default function PlayerBar({ job }: { job: Job }) {
 		}
 	}
 
-	const progress = seekable ? Math.min(Math.max(currentTime / duration, 0), 1) : 0
-
 	return (
 		<motion.div
 			initial={{ opacity: 0, y: 12 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.2, ease: 'easeOut' }}
-			className="sticky bottom-0 z-10 flex h-16 shrink-0 items-center gap-4 border-t border-border bg-background/85 px-4 backdrop-blur-md">
-			<div className="hidden min-w-0 basis-[150px] flex-col justify-center sm:flex">
-				<div className="truncate text-[13px] font-medium text-foreground">{job.name}</div>
-				<Tooltip>
-					<TooltipTrigger asChild>
-						<button
-							type="button"
-							onClick={() => void revealInFolder()}
-							className="cursor-pointer truncate text-start text-[12px] text-muted-foreground transition-colors duration-150 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/80">
-							{sourcePath}
-						</button>
-					</TooltipTrigger>
-					<TooltipContent side="top">{m.showInFolder()}</TooltipContent>
-				</Tooltip>
-			</div>
-
+			className="tyto-bar tyto-player sticky bottom-0 z-10">
 			{/* Transport controls read left-to-right in every locale, like the timeline they drive. */}
 			<div dir="ltr" className="flex min-w-0 flex-1 items-center gap-3">
-				<Button
-					size="icon"
-					onClick={toggle}
-					aria-label={playing ? m.pause() : m.play()}
-					className="h-9 w-9 shrink-0 rounded-full bg-primary text-primary-foreground hover:bg-primary/90">
-					{playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+				<Button iconOnly size="md" onClick={toggle} aria-label={playing ? m.pause() : m.play()} className="h-8 w-8 shrink-0">
+					{playing ? <Pause className="fill-current" /> : <Play className="fill-current" />}
 				</Button>
-
-				<span className="w-10 shrink-0 text-end font-mono text-[11px] tabular-nums text-muted-foreground">{formatTime(currentTime)}</span>
-
-				<div
-					ref={trackRef}
-					role="slider"
-					tabIndex={seekable ? 0 : -1}
-					aria-label={m.seek()}
-					aria-valuemin={0}
-					aria-valuemax={seekable ? Math.floor(duration) : 0}
-					aria-valuenow={Math.floor(currentTime)}
-					aria-disabled={!seekable}
-					onPointerDown={(event) => {
-						if (!seekable) return
-						event.currentTarget.setPointerCapture(event.pointerId)
-						seekToClientX(event.clientX)
-					}}
-					onPointerMove={(event) => {
-						if (!seekable || !event.currentTarget.hasPointerCapture(event.pointerId)) return
-						seekToClientX(event.clientX)
-					}}
-					onPointerUp={(event) => {
-						if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
-					}}
-					onKeyDown={(event) => {
-						if (!seekable) return
-						if (event.key === 'ArrowRight') {
-							event.preventDefault()
-							seekTo(currentTime + 5)
-						} else if (event.key === 'ArrowLeft') {
-							event.preventDefault()
-							seekTo(currentTime - 5)
-						} else if (event.key === ' ') {
-							event.preventDefault()
-							toggle()
-						}
-					}}
-					className={cn(
-						'group relative flex h-6 min-w-0 flex-1 touch-none items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/80',
-						seekable ? 'cursor-pointer' : 'cursor-default opacity-60',
-					)}>
-					<div className="h-1 w-full overflow-hidden rounded-full bg-muted">
-						<div className="h-full rounded-full bg-foreground" style={{ width: `${progress * 100}%` }} />
-					</div>
-					<div
-						aria-hidden
-						className="pointer-events-none absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100"
-						style={{ left: `${progress * 100}%` }}
-					/>
-				</div>
-
-				<span className="w-10 shrink-0 font-mono text-[11px] tabular-nums text-muted-foreground">{formatTime(duration)}</span>
+				<PlayerClock currentTime={currentTime} duration={duration} />
+				<ReplicaTimeline segments={job.segments} duration={duration} currentTime={currentTime} seekable={seekable} onSeek={seekTo} onToggle={toggle} />
 			</div>
 
 			<PlaybackRateButton playbackRate={playbackRate} onCycle={cyclePlaybackRate} />
 
 			<Tooltip>
 				<TooltipTrigger asChild>
-					<Button variant="ghost" size="iconSm" onClick={() => void saveACopy()} aria-label={m.save()} className="shrink-0 rounded-full">
+					<Button variant="ghost" size="iconSm" onClick={() => void saveACopy()} aria-label={m.save()} className="shrink-0">
 						<Download className="h-4 w-4" />
 					</Button>
 				</TooltipTrigger>
