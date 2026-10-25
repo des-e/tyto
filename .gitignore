@@ -51,3 +51,4 @@ tauri-plugin-aptabase/
 plans/
 
 .superpowers/
+!docs/superpowers/plans/
