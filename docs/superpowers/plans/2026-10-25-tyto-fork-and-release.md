@@ -26,7 +26,7 @@
 | 2. Конфиг Tauri | готово | af68a25 |
 | 3. Ссылки, тексты, иконка | готово | b29caa3, b81566f |
 | 4. Говорящие по умолчанию | готово | e155c17, 8761c0d |
-| 5. Скрыть телефон | не начата | |
+| 5. Скрыть телефон | готово | 62687f6 |
 | 6. Workflow релиза | не начата | |
 | 7. Установка, README, приёмка | не начата | |
 
@@ -244,13 +244,13 @@ test('очередь: diarize включён, но файла модели не�
 - Modify: `desktop/src/pages/settings/sections/recording.tsx`, `desktop/src/components/audio-device-input.tsx` — если там есть вход в телефонную функцию, скрыть его тем же флагом
 - Test: `desktop/src/lib/tyto/features.test.tsx`
 
-- [ ] **Step 1: Падающие тесты:**
+- [x] **Step 1: Падающие тесты:**
   - `'настройки: нет раздела «Телефон»'` — рендер `SettingsPage`, `queryByText(m.phone())` даёт `null`;
   - `'боковая панель: нет кнопки телефона'` — `queryByLabelText(m.phone())` даёт `null`.
-- [ ] **Step 2: FAIL** — `pnpm vitest run src/lib/tyto/features.test.tsx`
-- [ ] **Step 3: Обернуть точки входа** в `FEATURES.phone`. Компонент `PhoneSection` и Rust-часть handoff не удалять. Upstream-тест `phone.test.tsx` рендерит секцию напрямую и должен остаться зелёным.
-- [ ] **Step 4: PASS + полный прогон** — `pnpm test`
-- [ ] **Step 5: Commit** — `git commit -m "Tyto: скрыть запись с телефона в v1"`
+- [x] **Step 2: FAIL** — `pnpm vitest run src/lib/tyto/features.test.tsx`
+- [x] **Step 3: Обернуть точки входа** в `FEATURES.phone`. Компонент `PhoneSection` и Rust-часть handoff не удалять. Upstream-тест `phone.test.tsx` рендерит секцию напрямую и должен остаться зелёным.
+- [x] **Step 4: PASS + полный прогон** — `pnpm test`
+- [x] **Step 5: Commit** — `git commit -m "Tyto: скрыть запись с телефона в v1"`
 
 ---
 
