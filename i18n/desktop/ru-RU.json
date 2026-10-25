@@ -340,7 +340,7 @@
 	"transcribed": "Расшифровано",
 	"transcribing": "Расшифровываем…",
 	"transcriptWillDisplayedShortly": "Расшифровка появится здесь…",
-	"transcription": "Расшифровка",
+	"transcription": "Распознавание",
 	"translateToEnglish": "Перевести на английский",
 	"tryAgain": "Повторить",
 	"updateNow": "обновить сейчас",
@@ -745,5 +745,9 @@
 	"transcriptTabs": "Вид документа",
 	"meetingLanguage": "Язык встречи",
 	"filesStayLocal": "Файлы не покидают компьютер",
-	"closeSearch": "Закрыть поиск"
+	"closeSearch": "Закрыть поиск",
+	"settingsGroupTranscription": "Расшифровка",
+	"settingsGroupRecording": "Запись и голос",
+	"settingsGroupMore": "Дополнительно",
+	"navAdvanced": "Для опытных"
 }

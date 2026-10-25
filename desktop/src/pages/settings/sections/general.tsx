@@ -4,10 +4,9 @@ import { Moon, Sun } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { m } from '~/paraglide/messages.js'
-import { ReactComponent as GithubIcon } from '~/icons/github.svg'
-import { ReactComponent as LinkIcon } from '~/icons/link.svg'
 import * as config from '~/lib/config'
 import { DisplayLanguageInput } from '~/components/display-language-input'
+import { Button } from '~/components/ui/button'
 import { Switch } from '~/components/ui/switch'
 import { SegmentedControl } from '~/lib/tyto/segmented-control'
 import { SettingsGroup, SettingsRow, type SettingsViewModel } from './shared'
@@ -99,30 +98,20 @@ export function GeneralSection({ vm }: { vm: SettingsViewModel }) {
 				</SettingsRow>
 			</SettingsGroup>
 
-			<section className="space-y-2">
-				<h3 className="px-1 text-[13px] font-medium">{m.generalHelp()}</h3>
-				<div className="grid grid-cols-2 gap-2">
-					{[
-						{ label: m.projectLink(), icon: LinkIcon, action: () => openUrl(config.aboutURL) },
-						{ label: m.reportIssue(), icon: GithubIcon, action: vm.reportIssue },
-					].map(({ label, icon: Icon, action }) => (
-						<button
-							key={label}
-							type="button"
-							onClick={action}
-							className="flex min-h-11 items-center gap-2.5 rounded-lg border border-border/60 bg-card px-3 py-2.5 text-start text-xs font-medium transition-colors hover:bg-accent/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-							<Icon aria-hidden="true" className="h-4 w-4 shrink-0 text-muted-foreground" />
-							<span>{label}</span>
-						</button>
-					))}
-				</div>
+			<div className="mt-6 flex flex-wrap items-center gap-2 text-[12.5px] text-muted-foreground">
 				<button
 					type="button"
 					onClick={() => openUrl(config.upstreamURL)}
-					className="px-1 text-start text-xs text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+					className="text-start underline-offset-2 hover:text-foreground hover:underline">
 					{m.basedOnVibe()}
 				</button>
-			</section>
+				<Button variant="ghost" size="sm" className="ml-auto" onClick={() => openUrl(config.aboutURL)}>
+					{m.projectLink()}
+				</Button>
+				<Button variant="ghost" size="sm" className="-mr-3" onClick={vm.reportIssue}>
+					{m.reportIssue()}
+				</Button>
+			</div>
 		</div>
 	)
 }

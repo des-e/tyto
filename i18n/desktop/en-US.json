@@ -745,5 +745,9 @@
 	"transcriptTabs": "Document view",
 	"meetingLanguage": "Meeting language",
 	"filesStayLocal": "Files never leave your computer",
-	"closeSearch": "Close search"
+	"closeSearch": "Close search",
+	"settingsGroupTranscription": "Transcription",
+	"settingsGroupRecording": "Recording and voice",
+	"settingsGroupMore": "More",
+	"navAdvanced": "Advanced"
 }

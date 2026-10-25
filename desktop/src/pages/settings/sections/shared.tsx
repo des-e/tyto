@@ -7,11 +7,11 @@ import type { viewModel } from '../view-model'
 export type SettingsViewModel = ReturnType<typeof viewModel>
 
 /** Shared control sizing for compact row controls (selects / inputs). */
-export const rowControlClass = 'h-9 rounded-lg'
+export const rowControlClass = 'h-9 rounded-md'
 
 /**
- * A settings group: optional heading + one bordered container whose rows are
- * separated by hairline borders.
+ * A settings group: optional sub-heading, then plain rows on hairlines. No card around it:
+ * the page margin is the only container (`.tyto-rows` in theme.css drops the rows' side padding).
  */
 export function SettingsGroup({
 	title,
@@ -25,24 +25,24 @@ export function SettingsGroup({
 	className?: string
 }) {
 	return (
-		<section className="space-y-2">
+		<section className="mt-8 first:mt-0">
 			{(title || description) && (
-				<div className="space-y-0.5 px-1">
-					{title && <h3 className="text-[13px] font-medium text-foreground">{title}</h3>}
-					{description && <p className="text-xs text-muted-foreground">{description}</p>}
+				<div className="mb-2">
+					{title && <h3 className="text-[13.5px] leading-tight font-semibold text-foreground">{title}</h3>}
+					{description && <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>}
 				</div>
 			)}
-			<div className={cn('divide-y divide-border/45 overflow-hidden rounded-xl border border-border/60 bg-card', className)}>{children}</div>
+			<div className={cn('tyto-rows divide-y divide-border border-t border-border', className)}>{children}</div>
 		</section>
 	)
 }
 
 /** Label + optional one-line description, used on the left side of every row. */
-function RowLabel({ label, description, clamp = true }: { label: ReactNode; description?: ReactNode; clamp?: boolean }) {
+function RowLabel({ label, description, clamp = false }: { label: ReactNode; description?: ReactNode; clamp?: boolean }) {
 	return (
-		<div className="min-w-0 space-y-0.5">
+		<div className="min-w-0">
 			<div className="text-sm text-foreground">{label}</div>
-			{description && <p className={cn('text-xs text-muted-foreground', clamp && 'line-clamp-1')}>{description}</p>}
+			{description && <p className={cn('mt-0.5 max-w-[460px] text-xs text-muted-foreground', clamp && 'line-clamp-1')}>{description}</p>}
 		</div>
 	)
 }
@@ -53,7 +53,7 @@ export function SettingsRow({
 	description,
 	children,
 	className,
-	clampDescription = true,
+	clampDescription = false,
 }: {
 	label: ReactNode
 	description?: ReactNode
@@ -62,7 +62,7 @@ export function SettingsRow({
 	clampDescription?: boolean
 }) {
 	return (
-		<div className={cn('flex min-h-[52px] items-center justify-between gap-4 px-4 py-2.5', className)}>
+		<div className={cn('flex min-h-[56px] items-center justify-between gap-6 py-3', className)}>
 			<RowLabel label={label} description={description} clamp={clampDescription} />
 			{children && <div className="flex shrink-0 items-center gap-1.5">{children}</div>}
 		</div>
@@ -84,7 +84,7 @@ export function SettingsField({
 	className?: string
 }) {
 	return (
-		<div className={cn('space-y-2 px-4 py-3', className)}>
+		<div className={cn('space-y-2 py-3', className)}>
 			{(label || description) && <RowLabel label={label} description={description} clamp={false} />}
 			{children}
 			{footer && <div className="text-end text-xs text-muted-foreground">{footer}</div>}
@@ -94,7 +94,7 @@ export function SettingsField({
 
 /** A quiet note inside a group (e.g. "supports up to 4 speakers"). */
 export function SettingsNote({ children }: { children: ReactNode }) {
-	return <p className="px-4 py-2.5 text-xs text-muted-foreground">{children}</p>
+	return <p className="py-3 text-xs text-muted-foreground">{children}</p>
 }
 
 /** Whole-row clickable action: label on the left, small muted icon on the right. */
@@ -125,7 +125,7 @@ export function ActionRow({
 			onMouseDown={activateOnClick ? undefined : onClick}
 			onClick={activateOnClick ? onClick : undefined}
 			className={cn(
-				'flex min-h-[52px] w-full cursor-pointer items-center justify-between gap-4 px-4 py-2.5 text-start transition-colors',
+				'-mx-3 flex min-h-[56px] w-[calc(100%+1.5rem)] cursor-pointer rounded-md px-3 items-center justify-between gap-6 py-3 text-start transition-colors',
 				destructive ? 'text-destructive hover:bg-destructive/10' : 'hover:bg-accent/45',
 				'disabled:pointer-events-none disabled:opacity-50',
 				className,

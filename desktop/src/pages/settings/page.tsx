@@ -1,22 +1,7 @@
-import { ReactNode, useLayoutEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { m } from '~/paraglide/messages.js'
-import {
-	ArrowLeft,
-	ArrowUpRight,
-	Bot,
-	Cpu,
-	Globe,
-	Keyboard,
-	Mic,
-	ShieldCheck,
-	SlidersHorizontal,
-	Smartphone,
-	Sparkles,
-	Terminal,
-	Wrench,
-	X,
-} from 'lucide-react'
+import { ArrowLeft, ArrowUpRight, X } from 'lucide-react'
 import { openUrl } from '@tauri-apps/plugin-opener'
 import * as config from '~/lib/config'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip'
@@ -52,37 +37,50 @@ type Subpage = 'auto-export' | 'ai-summary' | 'ai-dictation' | 'whisper-options'
 interface SettingsSection {
 	id: SectionId
 	label: string
-	icon: ReactNode
 }
 
-/** Sidebar items, split into visually separated runs — no group headings. */
-type SettingsGroup = SettingsSection[]
+/** Sidebar items under an optional heading (the first run has none). */
+interface SettingsGroup {
+	title?: string
+	sections: SettingsSection[]
+}
 
 export default function SettingsPage({ setVisible, scrollTo }: SettingsPageProps) {
 	const vm = viewModel()
 
 	const groups: SettingsGroup[] = [
-		[
-			{ id: 'general', label: m.general(), icon: <Globe className="h-4 w-4" /> },
-			{ id: 'privacy', label: m.privacy(), icon: <ShieldCheck className="h-4 w-4" /> },
-		],
-		[
-			{ id: 'transcription', label: m.transcription(), icon: <SlidersHorizontal className="h-4 w-4" /> },
-			{ id: 'models', label: m.navModels(), icon: <Bot className="h-4 w-4" /> },
-			{ id: 'tuning', label: m.navTuning(), icon: <Cpu className="h-4 w-4" /> },
-		],
-		[
-			{ id: 'recording', label: m.recordingSettings(), icon: <Mic className="h-4 w-4" /> },
-			{ id: 'dictation', label: m.navDictation(), icon: <Keyboard className="h-4 w-4" /> },
-			{ id: 'ai', label: m.aiSection(), icon: <Sparkles className="h-4 w-4" /> },
-			...(FEATURES.phone ? [{ id: 'phone' as const, label: m.phone(), icon: <Smartphone className="h-4 w-4" /> }] : []),
-		],
-		[
-			{ id: 'api', label: m.navAgents(), icon: <Terminal className="h-4 w-4" /> },
-			{ id: 'advanced', label: m.advanced(), icon: <Wrench className="h-4 w-4" /> },
-		],
+		{
+			sections: [
+				{ id: 'general', label: m.general() },
+				{ id: 'privacy', label: m.privacy() },
+			],
+		},
+		{
+			title: m.settingsGroupTranscription(),
+			sections: [
+				{ id: 'transcription', label: m.transcription() },
+				{ id: 'models', label: m.navModels() },
+				{ id: 'tuning', label: m.navTuning() },
+			],
+		},
+		{
+			title: m.settingsGroupRecording(),
+			sections: [
+				{ id: 'recording', label: m.recordingSettings() },
+				{ id: 'dictation', label: m.navDictation() },
+				...(FEATURES.phone ? [{ id: 'phone' as const, label: m.phone() }] : []),
+			],
+		},
+		{
+			title: m.settingsGroupMore(),
+			sections: [
+				{ id: 'ai', label: m.aiSection() },
+				{ id: 'api', label: m.navAgents() },
+				{ id: 'advanced', label: m.navAdvanced() },
+			],
+		},
 	]
-	const sections = groups.flat()
+	const sections = groups.flatMap((group) => group.sections)
 
 	// Pages under a section, each with its own title and a way back; no dialog over the modal.
 	const subpages: Record<Subpage, { section: SectionId; title: string }> = {
@@ -142,28 +140,25 @@ export default function SettingsPage({ setVisible, scrollTo }: SettingsPageProps
 			<div
 				onMouseDown={(event) => event.stopPropagation()}
 				className="flex h-[640px] max-h-[calc(100dvh-3rem)] w-full max-w-3xl overflow-hidden rounded-2xl border border-border/60 bg-card shadow-2xl">
-				<div className="flex w-56 shrink-0 flex-col border-r border-border/55 bg-muted/40 p-3">
-					<div className="mb-2 flex items-center justify-between px-1 pb-1">
-						<span className="text-sm font-semibold">{m.settings()}</span>
-						<Button onMouseDown={() => setVisible(false)} variant="ghost" size="iconSm" className="h-7 w-7 rounded-lg">
-							<X className="h-4 w-4" />
-						</Button>
+				<div className="tyto-sidebar flex w-[220px] shrink-0 flex-col border-r border-border bg-sidebar px-2 py-6">
+					<div className="mb-3 flex h-7 items-center px-2">
+						<span className="text-[15px] leading-7 font-semibold tracking-[-0.015em]">{m.settings()}</span>
 					</div>
 					<nav aria-label={m.settings()} className="flex-1 overflow-y-auto">
-						{groups.map((group, index) => (
-							<div key={group[0].id} className={`space-y-0.5 ${index > 0 ? 'mt-3 border-t border-border/50 pt-3' : ''}`}>
-								{group.map((section) => (
+						{groups.map((group) => (
+							<div key={group.sections[0].id} data-group>
+								{group.title && (
+									<div data-settings-group className="mt-4 mb-1 px-2 text-xs leading-none font-medium text-muted-foreground">
+										{group.title}
+									</div>
+								)}
+								{group.sections.map((section) => (
 									<button
 										key={section.id}
 										type="button"
 										aria-current={activeSection === section.id ? 'page' : undefined}
 										onClick={() => goTo(section.id)}
-										className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left text-sm font-medium ${
-											activeSection === section.id
-												? 'tyto-selected'
-												: 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
-										}`}>
-										<span className={activeSection === section.id ? 'text-primary' : 'text-muted-foreground'}>{section.icon}</span>
+										className="tyto-settings-nav-item mb-0.5">
 										<span className="truncate">{section.label}</span>
 									</button>
 								))}
@@ -171,7 +166,7 @@ export default function SettingsPage({ setVisible, scrollTo }: SettingsPageProps
 						))}
 					</nav>
 					{/* The version is also the way into its own release notes — one line, not two affordances. */}
-					<div className="mt-2 border-t border-border/55 pt-3">
+					<div className="mt-2 border-t border-border pt-3">
 						<Tooltip>
 							<TooltipTrigger asChild>
 								<button
@@ -191,71 +186,82 @@ export default function SettingsPage({ setVisible, scrollTo }: SettingsPageProps
 					</div>
 				</div>
 
-				<div className="min-w-0 flex-1 overflow-y-auto p-6">
-					<div className="mb-5 flex items-center border-b border-border/55 pb-3">
-						<AnimatePresence initial={false}>
-							{subpage && (
-								<motion.div
-									key="back"
-									initial={{ width: 0 }}
-									animate={{ width: 32 }}
-									exit={{ width: 0 }}
-									transition={navigationSpring}
-									className="shrink-0 overflow-hidden">
-									<Button
-										variant="ghost"
-										size="iconSm"
-										className="h-7 w-6 rounded-lg"
-										onClick={() => navigateInside(null)}
-										aria-label={m.back()}>
-										<ArrowLeft className="h-4 w-4" />
-									</Button>
-								</motion.div>
-							)}
-						</AnimatePresence>
-						<h2 className="text-xl font-semibold">{subpage ? subpages[subpage].title : sections.find((s) => s.id === activeSection)?.label}</h2>
-					</div>
-					<div ref={viewportRef} className="overflow-hidden">
-						<div ref={contentRef} className="flow-root">
-							{subpage === 'whisper-options' && <WhisperOptionsSection vm={vm} />}
-							{subpage === 'audio-processing' && <AudioProcessingSection vm={vm} />}
-							{subpage === 'auto-export' && <AutoExportSection vm={vm} />}
-							{subpage === 'ai-summary' && <AiPromptSection vm={vm} task="summary" />}
-							{subpage === 'ai-dictation' && <AiPromptSection vm={vm} task="dictation" />}
-							{!subpage && activeSection === 'general' && <GeneralSection vm={vm} />}
+				<div className="relative min-w-0 flex-1">
+					<Button
+						onMouseDown={() => setVisible(false)}
+						variant="ghost"
+						size="sm"
+						iconOnly
+						aria-label={m.modalClose()}
+						className="absolute top-6 right-6 z-10">
+						<X className="h-4 w-4" />
+					</Button>
+					<div className="h-full overflow-y-auto px-8 py-6">
+						<div className="mb-6 flex h-7 items-center pr-10">
+							<AnimatePresence initial={false}>
+								{subpage && (
+									<motion.div
+										key="back"
+										initial={{ width: 0 }}
+										animate={{ width: 32 }}
+										exit={{ width: 0 }}
+										transition={navigationSpring}
+										className="shrink-0 overflow-hidden">
+										<Button
+											variant="ghost"
+											size="iconSm"
+											className="h-7 w-6 rounded-lg"
+											onClick={() => navigateInside(null)}
+											aria-label={m.back()}>
+											<ArrowLeft className="h-4 w-4" />
+										</Button>
+									</motion.div>
+								)}
+							</AnimatePresence>
+							<h2 className="tyto-title-settings">{subpage ? subpages[subpage].title : sections.find((s) => s.id === activeSection)?.label}</h2>
+						</div>
+						<div ref={viewportRef} className="overflow-hidden">
+							<div ref={contentRef} className="flow-root">
+								{subpage === 'whisper-options' && <WhisperOptionsSection vm={vm} />}
+								{subpage === 'audio-processing' && <AudioProcessingSection vm={vm} />}
+								{subpage === 'auto-export' && <AutoExportSection vm={vm} />}
+								{subpage === 'ai-summary' && <AiPromptSection vm={vm} task="summary" />}
+								{subpage === 'ai-dictation' && <AiPromptSection vm={vm} task="dictation" />}
+								{!subpage && activeSection === 'general' && <GeneralSection vm={vm} />}
 
-							{!subpage && activeSection === 'transcription' && (
-								<TranscriptionSection vm={vm} onOpenAutoExport={() => openSubpage('auto-export')} />
-							)}
+								{!subpage && activeSection === 'transcription' && (
+									<TranscriptionSection vm={vm} onOpenAutoExport={() => openSubpage('auto-export')} />
+								)}
 
-							{!subpage && activeSection === 'models' && <ModelsSection vm={vm} />}
+								{!subpage && activeSection === 'models' && <ModelsSection vm={vm} />}
 
-							{!subpage && activeSection === 'ai' && <AiSection vm={vm} onOpenPrompt={openPrompt} />}
+								{!subpage && activeSection === 'ai' && <AiSection vm={vm} onOpenPrompt={openPrompt} />}
 
-							{!subpage && activeSection === 'tuning' && (
-								<TuningSection
-									vm={vm}
-									onOpenWhisper={() => openSubpage('whisper-options')}
-									onOpenAudio={() => openSubpage('audio-processing')}
-								/>
-							)}
+								{!subpage && activeSection === 'tuning' && (
+									<TuningSection
+										vm={vm}
+										onOpenWhisper={() => openSubpage('whisper-options')}
+										onOpenAudio={() => openSubpage('audio-processing')}
+									/>
+								)}
 
-							{!subpage && activeSection === 'recording' && <RecordingSection />}
+								{!subpage && activeSection === 'recording' && <RecordingSection />}
 
-							{!subpage && activeSection === 'dictation' && <DictationSection vm={vm} onOpenCleanup={() => openSubpage('ai-dictation')} />}
+								{!subpage && activeSection === 'dictation' && <DictationSection vm={vm} onOpenCleanup={() => openSubpage('ai-dictation')} />}
 
-							{FEATURES.phone && activeSection === 'phone' && (
-								<PhoneSection
-									pairingOpen={subpage === 'phone-pairing'}
-									onPairingChange={(open) => navigateInside(open ? 'phone-pairing' : null)}
-								/>
-							)}
+								{FEATURES.phone && activeSection === 'phone' && (
+									<PhoneSection
+										pairingOpen={subpage === 'phone-pairing'}
+										onPairingChange={(open) => navigateInside(open ? 'phone-pairing' : null)}
+									/>
+								)}
 
-							{!subpage && activeSection === 'api' && <ApiSection vm={vm} />}
+								{!subpage && activeSection === 'api' && <ApiSection vm={vm} />}
 
-							{!subpage && activeSection === 'privacy' && <PrivacySection vm={vm} />}
+								{!subpage && activeSection === 'privacy' && <PrivacySection vm={vm} />}
 
-							{!subpage && activeSection === 'advanced' && <AdvancedSection vm={vm} />}
+								{!subpage && activeSection === 'advanced' && <AdvancedSection vm={vm} />}
+							</div>
 						</div>
 					</div>
 				</div>
