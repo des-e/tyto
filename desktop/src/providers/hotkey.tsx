@@ -222,7 +222,7 @@ export function HotkeyProvider({ children }: { children: ReactNode }) {
 					await invoke('type_text', { text: resultText })
 				} else {
 					await clipboard.writeText(resultText)
-					await notify('Vibe', m.hotkeyTranscriptionCopied())
+					await notify('Tyto', m.hotkeyTranscriptionCopied())
 				}
 				finishIndicator('completed', { output: hotkeyOutputModeRef.current })
 			} catch (error) {
@@ -235,7 +235,7 @@ export function HotkeyProvider({ children }: { children: ReactNode }) {
 					trackTranscribeFailed('hotkey', path, { errorMessage: message, userError: Boolean(code && isUserError(code)) })
 				}
 				finishIndicator('error', { message })
-				await notify('Vibe', message)
+				await notify('Tyto', message)
 			} finally {
 				isStoppingRef.current = false
 				isHotkeyRecordingRef.current = false
@@ -254,7 +254,7 @@ export function HotkeyProvider({ children }: { children: ReactNode }) {
 			if (!isHotkeyRecordingRef.current) return
 			const message = typeof payload === 'string' ? payload : payload?.message || m.error()
 			finishIndicator('error', { message })
-			void notify('Vibe', message)
+			void notify('Tyto', message)
 			// Keep the module flag true for the rest of this event dispatch so SessionProvider knows
 			// this was dictation, then release every dictation state before the next task.
 			queueMicrotask(() => {

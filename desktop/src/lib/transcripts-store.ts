@@ -18,7 +18,7 @@ import type { Segment, SpeakerNames } from './transcript'
  * disk, a missing folder or a corrupt file can never break the transcription flow.
  */
 
-export const TRANSCRIPTS_FOLDER = 'Vibe'
+export const TRANSCRIPTS_FOLDER = 'Tyto'
 export const TRANSCRIPT_EXTENSION = '.vibe.json'
 /** Name of the record inside a project folder. */
 export const TRANSCRIPT_FILENAME = `transcript${TRANSCRIPT_EXTENSION}`
@@ -290,7 +290,7 @@ export async function saveTranscript(input: SaveTranscriptInput): Promise<SaveTr
 			if (input.moveSourceMedia) throw error
 			console.warn('failed to copy imported media; saving its external source path:', input.sourcePath, error)
 		}
-		if (input.moveSourceMedia && !media) throw new Error(`Vibe-created media has no usable extension: ${input.sourcePath}`)
+		if (input.moveSourceMedia && !media) throw new Error(`Tyto-created media has no usable extension: ${input.sourcePath}`)
 
 		const record: TranscriptRecord = {
 			...baseRecord,

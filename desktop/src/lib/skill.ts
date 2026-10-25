@@ -54,10 +54,10 @@ function baseUrlSection(context: SkillContext) {
 	return [
 		'## The base URL changes every run',
 		'',
-		`\`${context.baseUrl}\` was correct when this skill was installed. Vibe binds a free port on every`,
+		`\`${context.baseUrl}\` was correct when this skill was installed. Tyto binds a free port on every`,
 		'run, and the API server is a toggle that is off by default, so do not assume it still answers.',
 		'',
-		`While the server runs, Vibe writes the current base URL into \`${CONFIG_KEYS.apiBaseUrl}\` in the config file`,
+		`While the server runs, Tyto writes the current base URL into \`${CONFIG_KEYS.apiBaseUrl}\` in the config file`,
 		'(path in the settings section below) and removes it on stop. Read it there rather than reusing',
 		'the one above — but treat it as a hint: a crash can leave a dead value behind, so confirm with',
 		'`GET <base>/health` before relying on it. No key, or no answer, means the server is off; ask the',
@@ -75,18 +75,18 @@ function commandLineSection(context: SkillContext) {
 		'# Transcribing without the API',
 		'',
 		context.serverBinary
-			? ['Vibe bundles the `server` engine as a standalone binary:', '', `  ${context.serverBinary}`].join('\n')
-			: 'Vibe bundles the `server` engine as a standalone binary next to the Vibe executable.',
+			? ['Tyto bundles the `server` engine as a standalone binary:', '', `  ${context.serverBinary}`].join('\n')
+			: 'Tyto bundles the `server` engine as a standalone binary next to the Tyto executable.',
 		'',
 		'It transcribes straight from the command line — no server, no port, and no GUI running. Run it',
 		'with `--help` for the current usage; the subcommands are `transcribe`, `serve`, `pull` and',
-		'`devices`, and `transcribe` needs a local whisper.cpp ggml model (the one Vibe uses is under',
+		'`devices`, and `transcribe` needs a local whisper.cpp ggml model (the one Tyto uses is under',
 		'`model.path` in the config file).',
 		'',
 		context.vibeBinary
-			? `The Vibe app itself is at \`${context.vibeBinary}\`. It takes no useful command line flags —`
-			: 'The Vibe app itself takes no useful command line flags —',
-		'`--help` prints nothing and exits 0, so never drive Vibe from the shell. If the user would be',
+			? `The Tyto app itself is at \`${context.vibeBinary}\`. It takes no useful command line flags —`
+			: 'The Tyto app itself takes no useful command line flags —',
+		'`--help` prints nothing and exits 0, so never drive Tyto from the shell. If the user would be',
 		'better off in the app, say so and let them open it: do not launch a GUI application on someone',
 		"else's machine without asking first.",
 	].join('\n')
@@ -96,11 +96,11 @@ function commandLineSection(context: SkillContext) {
 function transcriptsSection(context: SkillContext) {
 	const folder = context.transcriptsFolder
 	return [
-		'# Vibe transcripts',
+		'# Tyto transcripts',
 		'',
-		'Everything the user saved from Vibe lives under one folder:',
+		'Everything the user saved from Tyto lives under one folder:',
 		'',
-		folder ? `  ${folder}` : "  <the user's documents folder>/Vibe",
+		folder ? `  ${folder}` : "  <the user's documents folder>/Tyto",
 		'',
 		'Two layouts sit side by side in it:',
 		'',
@@ -120,7 +120,7 @@ function transcriptsSection(context: SkillContext) {
 		'  "modelPath": "/path/to/ggml-medium.bin",',
 		'  "audioFile": "audio.mp3",',
 		'  "segments": [{ "start": 0, "stop": 2400, "text": "Quick recap of yesterday." }],',
-		'  "summary": "optional — the last AI summary made in Vibe"',
+		'  "summary": "optional — the last AI summary made in Tyto"',
 		'}',
 		'~~~',
 		'',
@@ -141,7 +141,7 @@ function transcriptsSection(context: SkillContext) {
 		'4. the first entry wins — `createdAt` inside the record confirms it.',
 		'',
 		'~~~sh',
-		`folder="${folder ?? '$HOME/Documents/Vibe'}"`,
+		`folder="${folder ?? '$HOME/Documents/Tyto'}"`,
 		'for entry in "$folder"/*; do',
 		'  record="$entry"; [ -d "$entry" ] && record="$entry/transcript.vibe.json"',
 		'  case "$record" in *.vibe.json) ;; *) continue ;; esac',
@@ -177,9 +177,9 @@ function behaviourSection() {
 /** Where the settings live and how to change them without corrupting the file. */
 function settingsSection(context: SkillContext) {
 	return [
-		'# Vibe settings',
+		'# Tyto settings',
 		'',
-		'Vibe keeps every setting in one JSON file, safe to read and edit:',
+		'Tyto keeps every setting in one JSON file, safe to read and edit:',
 		'',
 		context.configPath ? `  ${context.configPath}` : '  (ask the user to open Settings → API & Agents → Config file)',
 		'',
@@ -195,9 +195,9 @@ function settingsSection(context: SkillContext) {
 		'}',
 		'~~~',
 		'',
-		'Vibe watches the file, so an edit applies immediately — no restart, and no need to ask the',
+		'Tyto watches the file, so an edit applies immediately — no restart, and no need to ask the',
 		'user to reopen the app. Write the whole file atomically (write a temporary file beside it,',
-		'then rename it over the original) so Vibe can never read a half-written config.',
+		'then rename it over the original) so Tyto can never read a half-written config.',
 		'',
 		`Source and docs: ${config.repoURL}`,
 	].join('\n')
@@ -220,7 +220,7 @@ export function withFrontmatter(body: string) {
 	return [
 		'---',
 		'name: vibe',
-		'description: Work with Vibe — read saved transcripts, transcribe audio through the local Vibe API, and read or change Vibe settings.',
+		'description: Work with Tyto — read saved transcripts, transcribe audio through the local Tyto API, and read or change Tyto settings.',
 		'---',
 		'',
 		body,

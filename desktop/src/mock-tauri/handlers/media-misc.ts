@@ -134,7 +134,7 @@ export const mediaMiscHandlers: CommandHandlerMap = {
 		return join(dirname(src), `${stem(basename(src))}${suffix}`)
 	},
 
-	get_default_projects_path: () => `${DOCUMENTS_FOLDER}/Vibe`,
+	get_default_projects_path: () => `${DOCUMENTS_FOLDER}/Tyto`,
 
 	// Unique like the real one: several downloads in a row must not land on the same file.
 	get_temp_path: (args) => `${APP_LOCAL_DATA}/tmp-${(tempPathCounter += 1)}.${String(args?.ext ?? 'tmp')}`,

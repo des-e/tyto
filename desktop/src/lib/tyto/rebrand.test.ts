@@ -39,3 +39,35 @@ describe('tyto texts', () => {
 		})
 	}
 })
+
+describe('tyto hardcoded names', () => {
+	const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../../')
+	const files = [
+		'src-tauri/src/setup.rs',
+		'src-tauri/src/tray.rs',
+		'src-tauri/src/keepawake.rs',
+		'src-tauri/src/config.rs',
+		'src/lib/transcripts-store.ts',
+		'src/providers/hotkey.tsx',
+		'src/lib/docx.ts',
+		'src/lib/skill.ts',
+		'src/mock-tauri/handlers/media-misc.ts',
+		'src-tauri/vc_redist.nsh',
+		'src-tauri/Cargo.toml',
+	]
+
+	it('uses its own projects folder', async () => {
+		const { TRANSCRIPTS_FOLDER } = await import('../transcripts-store')
+		expect(TRANSCRIPTS_FOLDER).toBe('Tyto')
+	})
+
+	it('has no user-visible "Vibe" string literal left', () => {
+		const literal = /["'`][^"'`\n]*\bVibe\b[^"'`\n]*["'`]/
+		for (const file of files) {
+			const offenders = readFileSync(resolve(root, file), 'utf-8')
+				.split('\n')
+				.filter((line) => !/^\s*(\/\/|\/?\*|#)/.test(line) && !/tracing::|(debug|info|warn|error)!\(/.test(line) && literal.test(line))
+			expect(offenders, file).toEqual([])
+		}
+	})
+})
