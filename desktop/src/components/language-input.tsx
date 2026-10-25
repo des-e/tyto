@@ -94,7 +94,7 @@ export default function LanguageInput({ variant = 'default' }: LanguageInputProp
 
 	const prominent = variant === 'prominent'
 	const selected = entries.find(({ code }) => code === selectedLang)
-	const triggerLabel = selectedLang === 'auto' && autoEntry ? autoEntry.label : selected ? stripDecoration(selected.label) : m.selectLanguage()
+	const triggerLabel = selectedLang === 'auto' ? stripDecoration(getLocalizedLanguageName('auto')) : selected ? stripDecoration(selected.label) : m.selectLanguage()
 
 	return (
 		<div className={cn('w-full', prominent ? '' : 'space-y-2')}>

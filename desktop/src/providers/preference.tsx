@@ -347,7 +347,10 @@ export function PreferenceProvider({ children }: { children: ReactNode }) {
 
 	function setLanguageDefaults() {
 		if (supportedLanguages[preference.displayLanguage]) {
-			preference.setModelOptions({ ...preference.modelOptions, lang: preference.displayLanguage.split('-')[0].toLowerCase() })
+			// Tyto: auto-detect is a deliberate choice, not a stale default; only a fixed language follows the app language.
+			if (preference.modelOptions.lang !== 'auto') {
+				preference.setModelOptions({ ...preference.modelOptions, lang: preference.displayLanguage.split('-')[0].toLowerCase() })
+			}
 			preference.setTextAreaDirection(getTextDirection())
 		}
 	}

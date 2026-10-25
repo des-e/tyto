@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, renderHook } from '@testing-library/react'
+import { act, cleanup, renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -20,6 +20,8 @@ import { CONFIG_KEYS } from '~/lib/config-keys'
 afterEach(cleanup)
 beforeEach(() => {
 	h.storeEntries = []
+	// The previous test's locale switch is kept by paraglide's localStorage strategy.
+	localStorage.clear()
 })
 
 /** Boots the real preference provider on top of a store that holds `entries`. */
@@ -45,5 +47,26 @@ describe('язык расшифровки по умолчанию', () => {
 		const saved = { ...(await import('~/providers/preference')).DEFAULT_MODEL_OPTIONS, lang: 'ru' }
 		const { result } = await renderPreference([[CONFIG_KEYS.modelOptions, saved]])
 		expect(result.current.modelOptions.lang).toBe('ru')
+	})
+
+	it('старая установка с сохранённым en остаётся на en', async () => {
+		const saved = { ...(await import('~/providers/preference')).DEFAULT_MODEL_OPTIONS, lang: 'en' }
+		const { result } = await renderPreference([[CONFIG_KEYS.modelOptions, saved]])
+		expect(result.current.modelOptions.lang).toBe('en')
+	})
+
+	it('смена языка приложения не трогает auto', async () => {
+		const { result } = await renderPreference([])
+		act(() => result.current.setDisplayLanguage('ru-RU'))
+		await new Promise((r) => setTimeout(r, 20))
+		expect(result.current.displayLanguage).toBe('ru-RU')
+		expect(result.current.modelOptions.lang).toBe('auto')
+	})
+
+	it('смена языка приложения переключает фиксированный язык (поведение Vibe)', async () => {
+		const saved = { ...(await import('~/providers/preference')).DEFAULT_MODEL_OPTIONS, lang: 'en' }
+		const { result } = await renderPreference([[CONFIG_KEYS.modelOptions, saved]])
+		act(() => result.current.setDisplayLanguage('ru-RU'))
+		await waitFor(() => expect(result.current.modelOptions.lang).toBe('ru'))
 	})
 })
