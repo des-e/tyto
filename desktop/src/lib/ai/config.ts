@@ -1,3 +1,5 @@
+import { detectProxyFormat, type ProxyFormat } from '~/lib/tyto/proxy-format'
+
 /** The pre-3.2 shape of `summarize.llm`, kept only for migration. */
 export interface LegacyLlmConfig {
 	platform?: string
@@ -20,16 +22,25 @@ export interface LegacyLlmConfig {
  * does to a sentence. Prompts belong to tasks, so changing the platform keeps them.
  */
 
-export type AiPlatform = 'ollama' | 'claude' | 'openai'
+export type AiPlatform = 'ollama' | 'claude' | 'openai' | 'proxy'
+
+/** Claude's official address; the Claude platform can point elsewhere through `claudeBaseUrl`. */
+export const CLAUDE_BASE_URL = 'https://api.anthropic.com'
 
 export interface AiConnection {
 	platform: AiPlatform
 	model: string
 	contextTokens: number
 	claudeApiKey: string
+	/** Where Claude requests go; empty means the official address. */
+	claudeBaseUrl: string
 	ollamaBaseUrl: string
 	openaiBaseUrl: string
 	openaiApiKey: string
+	/** A proxy service: its own address and key, in the OpenAI or the Claude request format. */
+	proxyBaseUrl: string
+	proxyApiKey: string
+	proxyFormat: ProxyFormat
 }
 
 export interface AiTask {
@@ -116,9 +127,13 @@ export const DEFAULT_AI: AiSettings = {
 		model: defaultModel('claude'),
 		contextTokens: 65_536,
 		claudeApiKey: '',
+		claudeBaseUrl: CLAUDE_BASE_URL,
 		ollamaBaseUrl: 'http://localhost:11434',
 		openaiBaseUrl: 'https://api.openai.com/v1',
 		openaiApiKey: '',
+		proxyBaseUrl: '',
+		proxyApiKey: '',
+		proxyFormat: 'openai',
 	},
 	tasks: {
 		summary: { enabled: false, autoOnFinish: false, preset: 'summary', prompt: presetPrompt('summary') },
@@ -126,9 +141,32 @@ export const DEFAULT_AI: AiSettings = {
 	},
 }
 
-/** The default model for a platform, so switching platforms never leaves a Claude model on Ollama. */
+/**
+ * The default model for a platform, so switching platforms never leaves a Claude model on Ollama.
+ * A proxy service names its own models, so it starts empty and the field shows an example.
+ */
 export function defaultModel(platform: AiPlatform) {
+	if (platform === 'proxy') return ''
 	return platform === 'ollama' ? 'gemma4:e2b' : platform === 'openai' ? 'gpt-5.6-luna' : 'claude-sonnet-5'
+}
+
+/**
+ * Stored settings from before a field existed (3.2 had no Claude address and no proxy) get the
+ * defaults for what is missing; nothing that is there is dropped or changed.
+ */
+export function normalizeAi(stored: Partial<AiSettings> | null | undefined): AiSettings {
+	if (!stored || typeof stored !== 'object') return DEFAULT_AI
+	const saved: Partial<AiConnection> = stored.connection && typeof stored.connection === 'object' ? stored.connection : {}
+	const connection: AiConnection = { ...DEFAULT_AI.connection, ...saved }
+	if (!connection.claudeBaseUrl?.trim()) connection.claudeBaseUrl = CLAUDE_BASE_URL
+	if (saved.proxyFormat !== 'openai' && saved.proxyFormat !== 'claude')
+		connection.proxyFormat = saved.proxyBaseUrl ? detectProxyFormat(saved.proxyBaseUrl) : DEFAULT_AI.connection.proxyFormat
+	const tasks = stored.tasks && typeof stored.tasks === 'object' ? stored.tasks : DEFAULT_AI.tasks
+	return {
+		...stored,
+		connection,
+		tasks: { summary: { ...DEFAULT_AI.tasks.summary, ...tasks.summary }, dictation: { ...DEFAULT_AI.tasks.dictation, ...tasks.dictation } },
+	}
 }
 
 /** Old `%s` prompts become `{transcript}` or `{text}`; anything else is left alone. */
@@ -149,6 +187,7 @@ export function migrateLegacy(legacy: LegacyLlmConfig | null | undefined, autoSu
 	const isDefault = presets.some((preset) => preset.task === 'summary' && preset.prompt === prompt)
 	return {
 		connection: {
+			...DEFAULT_AI.connection,
 			platform,
 			model: legacy.model || defaultModel(platform),
 			contextTokens: legacy.contextTokens ?? DEFAULT_AI.connection.contextTokens,

@@ -1,11 +1,13 @@
 import { openUrl } from '@tauri-apps/plugin-opener'
-import { Check, ChevronRight, Copy, ExternalLink } from 'lucide-react'
+import { Check, ChevronRight, Copy, ExternalLink, Waypoints } from 'lucide-react'
 import { siClaude, siOllama } from 'simple-icons'
 import { OPENAI_PATH } from '~/components/brand-glyph'
 import { m } from '~/paraglide/messages.js'
 import { ReactComponent as LinkIcon } from '~/icons/link.svg'
 import * as config from '~/lib/config'
-import { defaultModel, type AiPlatform, type AiSettings } from '~/lib/ai'
+import { CLAUDE_BASE_URL, defaultModel, type AiPlatform, type AiSettings } from '~/lib/ai'
+import { detectProxyFormat, type ProxyFormat } from '~/lib/tyto/proxy-format'
+import { SegmentedControl } from '~/lib/tyto/segmented-control'
 import NumberField from '~/components/number-field'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
@@ -28,13 +30,20 @@ function LabelWithLink({ label, tooltip, onClick }: { label: string; tooltip: st
 }
 
 /** Brand marks for the providers, so the picker reads at a glance. */
-const platformIcons: Record<AiPlatform, { path: string; title: string }> = {
+const platformIcons: Record<Exclude<AiPlatform, 'proxy'>, { path: string; title: string }> = {
 	claude: { path: siClaude.path, title: siClaude.title },
 	ollama: { path: siOllama.path, title: siOllama.title },
 	openai: { path: OPENAI_PATH, title: 'OpenAI' },
 }
 
 function PlatformOption({ platform }: { platform: AiPlatform }) {
+	if (platform === 'proxy')
+		return (
+			<span className="flex items-center gap-2">
+				<Waypoints aria-hidden className="h-4 w-4 shrink-0" />
+				<span>{m.aiProxyPlatform()}</span>
+			</span>
+		)
 	const icon = platformIcons[platform]
 	return (
 		<span className="flex items-center gap-2">
@@ -98,11 +107,11 @@ export function AiSection({ vm, onOpenPrompt }: { vm: SettingsViewModel; onOpenP
 			<SettingsGroup title={m.connection()}>
 				<SettingsRow label={m.llmPlatform()}>
 					<Select value={connection.platform} onValueChange={(platform: AiPlatform) => setConnection({ platform, model: defaultModel(platform) })}>
-						<SelectTrigger className={`w-52 ${rowControlClass}`}>
+						<SelectTrigger className={`w-64 ${rowControlClass}`}>
 							<SelectValue />
 						</SelectTrigger>
 						<SelectContent>
-							{(['claude', 'ollama', 'openai'] as const).map((name) => (
+							{(['claude', 'ollama', 'openai', 'proxy'] as const).map((name) => (
 								<SelectItem key={name} value={name}>
 									<PlatformOption platform={name} />
 								</SelectItem>
@@ -113,6 +122,15 @@ export function AiSection({ vm, onOpenPrompt }: { vm: SettingsViewModel; onOpenP
 
 				{connection.platform === 'claude' && (
 					<>
+						<SettingsRow label={m.aiApiAddress()}>
+							<Input
+								aria-label={m.aiApiAddress()}
+								value={connection.claudeBaseUrl}
+								onChange={(e) => setConnection({ claudeBaseUrl: e.target.value })}
+								placeholder={CLAUDE_BASE_URL}
+								className={`w-64 ${rowControlClass}`}
+							/>
+						</SettingsRow>
 						<SettingsRow
 							label={<LabelWithLink label={m.llmApiKey()} tooltip={m.findHere()} onClick={() => openUrl(config.llmApiKeyUrl)} />}
 							description={m.infoLlmApiKey()}>
@@ -193,6 +211,50 @@ export function AiSection({ vm, onOpenPrompt }: { vm: SettingsViewModel; onOpenP
 								value={connection.model}
 								onChange={(e) => setConnection({ model: e.target.value })}
 								placeholder={defaultModel('openai')}
+								className={`w-64 ${rowControlClass}`}
+							/>
+						</SettingsRow>
+					</>
+				)}
+
+				{connection.platform === 'proxy' && (
+					<>
+						<SettingsRow label={m.aiApiAddress()} description={m.aiProxyHint()}>
+							<Input
+								aria-label={m.aiApiAddress()}
+								value={connection.proxyBaseUrl}
+								onChange={(e) => setConnection({ proxyBaseUrl: e.target.value, proxyFormat: detectProxyFormat(e.target.value) })}
+								placeholder="https://.../v1"
+								className={`w-64 ${rowControlClass}`}
+							/>
+						</SettingsRow>
+						<SettingsRow label={m.aiProxyKey()}>
+							<Input
+								aria-label={m.aiProxyKey()}
+								value={connection.proxyApiKey}
+								onChange={(e) => setConnection({ proxyApiKey: e.target.value })}
+								placeholder={m.pasteApiKey()}
+								type="password"
+								className={`w-64 ${rowControlClass}`}
+							/>
+						</SettingsRow>
+						<SettingsRow label={m.aiProxyFormat()}>
+							<SegmentedControl<ProxyFormat>
+								ariaLabel={m.aiProxyFormat()}
+								value={connection.proxyFormat}
+								onChange={(proxyFormat) => setConnection({ proxyFormat })}
+								options={[
+									{ value: 'openai', label: 'OpenAI' },
+									{ value: 'claude', label: 'Claude' },
+								]}
+							/>
+						</SettingsRow>
+						<SettingsRow label={m.llmModel()}>
+							<Input
+								aria-label={m.llmModel()}
+								value={connection.model}
+								onChange={(e) => setConnection({ model: e.target.value })}
+								placeholder={defaultModel(connection.proxyFormat)}
 								className={`w-64 ${rowControlClass}`}
 							/>
 						</SettingsRow>

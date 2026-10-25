@@ -11,7 +11,7 @@ import { ModifyState } from '~/lib/types'
 import { supportedLanguages } from '~/lib/i18n'
 import { getLocale, getTextDirection, setLocale } from '~/paraglide/runtime.js'
 import { m } from '~/paraglide/messages.js'
-import { DEFAULT_AI, migrateLegacy, type AiSettings } from '~/lib/ai'
+import { DEFAULT_AI, migrateLegacy, normalizeAi, type AiSettings } from '~/lib/ai'
 import { readConfig } from '~/lib/config-store'
 import { message } from '@tauri-apps/plugin-dialog'
 import { invoke } from '@tauri-apps/api/core'
@@ -225,7 +225,7 @@ export function PreferenceProvider({ children }: { children: ReactNode }) {
 	const [projectsPath, setProjectsPath] = usePersisted<string | null>(CONFIG_KEYS.projectsPath, null)
 	const [autoExport, setAutoExport] = usePersisted<AutoExportSettings>(CONFIG_KEYS.autoExport, DEFAULT_AUTO_EXPORT)
 	// The pre-3.2 `summarize.llm` object is read once when `ai` is missing, so nobody loses a key or a prompt.
-	const [ai, setAi] = usePersisted<AiSettings>(
+	const [storedAi, setAi] = usePersisted<AiSettings>(
 		CONFIG_KEYS.ai,
 		useMemo(
 			() =>
@@ -236,6 +236,8 @@ export function PreferenceProvider({ children }: { children: ReactNode }) {
 			[],
 		),
 	)
+	// Tyto: settings saved before a field existed (Claude address, proxy) get its default.
+	const ai = useMemo(() => normalizeAi(storedAi), [storedAi])
 	useEffect(() => {
 		// Once, at boot: writes the migrated shape so the file carries it from now on.
 		if (readConfig(CONFIG_KEYS.ai, null) === null && readConfig(CONFIG_KEYS.legacyLlmConfig, null) !== null) setAi(ai)

@@ -81,6 +81,12 @@ const COPY: Array<[string, string]> = [
 	['generalTrayInfo', 'Tyto продолжит работать в фоне. Выйти можно из меню значка в трее.'],
 	['launchAtStartupInfo', 'Tyto откроется сам, когда вы войдете в Windows.'],
 	['generalAwakeInfo', 'Пока Tyto открыт. Экран при этом может гаснуть, ноутбук быстрее разряжается.'],
+	// «ИИ через прокси-сервис».
+	['aiProxyPlatform', 'Через прокси-сервис'],
+	['aiProxyHint', 'Вставьте адрес и ключ из инструкции вашего сервиса'],
+	['aiApiAddress', 'Адрес API'],
+	['aiProxyKey', 'Ключ'],
+	['aiProxyFormat', 'Формат'],
 ]
 
 describe('tyto ru copy', () => {

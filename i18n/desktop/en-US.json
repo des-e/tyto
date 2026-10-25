@@ -749,5 +749,10 @@
 	"settingsGroupTranscription": "Transcription",
 	"settingsGroupRecording": "Recording and voice",
 	"settingsGroupMore": "More",
-	"navAdvanced": "Advanced"
+	"navAdvanced": "Advanced",
+	"aiProxyPlatform": "Via a proxy service",
+	"aiProxyHint": "Paste the address and key from your service's instructions",
+	"aiApiAddress": "API address",
+	"aiProxyKey": "Key",
+	"aiProxyFormat": "Format"
 }

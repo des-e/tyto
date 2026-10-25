@@ -1,5 +1,6 @@
 import { fetch } from '@tauri-apps/plugin-http'
-import { PLACEHOLDERS, type AiConnection } from './config'
+import { joinApiUrl } from '~/lib/tyto/proxy-format'
+import { CLAUDE_BASE_URL, PLACEHOLDERS, type AiConnection } from './config'
 
 /** Output ceiling; the input side of the context is what is left after it and a margin. */
 const MAX_OUTPUT_TOKENS = 8_192
@@ -202,6 +203,11 @@ class OpenAICompatible implements AiClient {
 
 class Claude implements AiClient {
 	constructor(private connection: AiConnection) {}
+	/** `<base>/v1/messages`; a base that already ends in `/v1` is not given a second one. */
+	private url() {
+		const base = this.connection.claudeBaseUrl?.trim() || CLAUDE_BASE_URL
+		return joinApiUrl(base, /\/v1\/*$/i.test(base) ? 'messages' : 'v1/messages')
+	}
 	private headers() {
 		return { Origin: '', Referer: '', 'X-API-Key': this.connection.claudeApiKey, 'anthropic-version': '2023-06-01', 'Content-Type': 'application/json' }
 	}
@@ -214,12 +220,12 @@ class Claude implements AiClient {
 		})
 	}
 	async ask(prompt: string) {
-		const response = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: this.headers(), body: this.body(prompt, false) })
+		const response = await fetch(this.url(), { method: 'POST', headers: this.headers(), body: this.body(prompt, false) })
 		if (!response.ok) throw await failure('Claude', response)
 		return (await response.json()).content?.[0]?.text ?? ''
 	}
 	async stream(prompt: string, onToken: (text: string) => void) {
-		const response = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: this.headers(), body: this.body(prompt, true) })
+		const response = await fetch(this.url(), { method: 'POST', headers: this.headers(), body: this.body(prompt, true) })
 		if (!response.ok) throw await failure('Claude', response)
 		let text = ''
 		await readLines(response, (line) => {
@@ -239,7 +245,22 @@ class Claude implements AiClient {
 	}
 }
 
+/** A proxy service speaks one of the two formats, so it is that client with the proxy's address and key. */
+function proxyClient(connection: AiConnection): AiClient {
+	const base = connection.proxyBaseUrl?.trim() ?? ''
+	// Rejects on use, not here: the summaries hook builds its client during render.
+	if (!base) {
+		const missing = async (): Promise<string> => {
+			throw new Error('Proxy: no API address')
+		}
+		return { ask: missing, stream: missing }
+	}
+	if (connection.proxyFormat === 'claude') return new Claude({ ...connection, claudeBaseUrl: base, claudeApiKey: connection.proxyApiKey ?? '' })
+	return new OpenAICompatible({ ...connection, openaiBaseUrl: base, openaiApiKey: connection.proxyApiKey ?? '' })
+}
+
 export function createClient(connection: AiConnection): AiClient {
+	if (connection.platform === 'proxy') return proxyClient(connection)
 	if (connection.platform === 'ollama') return new Ollama(connection)
 	if (connection.platform === 'openai') return new OpenAICompatible(connection)
 	return new Claude(connection)

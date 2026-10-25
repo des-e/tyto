@@ -749,5 +749,10 @@
 	"settingsGroupTranscription": "Расшифровка",
 	"settingsGroupRecording": "Запись и голос",
 	"settingsGroupMore": "Дополнительно",
-	"navAdvanced": "Для опытных"
+	"navAdvanced": "Для опытных",
+	"aiProxyPlatform": "Через прокси-сервис",
+	"aiProxyHint": "Вставьте адрес и ключ из инструкции вашего сервиса",
+	"aiApiAddress": "Адрес API",
+	"aiProxyKey": "Ключ",
+	"aiProxyFormat": "Формат"
 }
