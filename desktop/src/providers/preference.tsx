@@ -173,7 +173,8 @@ const defaultDisplayLanguage = 'en-US'
 export const DEFAULT_MODEL_OPTIONS: ModelOptions = {
 	init_prompt: '',
 	verbose: false,
-	lang: 'en',
+	// Tyto: auto-detect, so Russian and mixed calls work out of the box (Vibe's own value for it is 'auto').
+	lang: 'auto',
 	n_threads: 4,
 	temperature: 0.4,
 	max_text_ctx: undefined,

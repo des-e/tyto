@@ -65,6 +65,12 @@ const COPY: Array<[string, string]> = [
 	['showSpeakers', 'Имена говорящих'],
 	['moreOptions', 'Еще настройки'],
 	['languageauto', 'Определить автоматически'],
+	// Settings navigation groups (item 11 of the spec).
+	['settingsGroupTranscription', 'Расшифровка'],
+	['settingsGroupRecording', 'Запись и голос'],
+	['settingsGroupMore', 'Дополнительно'],
+	['transcription', 'Распознавание'],
+	['navAdvanced', 'Для опытных'],
 	['modalErrorBody', 'Что-то пошло не так. Подробности ниже, их можно отправить нам.'],
 	['resetApp', 'Сбросить настройки Tyto'],
 	['crashedRecently', 'Tyto недавно закрылся с ошибкой, поэтому мы временно отключили видеокарту. Включить ее можно в настройках.'],
