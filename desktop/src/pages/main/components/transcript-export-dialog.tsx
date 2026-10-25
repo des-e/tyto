@@ -203,8 +203,8 @@ export default function TranscriptExportDialog({
 					</DialogDescription>
 				</DialogHeader>
 
-				<div className="grid min-h-0 flex-1 overflow-y-auto lg:grid-cols-[420px_minmax(0,1fr)] lg:overflow-hidden">
-					<div className="space-y-6 p-6 lg:overflow-y-auto lg:border-e lg:border-border">
+				<div className="grid min-h-0 flex-1 overflow-y-auto md:grid-cols-[420px_minmax(0,1fr)] md:overflow-hidden">
+					<div className="space-y-6 p-6 md:overflow-y-auto md:border-e md:border-border">
 						<ExportGroup id="tyto-export-content" label={m.exportContent()}>
 							<ExportContentCards value={content} onChange={onContentChange} hasSummary={hasSummary} />
 						</ExportGroup>
@@ -220,7 +220,7 @@ export default function TranscriptExportDialog({
 					</div>
 
 					<section
-						className="flex min-h-[18rem] flex-col border-t border-border bg-muted p-6 lg:min-h-0 lg:border-t-0"
+						className="flex min-h-[18rem] flex-col border-t border-border bg-muted p-6 md:min-h-0 md:border-t-0"
 						aria-labelledby="tyto-export-preview">
 						<h3 id="tyto-export-preview" className="tyto-eyebrow mb-2">
 							{m.exportPreview()}

@@ -25,7 +25,7 @@ const buttonVariants = cva(
 			variant: {
 				primary: cn(primary, filledDisabled),
 				secondary: cn(secondary, filledDisabled),
-				ghost: 'tyto-btn-ghost text-foreground hover:bg-accent',
+				ghost: 'tyto-btn-ghost text-foreground hover:bg-accent disabled:hover:bg-transparent',
 				destructive: cn('tyto-btn-destructive bg-[var(--tyto-danger)] text-white hover:bg-[color-mix(in_srgb,var(--tyto-danger)_88%,black)]', filledDisabled),
 				link: 'tyto-btn-link text-foreground underline-offset-4 hover:underline',
 				// Vibe names.

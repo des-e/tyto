@@ -67,6 +67,16 @@ const mount = (overrides: Partial<TranscriptExportDialogProps> = {}) => render(<
 const radio = (name: string) => screen.getByRole('radio', { name: new RegExp(name) }) as HTMLInputElement
 const checkbox = (name: string) => screen.getByRole('checkbox', { name: new RegExp(name) }) as HTMLInputElement
 
+describe('export dialog v2: layout', () => {
+	it('options and preview sit side by side from 768px, so the 800px default window gets two columns', () => {
+		mount()
+		const preview = screen.getByRole('region', { name: 'Предпросмотр' })
+		const grid = preview.parentElement as HTMLElement
+		expect(grid.className).toContain('md:grid-cols-[420px_minmax(0,1fr)]')
+		expect(grid.className).not.toMatch(/\blg:/)
+	})
+})
+
 describe('export dialog v2: formats', () => {
 	it('has no CSV option', () => {
 		mount()

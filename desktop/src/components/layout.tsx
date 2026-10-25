@@ -66,9 +66,10 @@ export function SidebarToggleButton() {
 			<TooltipTrigger asChild>
 				<Button
 					variant="ghost"
-					size="icon"
+					size="md"
+					iconOnly
 					aria-label={hint ? m.updateAvailableOpenRecents() : m.toggleRecents()}
-					className="relative h-9 w-9 rounded-full text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground [&_svg]:size-[18px]"
+					className="relative [&_svg]:size-[18px]"
 					onClick={() => window.dispatchEvent(new CustomEvent(TOGGLE_SIDEBAR_EVENT))}>
 					<PanelLeft strokeWidth={1.75} />
 					{hint && (

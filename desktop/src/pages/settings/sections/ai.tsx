@@ -85,7 +85,7 @@ export function AiSection({ vm, onOpenPrompt }: { vm: SettingsViewModel; onOpenP
 		<div className="space-y-6">
 			<SettingsGroup title={m.aiTasks()}>
 				<SettingsRow label={m.aiSummaryTask()} description={presetLabel(tasks.summary.preset)}>
-					<Button variant="outline" size="sm" className="rounded-lg" onClick={() => onOpenPrompt('summary')}>
+					<Button variant="outline" size="sm" onClick={() => onOpenPrompt('summary')}>
 						{m.aiEditPrompt()}
 					</Button>
 					<Switch checked={tasks.summary.enabled} onCheckedChange={(enabled) => setTask('summary', { enabled })} />
@@ -96,7 +96,7 @@ export function AiSection({ vm, onOpenPrompt }: { vm: SettingsViewModel; onOpenP
 					</SettingsRow>
 				)}
 				<SettingsRow label={m.aiDictationTask()} description={presetLabel(tasks.dictation.preset)}>
-					<Button variant="outline" size="sm" className="rounded-lg" onClick={() => onOpenPrompt('dictation')}>
+					<Button variant="outline" size="sm" onClick={() => onOpenPrompt('dictation')}>
 						{m.aiEditPrompt()}
 					</Button>
 					<Switch checked={tasks.dictation.enabled} onCheckedChange={(enabled) => setTask('dictation', { enabled })} />
@@ -235,7 +235,7 @@ export function AiSection({ vm, onOpenPrompt }: { vm: SettingsViewModel; onOpenP
 							m.aiTestInfo()
 						)
 					}>
-					<Button variant="outline" size="sm" className="rounded-lg" onClick={() => void vm.testAi()} disabled={test?.status === 'testing'}>
+					<Button variant="outline" size="sm" onClick={() => void vm.testAi()} disabled={test?.status === 'testing'}>
 						{test?.status === 'testing' ? <Spinner className="h-3.5 w-3.5" /> : null}
 						{m.runLlmCheck()}
 					</Button>

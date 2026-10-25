@@ -25,6 +25,15 @@ const chipClass = 'tyto-who'
 const interactiveChipClass =
 	'-mx-1 cursor-pointer rounded-md px-1 transition-colors duration-150 hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/80'
 
+/** A long name stays on one line; the tooltip carries the full name. */
+function NameText({ text }: { text: string }) {
+	return (
+		<span className="min-w-0 truncate" title={text}>
+			{text}
+		</span>
+	)
+}
+
 /**
  * The "Speaker N" tag in front of a line. Clicking it opens a small editor: the name typed there
  * replaces the tag on every line of that speaker, and clearing it brings the default back. The
@@ -48,7 +57,7 @@ export function SpeakerLabel({ speaker, speakers, speakerNames, editable, onRena
 		return (
 			<span className={chipClass}>
 				<SpeakerMark speaker={speaker} name={current} />
-				{speakerName(speaker, label, speakerNames)}
+				<NameText text={speakerName(speaker, label, speakerNames)} />
 			</span>
 		)
 
@@ -78,7 +87,7 @@ export function SpeakerLabel({ speaker, speakers, speakerNames, editable, onRena
 				{speaker != null ? (
 					<button type="button" title={m.renameSpeaker()} className={cn(chipClass, interactiveChipClass)}>
 						<SpeakerMark speaker={speaker} name={current} />
-						{speakerName(speaker, label, speakerNames)}
+						<NameText text={speakerName(speaker, label, speakerNames)} />
 					</button>
 				) : (
 					<button
@@ -94,7 +103,7 @@ export function SpeakerLabel({ speaker, speakers, speakerNames, editable, onRena
 					</button>
 				)}
 			</PopoverTrigger>
-			<PopoverContent align="start" className="w-64 rounded-2xl p-3">
+			<PopoverContent align="start" className="w-64 rounded-[var(--tyto-r-lg)] p-3">
 				{speaker != null && (
 					<form
 						className="mb-3"
@@ -103,7 +112,7 @@ export function SpeakerLabel({ speaker, speakers, speakerNames, editable, onRena
 							saveName()
 							setOpen(false)
 						}}>
-						<p className="mb-2 text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase">{m.renameSpeaker()}</p>
+						<p className="tyto-eyebrow mb-2">{m.renameSpeaker()}</p>
 						<Input
 							autoFocus
 							value={draft}
@@ -117,7 +126,7 @@ export function SpeakerLabel({ speaker, speakers, speakerNames, editable, onRena
 						/>
 					</form>
 				)}
-				<p className="mb-2 text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase">{m.speakerOfThisLine()}</p>
+				<p className="tyto-eyebrow mb-2">{m.speakerOfThisLine()}</p>
 				<div className="flex flex-wrap gap-1.5">
 					{speakers.map((candidate) => (
 						<button
@@ -126,7 +135,7 @@ export function SpeakerLabel({ speaker, speakers, speakerNames, editable, onRena
 							aria-pressed={candidate === speaker}
 							onClick={() => assign(candidate)}
 							className={cn(
-								'cursor-pointer rounded-full border px-2.5 py-1 text-[12px] font-medium transition-colors duration-150',
+								'cursor-pointer rounded-[var(--tyto-r-sm)] border px-2.5 py-1 text-[12px] font-medium transition-colors duration-150',
 								candidate === speaker
 									? 'border-foreground/20 bg-foreground text-background'
 									: 'border-border bg-muted/50 text-muted-foreground hover:text-foreground',
@@ -137,7 +146,7 @@ export function SpeakerLabel({ speaker, speakers, speakerNames, editable, onRena
 					<button
 						type="button"
 						onClick={() => assign(nextSpeaker)}
-						className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-dashed border-border px-2.5 py-1 text-[12px] font-medium text-muted-foreground transition-colors duration-150 hover:text-foreground">
+						className="inline-flex cursor-pointer items-center gap-1 rounded-[var(--tyto-r-sm)] border border-dashed border-border px-2.5 py-1 text-[12px] font-medium text-muted-foreground transition-colors duration-150 hover:text-foreground">
 						<Plus className="h-3 w-3" />
 						{m.newSpeaker()}
 					</button>

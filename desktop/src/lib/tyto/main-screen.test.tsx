@@ -1,6 +1,9 @@
 // @vitest-environment jsdom
 
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react'
+import { readFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const h = vi.hoisted(() => ({
@@ -43,6 +46,7 @@ vi.mock('@tanstack/react-virtual', () => ({
 import { setLocale } from '~/paraglide/runtime.js'
 import type { Segment } from '~/lib/transcript'
 import TranscriptView from '~/pages/main/components/transcript-view'
+import { SpeakerLabel } from '~/pages/main/components/speaker-label'
 import { useDropTarget } from '~/pages/main/hooks/use-drop-target'
 import { EmptyScreen } from './empty-screen'
 import { SpeakerMark } from './speaker-mark'
@@ -279,5 +283,26 @@ describe('пустой экран', () => {
 		act(() => h.listeners.get('tauri://drag-drop')!({ payload: { paths: ['C:/встреча.mp3'] } }))
 		expect(onPaths).toHaveBeenCalledWith(['C:/встреча.mp3'])
 		expect(area.getAttribute('data-dragging')).toBe('false')
+	})
+})
+
+describe('long speaker names', () => {
+	const longName = 'Константин Константинопольский-Преображенский, руководитель'.padEnd(60, 'а')
+
+	it.each([false, true])('truncate on one line and keep the full name in the tooltip (editable: %s)', (editable) => {
+		render(<SpeakerLabel speaker={0} speakers={[0]} speakerNames={{ 0: longName }} editable={editable} onRename={vi.fn()} onAssign={vi.fn()} />)
+		const name = screen.getByText(longName)
+		expect(longName).toHaveLength(60)
+		expect(name.className).toContain('truncate')
+		expect(name.getAttribute('title')).toBe(longName)
+	})
+
+	it('the name box may shrink, and the hover chip never covers more than 40% of the line', () => {
+		const css = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), 'theme.css'), 'utf-8')
+		const who = css.match(/\n\.tyto-who\s*\{([^}]*)\}/)?.[1] ?? ''
+		expect(who).toMatch(/max-width: 100%/)
+		expect(who).toMatch(/min-width: 0/)
+		const aside = css.match(/\n\.tyto-script-aside\s*\{([^}]*)\}/)?.[1] ?? ''
+		expect(aside).toMatch(/max-width: 40%/)
 	})
 })

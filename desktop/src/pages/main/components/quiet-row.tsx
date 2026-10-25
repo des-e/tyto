@@ -48,7 +48,7 @@ export default function QuietRow() {
 						{m.moreOptions()}
 					</Button>
 				</PopoverTrigger>
-				<PopoverContent align="start" className="w-72 rounded-2xl p-4">
+				<PopoverContent align="start" className="w-72 rounded-[var(--tyto-r-lg)] p-4">
 					<p className="mb-2 text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase">{m.modelOptions()}</p>
 					<div className="divide-y divide-border">
 						<OptionRow

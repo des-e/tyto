@@ -10,6 +10,7 @@ import { Spinner } from '~/components/ui/spinner'
 import { Switch } from '~/components/ui/switch'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip'
 import { cn } from '~/lib/style'
+import { SegmentedControl } from '~/lib/tyto/segmented-control'
 import { TranscriptTabs } from '~/lib/tyto/transcript-tabs'
 import type { TextFormat } from '~/components/format-select'
 import type { Job } from '../hooks/use-transcribe-queue'
@@ -42,48 +43,30 @@ function ViewOptions({ options }: { options: TranscriptViewOptions }) {
 				</TooltipTrigger>
 				<TooltipContent>{m.viewOptions()}</TooltipContent>
 			</Tooltip>
-			<PopoverContent align="end" className="w-64 rounded-2xl p-4">
-				<p className="mb-2 text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase">{m.viewOptions()}</p>
+			<PopoverContent align="end" className="w-64 rounded-[var(--tyto-r-lg)] p-4">
+				<p className="tyto-eyebrow mb-2">{m.viewOptions()}</p>
 				<div className="space-y-3">
 					<div className="space-y-1.5">
 						<span className="text-sm text-foreground">{m.textSize()}</span>
-						<div className="inline-flex w-full items-center gap-1 rounded-full border border-border bg-muted/50 p-1">
-							{TEXT_SIZES.map((size) => (
-								<button
-									key={size.value}
-									type="button"
-									onClick={() => options.setTextSize(size.value)}
-									className={cn(
-										'flex-1 cursor-pointer rounded-full py-1 text-[12px] font-medium transition-colors duration-150',
-										options.textSize === size.value
-											? 'tyto-selected'
-											: 'text-muted-foreground hover:text-foreground',
-									)}>
-									{size.label()}
-								</button>
-							))}
-						</div>
+						<SegmentedControl
+							ariaLabel={m.textSize()}
+							value={options.textSize}
+							options={TEXT_SIZES.map((size) => ({ value: size.value, label: size.label() }))}
+							onChange={options.setTextSize}
+							className="flex w-full [&>button]:flex-1"
+						/>
 					</div>
 					<div className="flex items-center justify-between gap-4 border-t border-border pt-3">
 						<span className="text-sm text-foreground">{m.textDirection()}</span>
-						<div className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/50 p-1">
-							{(['ltr', 'rtl'] as const).map((value) => (
-								<button
-									key={value}
-									type="button"
-									aria-label={value.toUpperCase()}
-									aria-pressed={preference.textAreaDirection === value}
-									onClick={() => preference.setTextAreaDirection(value)}
-									className={cn(
-										'flex h-6 w-8 cursor-pointer items-center justify-center rounded-full transition-colors duration-150',
-										preference.textAreaDirection === value
-											? 'tyto-selected'
-											: 'text-muted-foreground hover:text-foreground',
-									)}>
-									{value === 'ltr' ? <PilcrowRight className="h-3.5 w-3.5" /> : <PilcrowLeft className="h-3.5 w-3.5" />}
-								</button>
-							))}
-						</div>
+						<SegmentedControl
+							ariaLabel={m.textDirection()}
+							value={preference.textAreaDirection}
+							options={[
+								{ value: 'ltr', label: 'LTR', icon: <PilcrowRight className="h-3.5 w-3.5" /> },
+								{ value: 'rtl', label: 'RTL', icon: <PilcrowLeft className="h-3.5 w-3.5" /> },
+							]}
+							onChange={preference.setTextAreaDirection}
+						/>
 					</div>
 
 					<div className="flex items-center justify-between gap-4">
@@ -147,25 +130,21 @@ function SummaryMenu({ job, tab, setTab }: { job: Job | null; tab: TranscriptTab
 					</TooltipTrigger>
 					<TooltipContent>{actionLabel}</TooltipContent>
 				</Tooltip>
-				<PopoverContent align="end" className="w-64 rounded-2xl p-4">
-					<p className="mb-2 text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase">{m.aiSection()}</p>
+				<PopoverContent align="end" className="w-64 rounded-[var(--tyto-r-lg)] p-4">
+					<p className="tyto-eyebrow mb-2">{m.aiSection()}</p>
 
 					<div className="space-y-3">
 						{hasSummary && (
-							<div className="inline-flex w-full items-center gap-1 rounded-full border border-border bg-muted/50 p-1">
-								{(['transcript', 'summary'] as const).map((value) => (
-									<button
-										key={value}
-										type="button"
-										onClick={() => setTab(value)}
-										className={cn(
-											'flex-1 cursor-pointer rounded-full py-1 text-[12px] font-medium transition-colors duration-150',
-											tab === value ? 'tyto-selected' : 'text-muted-foreground hover:text-foreground',
-										)}>
-										{value === 'transcript' ? m.segmentsTab() : m.summaryTab()}
-									</button>
-								))}
-							</div>
+							<SegmentedControl
+								ariaLabel={m.aiSection()}
+								value={tab}
+								options={[
+									{ value: 'transcript', label: m.segmentsTab() },
+									{ value: 'summary', label: m.summaryTab() },
+								]}
+								onChange={setTab}
+								className="flex w-full [&>button]:flex-1"
+							/>
 						)}
 
 						<div className={cn('space-y-0.5', hasSummary && 'border-t border-border pt-2')}>
@@ -174,7 +153,7 @@ function SummaryMenu({ job, tab, setTab }: { job: Job | null; tab: TranscriptTab
 									type="button"
 									disabled={summarizing}
 									onClick={() => run()}
-									className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-2 py-2 text-start text-sm text-foreground transition-colors duration-150 hover:bg-muted/70 disabled:pointer-events-none disabled:opacity-50">
+									className="flex w-full cursor-pointer items-center gap-2.5 rounded-[var(--tyto-r-sm)] px-2 py-2 text-start text-sm text-foreground transition-colors duration-150 hover:bg-muted/70 disabled:pointer-events-none disabled:opacity-50">
 									<Sparkles className="h-3.5 w-3.5 text-muted-foreground" />
 									{summaryError ? m.retrySummary() : hasSummary ? m.regenerateSummary() : m.summarizeTranscript()}
 								</button>
@@ -187,7 +166,7 @@ function SummaryMenu({ job, tab, setTab }: { job: Job | null; tab: TranscriptTab
 										setOpen(false)
 										setPromptOpen(true)
 									}}
-									className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-2 py-2 text-start text-sm text-foreground transition-colors duration-150 hover:bg-muted/70 disabled:pointer-events-none disabled:opacity-50">
+									className="flex w-full cursor-pointer items-center gap-2.5 rounded-[var(--tyto-r-sm)] px-2 py-2 text-start text-sm text-foreground transition-colors duration-150 hover:bg-muted/70 disabled:pointer-events-none disabled:opacity-50">
 									<Pencil className="h-3.5 w-3.5 text-muted-foreground" />
 									{m.customizeSummary()}
 								</button>

@@ -191,7 +191,7 @@ export default function ShortcutRecorder({ value, onChange, defaultValue, onCapt
 				)}
 			</div>
 
-			<PopoverContent align="end" className="w-64 rounded-2xl p-4" onOpenAutoFocus={(event) => event.preventDefault()}>
+			<PopoverContent align="end" className="w-64 rounded-[var(--tyto-r-lg)] p-4" onOpenAutoFocus={(event) => event.preventDefault()}>
 				<p className="flex items-center gap-2 text-[13px] text-foreground">
 					<Keyboard className="h-3.5 w-3.5 text-muted-foreground" />
 					{m.pressShortcutKeys()}

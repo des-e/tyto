@@ -95,7 +95,7 @@ function RecordPanel() {
 					<LevelMeter />
 					<span className="font-mono text-2xl tracking-tight tabular-nums">{formatElapsed(recordElapsed)}</span>
 				</div>
-				<Button onClick={() => recording.stopRecord()} className="h-10 w-full rounded-xl">
+				<Button onClick={() => recording.stopRecord()} className="h-10 w-full">
 					<Square className="h-3.5 w-3.5 fill-current" />
 					{m.stopRecording()}
 				</Button>
@@ -109,16 +109,17 @@ function RecordPanel() {
 		<div
 			className={cn(
 				'flex w-full flex-col gap-5 py-2.5',
-				'[&_label]:text-[11px] [&_label]:font-medium [&_label]:tracking-[0.08em] [&_label]:text-muted-foreground [&_label]:uppercase',
+				// The .tyto-eyebrow look (12 px, 500, muted, normal case) on labels this file does not own.
+				'[&_label]:text-[12px] [&_label]:font-medium [&_label]:tracking-normal [&_label]:text-muted-foreground',
 			)}>
-			<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 [&>div]:space-y-1.5 [&_button]:h-10 [&_button]:rounded-xl">
+			<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 [&>div]:space-y-1.5 [&_button]:h-10 [&_button]:rounded-[var(--tyto-r-md)]">
 				<AudioDeviceInput type="input" devices={recording.devices} device={recording.inputDevice} setDevice={recording.setInputDevice} />
 				<AudioDeviceInput type="output" devices={recording.devices} device={recording.outputDevice} setDevice={recording.setOutputDevice} />
 			</div>
 			<Button
 				onClick={() => recording.startRecord()}
 				disabled={!preference.modelPath || (!recording.inputDevice && !recording.outputDevice)}
-				className="h-10 w-full rounded-xl disabled:opacity-40">
+				className="h-10 w-full">
 				<Mic className="h-4 w-4" />
 				{m.startRecord()}
 			</Button>
@@ -166,7 +167,7 @@ function LinkPanel() {
 					</div>
 
 					{link.batch && (
-						<p dir="ltr" className="truncate text-center text-[12px] text-muted-foreground/80">
+						<p dir="ltr" className="truncate text-center text-[12px] text-muted-foreground">
 							{link.batch.total > 1 && (
 								<span className="me-2 font-medium text-muted-foreground">
 									{m.linkOfTotal({ current: String(link.batch.index + 1), total: String(link.batch.total) })}
@@ -178,10 +179,9 @@ function LinkPanel() {
 				</div>
 
 				<Button
-					variant="ghost"
+					variant="secondary"
 					size="sm"
-					onClick={() => link.cancelYtDlpDownload()}
-					className="h-8 rounded-full px-4 text-[13px] font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive">
+					onClick={() => link.cancelYtDlpDownload()}>
 					{m.cancel()}
 				</Button>
 			</div>
@@ -206,7 +206,7 @@ function LinkPanel() {
 						}}
 						// Short enough to stay fully readable when the window is narrow.
 						placeholder={link.queuedLinks.length ? m.pasteAnotherLink() : m.pasteMediaLink()}
-						className={cn('h-10 min-w-0 rounded-xl px-3.5 text-sm', link.audioUrl && 'pe-10')}
+						className={cn('h-10 min-w-0 rounded-[var(--tyto-r-md)] px-3.5 text-sm', link.audioUrl && 'pe-10')}
 					/>
 					{/* The way to build a list by hand: park this link and type the next one. */}
 					{link.audioUrl && (
@@ -216,7 +216,7 @@ function LinkPanel() {
 									type="button"
 									aria-label={m.addLink()}
 									onClick={() => link.queueLinks()}
-									className="absolute end-1.5 top-1/2 flex h-7 w-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/80">
+									className="absolute end-1.5 top-1/2 flex h-7 w-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-[var(--tyto-r-sm)] text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/80">
 									<Plus className="h-4 w-4" />
 								</button>
 							</TooltipTrigger>
@@ -228,10 +228,10 @@ function LinkPanel() {
 					onClick={() => link.downloadAudio()}
 					disabled={!preference.modelPath || link.pendingLinks.length === 0}
 					// Wide enough for the count, so the box beside it never changes size.
-					className="h-10 w-32 shrink-0 rounded-xl px-4 disabled:opacity-40">
+					className="h-10 w-32 shrink-0 px-4">
 					{m.transcribe()}
 					{link.pendingLinks.length > 1 && (
-						<span className="rounded-full bg-primary-foreground/20 px-1.5 text-[11px] font-semibold tabular-nums">{link.pendingLinks.length}</span>
+						<span className="rounded-[var(--tyto-r-xs)] bg-primary-foreground/20 px-1.5 text-[11px] font-semibold tabular-nums">{link.pendingLinks.length}</span>
 					)}
 				</Button>
 			</motion.div>
@@ -251,9 +251,9 @@ function LinkPanel() {
 									animate={{ height: 'auto', opacity: 1 }}
 									exit={{ height: 0, opacity: 0 }}
 									transition={{ duration: 0.18, ease: 'easeOut' }}
-									className="group shrink-0 overflow-hidden rounded-lg text-[13px] text-muted-foreground transition-colors duration-150 hover:bg-muted/60">
+									className="group shrink-0 overflow-hidden rounded-[var(--tyto-r-sm)] text-[13px] text-muted-foreground transition-colors duration-150 hover:bg-muted/60">
 									<div className="flex items-center gap-2.5 px-2 py-1">
-										<Link2 className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" />
+										<Link2 className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
 										<span dir="ltr" className="min-w-0 flex-1 truncate text-start text-foreground/90">
 											{url}
 										</span>
@@ -273,8 +273,8 @@ function LinkPanel() {
 			</AnimatePresence>
 
 			<motion.div layout="position" className="flex flex-col items-center gap-3">
-				<p className="text-[11px] font-medium tracking-[0.08em] text-muted-foreground/80 uppercase">{m.worksWith()}</p>
-				<div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-3 text-muted-foreground/70">
+				<p className="tyto-eyebrow">{m.worksWith()}</p>
+				<div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-3 text-muted-foreground">
 					{linkSources.map((source) => (
 						<Tooltip key={source.title}>
 							<TooltipTrigger asChild>
@@ -289,7 +289,7 @@ function LinkPanel() {
 							<TooltipContent side="bottom">{source.title}</TooltipContent>
 						</Tooltip>
 					))}
-					<span className="text-[12px] text-muted-foreground/70">{m.moreSources()}</span>
+					<span className="text-[12px] text-muted-foreground">{m.moreSources()}</span>
 				</div>
 			</motion.div>
 		</motion.div>

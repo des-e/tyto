@@ -71,14 +71,16 @@ describe('tyto theme tokens', () => {
 			sidebar: '#fafafa',
 			border: '#e5e5e5',
 			'sidebar-border': '#ededed',
-			'muted-foreground': '#737373',
+			'muted-foreground': '#6b6b6b',
 		})
 	})
 
-	it('muted text keeps WCAG AA contrast (>= 4.5:1) on the page and the sidebar', () => {
-		for (const theme of [light, dark]) {
-			expect(contrast(theme['muted-foreground'], theme.background)).toBeGreaterThanOrEqual(4.5)
-			expect(contrast(theme['muted-foreground'], theme.sidebar)).toBeGreaterThanOrEqual(4.5)
+	it('muted text keeps WCAG AA contrast (>= 4.5:1) on every surface it sits on, in both themes', () => {
+		const surfaces = ['background', 'sidebar', 'muted', 'sidebar-accent', 'popover']
+		for (const [name, theme] of [['light', light], ['dark', dark]] as const) {
+			for (const surface of surfaces) {
+				expect(contrast(theme['muted-foreground'], theme[surface]), `${name} muted-foreground on ${surface}`).toBeGreaterThanOrEqual(4.5)
+			}
 		}
 	})
 
@@ -89,7 +91,7 @@ describe('tyto theme tokens', () => {
 			sidebar: '#111113',
 			border: '#1f1f22',
 			input: '#2a2a2f',
-			'muted-foreground': '#808088',
+			'muted-foreground': '#84848c',
 		})
 	})
 
@@ -129,6 +131,11 @@ describe('tyto theme tokens', () => {
 			expect(contrast(theme['tyto-disabled-fg'], theme.muted)).toBeGreaterThanOrEqual(4.5)
 			expect(contrast('#ffffff', theme['tyto-danger'])).toBeGreaterThanOrEqual(4.5)
 		}
+	})
+
+	it('error toasts show the icon in --tyto-danger, visible (>= 3:1) on the inverted plate in both themes', () => {
+		expect(css).toMatch(/\[data-sonner-toast\]\[data-styled='true'\]\[data-type='error'\] \[data-icon\]\s*\{[^}]*color: var\(--tyto-danger\)/)
+		for (const theme of [light, dark]) expect(contrast(theme['tyto-danger'], theme.foreground)).toBeGreaterThanOrEqual(3)
 	})
 
 	it('progress tracks (--tyto-track) keep >= 3:1 against the page and the sidebar in both themes (WCAG 1.4.11)', () => {
@@ -233,6 +240,55 @@ describe('tyto shape tokens and type', () => {
 		expect(css).toMatch(/\[data-sonner-toaster\]\[data-x-position='center'\][^{]*\{[^}]*var\(--tyto-main-x/)
 	})
 })
+
+describe('no leftover Vibe look in the main screens', () => {
+	it('record and link panels use token radii, the Button disabled state and full muted text', () => {
+		const hero = read('pages/main/components/idle-hero.tsx')
+		expect(hero).not.toMatch(/rounded-(xl|2xl)\b/)
+		expect(hero).not.toContain('disabled:opacity-40')
+		expect(hero).not.toMatch(/muted-foreground\/\d/)
+		expect(hero).not.toMatch(/\buppercase\b/)
+		expect(hero).not.toMatch(/rounded-full px-4 text-\[13px\]/)
+	})
+
+	it('toolbar popovers use the SegmentedControl, not pills', () => {
+		const toolbar = read('pages/main/components/transcript-toolbar.tsx')
+		expect(toolbar).not.toContain('rounded-full')
+		expect(toolbar.match(/<SegmentedControl/g)).toHaveLength(3)
+	})
+
+	it('sidebar toggle is a square 32px ghost icon button; banner and speaker chips are not pills', () => {
+		const layout = read('components/layout.tsx')
+		expect(layout).toMatch(/size="md"\s+iconOnly/)
+		expect(layout).not.toContain('h-9 w-9 rounded-full')
+		expect(read('pages/main/components/batch-banner.tsx')).not.toContain('<Button size="sm" className="rounded-full"')
+		const speaker = read('pages/main/components/speaker-label.tsx')
+		expect(speaker).not.toMatch(/rounded-(full|2xl)\b/)
+	})
+
+	it('popovers and the settings modal use the 12px radius token; ai.tsx keeps the Button radius', () => {
+		for (const file of [
+			'pages/settings/page.tsx',
+			'components/language-combobox.tsx',
+			'components/shortcut-recorder.tsx',
+			'pages/main/components/quiet-row.tsx',
+			'pages/main/components/transcript-toolbar.tsx',
+		])
+			expect(read(file), file).not.toContain('rounded-2xl')
+		expect(read('pages/settings/sections/ai.tsx')).not.toMatch(/size="sm" className="rounded-lg"/)
+	})
+
+	it('RTL: settings nav and close button use logical properties', () => {
+		expect(rule(css(), '.tyto-settings-nav-item')).toMatch(/text-align: start/)
+		expect(css()).toMatch(/\.tyto-settings-nav-item\[aria-current='page'\]::before\s*\{[^}]*inset-inline-start: 0/)
+		const page = read('pages/settings/page.tsx')
+		expect(page).not.toMatch(/\bright-6\b|-mr-3\b/)
+	})
+})
+
+function css() {
+	return read('lib/tyto/theme.css')
+}
 
 describe('owl branding in secondary windows', () => {
 	it('the window title is Tyto', () => {

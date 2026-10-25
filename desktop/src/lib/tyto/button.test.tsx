@@ -19,6 +19,11 @@ describe('Tyto button system', () => {
 		for (const other of NEW_VARIANTS.filter((v) => v !== variant)) expect(button.className).not.toContain(`tyto-btn-${other}`)
 	})
 
+	it('a disabled ghost button gets no hover plate', () => {
+		render(<Button variant="ghost" disabled>Отмена</Button>)
+		expect(screen.getByRole('button').className).toContain('disabled:hover:bg-transparent')
+	})
+
 	it('defaults to the primary variant at md size', () => {
 		render(<Button>Расшифровать</Button>)
 		const button = screen.getByRole('button')

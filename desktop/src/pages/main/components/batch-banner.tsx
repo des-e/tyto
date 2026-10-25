@@ -83,7 +83,7 @@ export default function BatchBanner() {
 					)}
 				</div>
 				{summary.folder && (
-					<Button size="sm" className="rounded-full" onClick={() => void openPath({ name: '', path: summary.folder! })}>
+					<Button size="sm" onClick={() => void openPath({ name: '', path: summary.folder! })}>
 						<FolderOpen className="h-3.5 w-3.5" />
 						{m.openFolder()}
 					</Button>

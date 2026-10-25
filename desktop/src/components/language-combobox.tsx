@@ -324,7 +324,7 @@ export function LanguageCombobox({
 			<PopoverContent
 				align="start"
 				onOpenAutoFocus={(event) => event.preventDefault()}
-				className={cn('rounded-2xl p-0', prominent ? 'w-[240px]' : 'w-[var(--radix-popper-anchor-width)] min-w-[240px]', contentClassName)}>
+				className={cn('rounded-[var(--tyto-r-lg)] p-0', prominent ? 'w-[240px]' : 'w-[var(--radix-popper-anchor-width)] min-w-[240px]', contentClassName)}>
 				<div ref={listRef} className="max-h-72 overflow-y-auto p-1.5">
 					{flat.length === 0 && <p className="px-3 py-6 text-center text-[13px] text-muted-foreground">{emptyLabel ?? m.noMatches()}</p>}
 					{groups.map((group, groupIndex) => (
