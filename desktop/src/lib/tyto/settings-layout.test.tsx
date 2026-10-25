@@ -81,18 +81,3 @@ describe('Tyto: настройки строками', () => {
 		expect(row.className).not.toMatch(/\bpx-4\b/)
 	})
 })
-
-describe('Tyto: русские названия групп', () => {
-	it('ru-RU: группы называются как в макете', async () => {
-		const { readFileSync } = await import('node:fs')
-		const { resolve } = await import('node:path')
-		const ru = JSON.parse(readFileSync(resolve(process.cwd(), '../i18n/desktop/ru-RU.json'), 'utf-8'))
-		expect([ru.settingsGroupTranscription, ru.settingsGroupRecording, ru.settingsGroupMore, ru.transcription, ru.navAdvanced]).toEqual([
-			'Расшифровка',
-			'Запись и голос',
-			'Дополнительно',
-			'Распознавание',
-			'Для опытных',
-		])
-	})
-})

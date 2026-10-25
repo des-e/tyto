@@ -64,7 +64,7 @@ export function TranscriptionSection({ vm, onOpenAutoExport }: { vm: SettingsVie
 		<div className="space-y-6">
 			<SettingsGroup>
 				{/* LanguageInput lives outside this page; reflow it into a settings row. */}
-				<div className="[&>div]:flex [&>div]:min-h-[52px] [&>div]:items-center [&>div]:justify-between [&>div]:gap-4 [&>div]:space-y-0 [&>div]:px-4 [&>div]:py-2.5 [&_label]:text-sm [&_label]:font-normal [&_button]:h-9 [&_button]:w-52 [&_button]:rounded-lg">
+				<div className="[&>div]:flex [&>div]:min-h-[56px] [&>div]:items-center [&>div]:justify-between [&>div]:gap-6 [&>div]:space-y-0 [&>div]:px-0 [&>div]:py-3 [&_label]:text-sm [&_label]:font-normal [&_button]:h-9 [&_button]:w-52 [&_button]:rounded-md">
 					<LanguageInput />
 				</div>
 				<SettingsRow label={m.autoExport()} description={autoExport.enabled ? describeAutoExport(autoExport) : m.autoExportInfo()}>
