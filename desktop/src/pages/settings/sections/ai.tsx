@@ -5,9 +5,8 @@ import { OPENAI_PATH } from '~/components/brand-glyph'
 import { m } from '~/paraglide/messages.js'
 import { ReactComponent as LinkIcon } from '~/icons/link.svg'
 import * as config from '~/lib/config'
-import { CLAUDE_BASE_URL, defaultModel, type AiPlatform, type AiSettings } from '~/lib/ai'
-import { detectProxyFormat, type ProxyFormat } from '~/lib/tyto/proxy-format'
-import { SegmentedControl } from '~/lib/tyto/segmented-control'
+import { defaultModel, type AiPlatform, type AiSettings } from '~/lib/ai'
+import { ClaudeAddressRow, ProxyFields } from '~/lib/tyto/proxy-fields'
 import NumberField from '~/components/number-field'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
@@ -122,15 +121,7 @@ export function AiSection({ vm, onOpenPrompt }: { vm: SettingsViewModel; onOpenP
 
 				{connection.platform === 'claude' && (
 					<>
-						<SettingsRow label={m.aiApiAddress()}>
-							<Input
-								aria-label={m.aiApiAddress()}
-								value={connection.claudeBaseUrl}
-								onChange={(e) => setConnection({ claudeBaseUrl: e.target.value })}
-								placeholder={CLAUDE_BASE_URL}
-								className={`w-64 ${rowControlClass}`}
-							/>
-						</SettingsRow>
+						<ClaudeAddressRow connection={connection} setConnection={setConnection} />
 						<SettingsRow
 							label={<LabelWithLink label={m.llmApiKey()} tooltip={m.findHere()} onClick={() => openUrl(config.llmApiKeyUrl)} />}
 							description={m.infoLlmApiKey()}>
@@ -217,49 +208,7 @@ export function AiSection({ vm, onOpenPrompt }: { vm: SettingsViewModel; onOpenP
 					</>
 				)}
 
-				{connection.platform === 'proxy' && (
-					<>
-						<SettingsRow label={m.aiApiAddress()} description={m.aiProxyHint()}>
-							<Input
-								aria-label={m.aiApiAddress()}
-								value={connection.proxyBaseUrl}
-								onChange={(e) => setConnection({ proxyBaseUrl: e.target.value, proxyFormat: detectProxyFormat(e.target.value) })}
-								placeholder="https://.../v1"
-								className={`w-64 ${rowControlClass}`}
-							/>
-						</SettingsRow>
-						<SettingsRow label={m.aiProxyKey()}>
-							<Input
-								aria-label={m.aiProxyKey()}
-								value={connection.proxyApiKey}
-								onChange={(e) => setConnection({ proxyApiKey: e.target.value })}
-								placeholder={m.pasteApiKey()}
-								type="password"
-								className={`w-64 ${rowControlClass}`}
-							/>
-						</SettingsRow>
-						<SettingsRow label={m.aiProxyFormat()}>
-							<SegmentedControl<ProxyFormat>
-								ariaLabel={m.aiProxyFormat()}
-								value={connection.proxyFormat}
-								onChange={(proxyFormat) => setConnection({ proxyFormat })}
-								options={[
-									{ value: 'openai', label: 'OpenAI' },
-									{ value: 'claude', label: 'Claude' },
-								]}
-							/>
-						</SettingsRow>
-						<SettingsRow label={m.llmModel()}>
-							<Input
-								aria-label={m.llmModel()}
-								value={connection.model}
-								onChange={(e) => setConnection({ model: e.target.value })}
-								placeholder={defaultModel(connection.proxyFormat)}
-								className={`w-64 ${rowControlClass}`}
-							/>
-						</SettingsRow>
-					</>
-				)}
+				{connection.platform === 'proxy' && <ProxyFields connection={connection} setConnection={setConnection} />}
 
 				<SettingsRow label={m.contextSize()} description={m.infoContextSize()}>
 					<NumberField

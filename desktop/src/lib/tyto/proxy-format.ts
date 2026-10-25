@@ -13,3 +13,11 @@ export function detectProxyFormat(baseUrl: string): ProxyFormat {
 export function joinApiUrl(base: string, path: string): string {
 	return `${base.trim().replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`
 }
+
+/** Plain `http://` to anything but this computer: the key would travel unencrypted. */
+export function isInsecureRemote(baseUrl: string): boolean {
+	const match = /^http:\/\/(\[[^\]]*\]|[^/:?#]*)/i.exec(baseUrl.trim())
+	if (!match) return false
+	const host = match[1].toLowerCase()
+	return host !== 'localhost' && host !== '127.0.0.1' && host !== '[::1]'
+}

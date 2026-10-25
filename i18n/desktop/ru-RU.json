@@ -754,5 +754,8 @@
 	"aiProxyHint": "Вставьте адрес и ключ из инструкции вашего сервиса",
 	"aiApiAddress": "Адрес API",
 	"aiProxyKey": "Ключ",
-	"aiProxyFormat": "Формат"
+	"aiProxyFormat": "Формат",
+	"aiProxyLabel": "Прокси-сервис",
+	"aiProxyNoAddress": "Укажите адрес API",
+	"aiInsecureAddress": "Адрес без https: ключ будет передаваться незашифрованным"
 }

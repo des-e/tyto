@@ -32,7 +32,7 @@ export interface AiConnection {
 	model: string
 	contextTokens: number
 	claudeApiKey: string
-	/** Where Claude requests go; empty means the official address. */
+	/** Where Claude requests go; empty means the official address (kept empty, the client falls back). */
 	claudeBaseUrl: string
 	ollamaBaseUrl: string
 	openaiBaseUrl: string
@@ -41,6 +41,8 @@ export interface AiConnection {
 	proxyBaseUrl: string
 	proxyApiKey: string
 	proxyFormat: ProxyFormat
+	/** The format was picked by hand, so typing the address no longer changes it. */
+	proxyFormatManual: boolean
 }
 
 export interface AiTask {
@@ -134,6 +136,7 @@ export const DEFAULT_AI: AiSettings = {
 		proxyBaseUrl: '',
 		proxyApiKey: '',
 		proxyFormat: 'openai',
+		proxyFormatManual: false,
 	},
 	tasks: {
 		summary: { enabled: false, autoOnFinish: false, preset: 'summary', prompt: presetPrompt('summary') },
@@ -158,7 +161,8 @@ export function normalizeAi(stored: Partial<AiSettings> | null | undefined): AiS
 	if (!stored || typeof stored !== 'object') return DEFAULT_AI
 	const saved: Partial<AiConnection> = stored.connection && typeof stored.connection === 'object' ? stored.connection : {}
 	const connection: AiConnection = { ...DEFAULT_AI.connection, ...saved }
-	if (!connection.claudeBaseUrl?.trim()) connection.claudeBaseUrl = CLAUDE_BASE_URL
+	// Only a missing address gets the official one; an emptied field stays empty (the client falls back).
+	if (typeof connection.claudeBaseUrl !== 'string') connection.claudeBaseUrl = CLAUDE_BASE_URL
 	if (saved.proxyFormat !== 'openai' && saved.proxyFormat !== 'claude')
 		connection.proxyFormat = saved.proxyBaseUrl ? detectProxyFormat(saved.proxyBaseUrl) : DEFAULT_AI.connection.proxyFormat
 	const tasks = stored.tasks && typeof stored.tasks === 'object' ? stored.tasks : DEFAULT_AI.tasks

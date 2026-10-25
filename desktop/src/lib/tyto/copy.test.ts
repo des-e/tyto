@@ -87,6 +87,9 @@ const COPY: Array<[string, string]> = [
 	['aiApiAddress', 'Адрес API'],
 	['aiProxyKey', 'Ключ'],
 	['aiProxyFormat', 'Формат'],
+	['aiProxyLabel', 'Прокси-сервис'],
+	['aiProxyNoAddress', 'Укажите адрес API'],
+	['aiInsecureAddress', 'Адрес без https: ключ будет передаваться незашифрованным'],
 ]
 
 describe('tyto ru copy', () => {

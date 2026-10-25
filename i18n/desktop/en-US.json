@@ -754,5 +754,8 @@
 	"aiProxyHint": "Paste the address and key from your service's instructions",
 	"aiApiAddress": "API address",
 	"aiProxyKey": "Key",
-	"aiProxyFormat": "Format"
+	"aiProxyFormat": "Format",
+	"aiProxyLabel": "Proxy service",
+	"aiProxyNoAddress": "Enter the API address",
+	"aiInsecureAddress": "The address is not https: the key will be sent unencrypted"
 }

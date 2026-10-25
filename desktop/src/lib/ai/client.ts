@@ -1,4 +1,5 @@
 import { fetch } from '@tauri-apps/plugin-http'
+import { m } from '~/paraglide/messages.js'
 import { joinApiUrl } from '~/lib/tyto/proxy-format'
 import { CLAUDE_BASE_URL, PLACEHOLDERS, type AiConnection } from './config'
 
@@ -157,7 +158,11 @@ class Ollama implements AiClient {
 }
 
 class OpenAICompatible implements AiClient {
-	constructor(private connection: AiConnection) {}
+	/** `label` prefixes errors, so a proxy failure reads as the proxy's, not OpenAI's. */
+	constructor(
+		private connection: AiConnection,
+		private label = 'OpenAI',
+	) {}
 	private url() {
 		return `${(this.connection.openaiBaseUrl || 'https://api.openai.com/v1').replace(/\/+$/, '')}/chat/completions`
 	}
@@ -176,12 +181,12 @@ class OpenAICompatible implements AiClient {
 	}
 	async ask(prompt: string) {
 		const response = await fetch(this.url(), { method: 'POST', headers: this.headers(), body: this.body(prompt, false) })
-		if (!response.ok) throw await failure('OpenAI', response)
+		if (!response.ok) throw await failure(this.label, response)
 		return (await response.json()).choices?.[0]?.message?.content ?? ''
 	}
 	async stream(prompt: string, onToken: (text: string) => void) {
 		const response = await fetch(this.url(), { method: 'POST', headers: this.headers(), body: this.body(prompt, true) })
-		if (!response.ok) throw await failure('OpenAI', response)
+		if (!response.ok) throw await failure(this.label, response)
 		let text = ''
 		await readLines(response, (line) => {
 			if (!line.startsWith('data:')) return
@@ -202,7 +207,10 @@ class OpenAICompatible implements AiClient {
 }
 
 class Claude implements AiClient {
-	constructor(private connection: AiConnection) {}
+	constructor(
+		private connection: AiConnection,
+		private label = 'Claude',
+	) {}
 	/** `<base>/v1/messages`; a base that already ends in `/v1` is not given a second one. */
 	private url() {
 		const base = this.connection.claudeBaseUrl?.trim() || CLAUDE_BASE_URL
@@ -221,12 +229,12 @@ class Claude implements AiClient {
 	}
 	async ask(prompt: string) {
 		const response = await fetch(this.url(), { method: 'POST', headers: this.headers(), body: this.body(prompt, false) })
-		if (!response.ok) throw await failure('Claude', response)
+		if (!response.ok) throw await failure(this.label, response)
 		return (await response.json()).content?.[0]?.text ?? ''
 	}
 	async stream(prompt: string, onToken: (text: string) => void) {
 		const response = await fetch(this.url(), { method: 'POST', headers: this.headers(), body: this.body(prompt, true) })
-		if (!response.ok) throw await failure('Claude', response)
+		if (!response.ok) throw await failure(this.label, response)
 		let text = ''
 		await readLines(response, (line) => {
 			if (!line.startsWith('data:')) return
@@ -251,12 +259,13 @@ function proxyClient(connection: AiConnection): AiClient {
 	// Rejects on use, not here: the summaries hook builds its client during render.
 	if (!base) {
 		const missing = async (): Promise<string> => {
-			throw new Error('Proxy: no API address')
+			throw new Error(`${m.aiProxyLabel()}: ${m.aiProxyNoAddress()}`)
 		}
 		return { ask: missing, stream: missing }
 	}
-	if (connection.proxyFormat === 'claude') return new Claude({ ...connection, claudeBaseUrl: base, claudeApiKey: connection.proxyApiKey ?? '' })
-	return new OpenAICompatible({ ...connection, openaiBaseUrl: base, openaiApiKey: connection.proxyApiKey ?? '' })
+	const key = connection.proxyApiKey ?? ''
+	if (connection.proxyFormat === 'claude') return new Claude({ ...connection, claudeBaseUrl: base, claudeApiKey: key }, m.aiProxyLabel())
+	return new OpenAICompatible({ ...connection, openaiBaseUrl: base, openaiApiKey: key }, m.aiProxyLabel())
 }
 
 export function createClient(connection: AiConnection): AiClient {
