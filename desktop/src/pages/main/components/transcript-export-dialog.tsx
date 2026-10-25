@@ -20,10 +20,10 @@ import {
 	ExportFormatGrid,
 	ExportGroup,
 	canCopy,
-	durationLabel,
 	hasDocumentTheme,
 	timestampsRequired,
 } from '~/lib/tyto/export-format-grid'
+import { durationLabel } from '~/lib/tyto/format'
 
 SyntaxHighlighter.registerLanguage('json', jsonLanguage)
 

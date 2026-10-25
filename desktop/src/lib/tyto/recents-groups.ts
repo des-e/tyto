@@ -1,6 +1,7 @@
+import { useEffect, useState } from 'react'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime.js'
-import { durationLabel } from './export-format-grid'
+import { durationLabel } from './format'
 
 /**
  * Sidebar history by day (docs/design/2026-10-25-tyto-visual-language.md, difference 5): «Сегодня /
@@ -32,6 +33,37 @@ export function recentsGroupOf(date: Date, now: Date): RecentsGroupKey {
 	// getDay(): 0 = Sunday. Days since Monday: Monday 0 … Sunday 6.
 	const weekStart = daysBefore(today, (today.getDay() + 6) % 7)
 	return date >= weekStart ? 'week' : 'earlier'
+}
+
+/**
+ * The moment the groups are relative to. It moves on at local midnight (so «Сегодня» becomes «Вчера»
+ * in a window left open overnight) and whenever the window regains focus (after sleep, timers lag).
+ */
+export function useNow(): Date {
+	const [now, setNow] = useState(() => new Date())
+	useEffect(() => {
+		let timer: ReturnType<typeof setTimeout>
+		const schedule = () => {
+			const current = new Date()
+			const midnight = new Date(current.getFullYear(), current.getMonth(), current.getDate() + 1)
+			timer = setTimeout(() => {
+				setNow(new Date())
+				schedule()
+			}, midnight.getTime() - current.getTime() + 1000)
+		}
+		const onFocus = () => {
+			setNow(new Date())
+			clearTimeout(timer)
+			schedule()
+		}
+		schedule()
+		window.addEventListener('focus', onFocus)
+		return () => {
+			clearTimeout(timer)
+			window.removeEventListener('focus', onFocus)
+		}
+	}, [])
+	return now
 }
 
 /** Keeps the incoming order inside each group; empty groups are left out. */

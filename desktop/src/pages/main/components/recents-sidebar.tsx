@@ -24,7 +24,7 @@ import { getVersionNumber } from '~/lib/logs'
 import { FEATURES } from '~/lib/tyto/features'
 import { OwlMark } from '~/lib/tyto/owl-mark'
 import { useMainAreaOffset } from '~/lib/tyto/main-area'
-import { groupRecents, recentMeta, recentsGroupLabel } from '~/lib/tyto/recents-groups'
+import { groupRecents, recentMeta, recentsGroupLabel, useNow } from '~/lib/tyto/recents-groups'
 import { useRecordDuration } from '~/lib/tyto/recents-duration'
 import { TOGGLE_SIDEBAR_EVENT } from '~/components/layout'
 import { Button } from '~/components/ui/button'
@@ -412,8 +412,8 @@ export default function RecentsSidebar() {
 	// finished with saving switched off) — without them a new transcription looks like it went nowhere.
 	const liveJobs = useMemo(() => queue.jobs.filter((job) => !job.savedPath && !job.hydrated), [queue.jobs])
 
-	// Day groups are relative to the moment the list was last (re)built.
-	const now = useMemo(() => new Date(), [entries, liveJobs])
+	// Day groups move on at local midnight and when the window regains focus.
+	const now = useNow()
 
 	// One flat list for the virtualizer: a label row before each day group. Jobs of the open session
 	// are happening now, so they head «Сегодня».

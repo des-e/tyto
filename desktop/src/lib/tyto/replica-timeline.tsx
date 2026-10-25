@@ -27,7 +27,8 @@ interface Piece {
 	/** seconds */
 	start: number
 	stop: number
-	tone: SpeakerTone
+	/** `rest`: the part of the media nobody has transcribed yet, no speaker. */
+	tone: SpeakerTone | 'rest'
 }
 
 /** One piece per series of a speaker's lines; the untranscribed rest of the media is one more, untoned. */
@@ -38,14 +39,15 @@ function pieces(segments: Segment[], total: number): Piece[] {
 		tone: speakerTone(replica.speaker ?? 0).tone,
 	}))
 	const end = result.length ? result[result.length - 1].stop : 0
-	if (total - end >= 1) result.push({ start: end, stop: total, tone: 'filled' })
+	if (total - end >= 1) result.push({ start: end, stop: total, tone: 'rest' })
 	return result
 }
 
 /**
  * Seek bar made of the transcript's replicas (difference 8): one piece per series of a speaker's lines,
- * in greys by speaker (the same three tones as the speaker marks). Unplayed pieces share the track grey
- * (`--tyto-track`, ≥ 3:1); the played part shows the speaker tones. Pressing a piece jumps to its
+ * in greys by speaker (the same three tones as the speaker marks), on both sides of the playhead:
+ * unplayed tones step up from the track grey (`--tyto-track`, ≥ 3:1), played ones are darker and
+ * further apart; the playhead marks the position. Pressing a piece jumps to its
  * start; dragging scrubs to the exact position. Arrows move 5 s, space plays and pauses.
  */
 export function ReplicaTimeline({
@@ -135,7 +137,7 @@ export function ReplicaTimeline({
 				<>
 					<div className="tyto-timeline-layer">
 						{layout.map((piece) => (
-							<div key={piece.start} data-replica-start={piece.start} className="tyto-timeline-replica" style={place(piece)} />
+							<div key={piece.start} data-replica-start={piece.start} data-tone={piece.tone} className="tyto-timeline-replica" style={place(piece)} />
 						))}
 					</div>
 					<div aria-hidden="true" className="tyto-timeline-layer tyto-timeline-played" style={{ clipPath: `inset(0 ${(1 - progress) * 100}% 0 0)` }}>

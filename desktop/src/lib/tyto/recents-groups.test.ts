@@ -1,6 +1,9 @@
-import { beforeAll, describe, expect, it } from 'vitest'
+// @vitest-environment jsdom
+
+import { act, renderHook } from '@testing-library/react'
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { setLocale } from '~/paraglide/runtime.js'
-import { groupRecents, recentMeta, recentsGroupLabel, recentsGroupOf } from './recents-groups'
+import { groupRecents, recentMeta, recentsGroupLabel, recentsGroupOf, useNow } from './recents-groups'
 
 beforeAll(() => {
 	setLocale('ru-RU', { reload: false })
@@ -61,6 +64,29 @@ describe('groupRecents', () => {
 			'На этой неделе',
 			'Раньше',
 		])
+	})
+})
+
+describe('useNow', () => {
+	afterEach(() => {
+		vi.useRealTimers()
+	})
+
+	it('сдвигается в локальную полночь и при возврате фокуса в окно', () => {
+		vi.useFakeTimers()
+		vi.setSystemTime(new Date(2026, 9, 22, 23, 59, 0))
+		const { result } = renderHook(() => useNow())
+		expect(result.current.getDate()).toBe(22)
+		act(() => {
+			vi.advanceTimersByTime(2 * 60_000)
+		})
+		expect(result.current.getDate()).toBe(23)
+
+		vi.setSystemTime(new Date(2026, 9, 25, 9, 0))
+		act(() => {
+			window.dispatchEvent(new Event('focus'))
+		})
+		expect(result.current.getDate()).toBe(25)
 	})
 })
 

@@ -140,6 +140,30 @@ describe('tyto theme tokens', () => {
 		}
 	})
 
+	it('unplayed timeline tones keep at least the track contrast; played tones stay apart from them', () => {
+		// color-mix(in srgb, fg P%, track) per channel.
+		const mix = (a: string, b: string, p: number) =>
+			'#' +
+			[1, 3, 5]
+				.map((i) => Math.round(parseInt(a.slice(i, i + 2), 16) * p + parseInt(b.slice(i, i + 2), 16) * (1 - p)).toString(16).padStart(2, '0'))
+				.join('')
+		const share = (selector: string) => {
+			const match = css.match(new RegExp(`\\n${selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[^{]*\\{[^}]*color-mix\\(in srgb, var\\(--foreground\\) (\\d+)%, var\\(--tyto-track\\)\\)`))
+			if (!match) throw new Error(`no tone for ${selector}`)
+			return Number(match[1]) / 100
+		}
+		const unplayed = [share(".tyto-timeline-replica[data-tone='filled']"), share(".tyto-timeline-replica[data-tone='outline']"), 0]
+		const played = [1, share(".tyto-timeline-played .tyto-timeline-replica[data-tone='outline']"), share('.tyto-timeline-played .tyto-timeline-replica:is(')]
+		expect(Math.min(...played)).toBeGreaterThan(Math.max(...unplayed))
+		for (const theme of [light, dark]) {
+			for (const p of unplayed) {
+				const tone = mix(theme.foreground, theme['tyto-track'], p)
+				expect(contrast(tone, theme.background)).toBeGreaterThanOrEqual(contrast(theme['tyto-track'], theme.background))
+				expect(contrast(tone, theme.background)).toBeGreaterThanOrEqual(3)
+			}
+		}
+	})
+
 	it('setup progress bar and waiting step circle use the shared track token', () => {
 		const setup = read('lib/tyto/setup-steps.tsx')
 		expect(setup).toContain('bg-[var(--tyto-track)]')

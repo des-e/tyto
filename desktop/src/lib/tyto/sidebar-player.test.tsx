@@ -44,6 +44,8 @@ const session = vi.hoisted(() => ({
 }))
 vi.mock('~/pages/main/session', () => ({ useSession: () => session.value }))
 
+import { invoke } from '@tauri-apps/api/core'
+import { toast } from 'sonner'
 import { TooltipProvider } from '~/components/ui/tooltip'
 import type { Segment } from '~/lib/transcript'
 import PlayerBar from '~/pages/main/components/player-bar'
@@ -81,7 +83,8 @@ beforeEach(() => {
 	store.durations = { '/p/plan/transcript.vibe.json': 48 * 60, '/p/long/transcript.vibe.json': 22 * 60 }
 	const running = { id: 'run', name: 'Созвон с бухгалтерией', path: '/m/a.mp3', status: 'running', progress: 64, segments: [] }
 	const selected = { id: 'sel', name: 'Планерка отдела продаж', path: '/m/b.mp3', status: 'done', progress: 100, segments: [], savedPath: '/p/plan/transcript.vibe.json', hydrated: true }
-	session.value.queue = { ...session.value.queue, jobs: [running, selected], selectedJob: selected, selectedId: 'sel' }
+	session.value.queue = { ...session.value.queue, jobs: [running, selected], selectedJob: selected, selectedId: 'sel', running: false }
+	vi.clearAllMocks()
 })
 
 afterEach(cleanup)
@@ -178,6 +181,26 @@ describe('плеер со шкалой реплик (отличие 8)', () => {
 		expect(tones).toEqual(['filled', 'outline', 'grey', 'filled'])
 	})
 
+	it('оттенки говорящих видны и на неотыгранной части (позиция 0)', () => {
+		render(<ReplicaTimeline segments={segments} duration={120} currentTime={0} seekable onSeek={vi.fn()} onToggle={vi.fn()} />)
+		const tones = [...document.querySelectorAll('[data-replica-start]')].map((node) => node.getAttribute('data-tone'))
+		expect(tones).toEqual(['filled', 'outline', 'grey', 'filled'])
+		const unplayed = (tone: string) => {
+			const match = css.match(new RegExp(`\\n\\.tyto-timeline-replica\\[data-tone='${tone}'\\]\\s*\\{[^}]*background: ([^;]+);`))
+			return match?.[1] ?? 'var(--tyto-track)'
+		}
+		const declared = ['filled', 'outline', 'grey'].map(unplayed)
+		expect(new Set(declared).size).toBe(3)
+		expect(declared[2]).toBe('var(--tyto-track)')
+	})
+
+	it('неразмеченный хвост записи без тона говорящего', () => {
+		render(<ReplicaTimeline segments={segments} duration={200} currentTime={0} seekable onSeek={vi.fn()} onToggle={vi.fn()} />)
+		const last = [...document.querySelectorAll('[data-replica-start]')].pop()!
+		expect(last.getAttribute('data-replica-start')).toBe('120')
+		expect(last.getAttribute('data-tone')).toBe('rest')
+	})
+
 	it('шкала не вылезает за край, если медиа короче расшифровки', () => {
 		render(<ReplicaTimeline segments={segments} duration={1} currentTime={0} seekable onSeek={vi.fn()} onToggle={vi.fn()} />)
 		const last = [...document.querySelectorAll<HTMLElement>('[data-replica-start]')].pop()!
@@ -219,6 +242,48 @@ describe('плеер со шкалой реплик (отличие 8)', () => {
 		expect(play.className).not.toContain('rounded-full')
 		expect(screen.getByText('00:00')).toBeTruthy()
 		expect(document.querySelectorAll('[data-replica-start]')).toHaveLength(4)
+	})
+})
+
+describe('плеер: показать запись в папке', () => {
+	const job = { id: 'j', name: 'Планерка', path: '/m/meetings/plan.mp3', status: 'done', progress: 100, segments }
+	const renderPlayer = () =>
+		render(
+			<TooltipProvider>
+				<PlayerBar job={job as never} />
+			</TooltipProvider>,
+		)
+
+	it('открывает папку исходного файла', async () => {
+		renderPlayer()
+		fireEvent.click(screen.getByRole('button', { name: 'Показать в папке' }))
+		await vi.waitFor(() => expect(vi.mocked(invoke)).toHaveBeenCalledWith('open_path', { path: '/m/meetings' }))
+	})
+
+	it('если папка не открылась, говорит об этом', async () => {
+		vi.mocked(invoke).mockRejectedValueOnce(new Error('nope'))
+		renderPlayer()
+		fireEvent.click(screen.getByRole('button', { name: 'Показать в папке' }))
+		await vi.waitFor(() => expect(vi.mocked(toast.error)).toHaveBeenCalledWith('Не удалось открыть папку с файлом', expect.anything()))
+	})
+})
+
+describe('боковая панель: пока идет расшифровка и после изменений', () => {
+	it('во время расшифровки записи истории не открываются и не подсвечиваются', async () => {
+		session.value.queue = { ...session.value.queue, running: true }
+		renderSidebar()
+		const button = (await screen.findByText('Интервью: логист на склад')).closest('button')!
+		expect(button.disabled).toBe(true)
+		expect(css).toMatch(/\.tyto-recent:not\(\.tyto-recent-selected\):hover:not\(:has\(> \.tyto-recent-main:disabled\)\)/)
+		expect(css).toMatch(/\.tyto-recent-main:disabled \.tyto-recent-title\s*\{[^}]*color: var\(--muted-foreground\)/)
+	})
+
+	it('длительность перечитывается, когда хранилище сообщает об изменении', async () => {
+		renderSidebar()
+		expect(await screen.findByText('09:15 · 22 мин')).toBeTruthy()
+		store.durations['/p/long/transcript.vibe.json'] = 31 * 60
+		window.dispatchEvent(new CustomEvent('transcripts-changed'))
+		expect(await screen.findByText('09:15 · 31 мин')).toBeTruthy()
 	})
 })
 

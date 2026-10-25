@@ -2,7 +2,7 @@ import { convertFileSrc, invoke } from '@tauri-apps/api/core'
 import * as dialog from '@tauri-apps/plugin-dialog'
 import * as fs from '@tauri-apps/plugin-fs'
 import { motion } from 'framer-motion'
-import { Download, Pause, Play } from 'lucide-react'
+import { Download, FolderOpen, Pause, Play } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { m } from '~/paraglide/messages.js'
@@ -38,6 +38,10 @@ export interface PlayerTimeDetail {
 function dirname(path: string) {
 	const index = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\'))
 	return index > 0 ? path.slice(0, index) : path
+}
+
+function basename(path: string) {
+	return path.slice(Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\')) + 1)
 }
 
 function extension(path: string) {
@@ -173,6 +177,14 @@ export default function PlayerBar({ job }: { job: Job }) {
 		}
 	}, [broadcast, toggle])
 
+	async function revealInFolder() {
+		try {
+			await invoke('open_path', { path: dirname(sourcePath) })
+		} catch {
+			toast.error(m.couldNotOpenFolder(), { position: 'bottom-center' })
+		}
+	}
+
 	async function saveACopy() {
 		const ext = extension(sourcePath)
 		try {
@@ -216,6 +228,16 @@ export default function PlayerBar({ job }: { job: Job }) {
 			</div>
 
 			<PlaybackRateButton playbackRate={playbackRate} onCycle={cyclePlaybackRate} />
+
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<Button variant="ghost" size="sm" iconOnly onClick={() => void revealInFolder()} aria-label={m.showInFolder()} className="shrink-0">
+						<FolderOpen />
+					</Button>
+				</TooltipTrigger>
+				{/* The loaded file, so it is clear which folder will open. */}
+				<TooltipContent side="top">{basename(sourcePath)}</TooltipContent>
+			</Tooltip>
 
 			<Tooltip>
 				<TooltipTrigger asChild>

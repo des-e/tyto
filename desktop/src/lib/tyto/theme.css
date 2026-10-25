@@ -882,8 +882,13 @@ svg.lucide {
 	transition: background-color 150ms var(--tyto-ease);
 }
 
-.tyto-recent:hover {
+.tyto-recent:not(.tyto-recent-selected):hover:not(:has(> .tyto-recent-main:disabled)) {
 	background-color: var(--sidebar-accent);
+}
+
+/* While a job runs, other history rows cannot open: no hover, muted title (>= 4.5:1, theme.test.ts). */
+.tyto-recent-main:disabled .tyto-recent-title {
+	color: var(--muted-foreground);
 }
 
 /* Selected: a white row with a 2 px rule at its start, instead of Vibe's ink plate. */
@@ -1043,17 +1048,29 @@ svg.lucide {
 	right: 0;
 }
 
-/* Played pieces in the speaker-mark tones: filled = text colour, outline and grey step towards the track. */
+/*
+ * Speaker tones (the speaker-mark order filled / outline / grey) on both sides of the playhead.
+ * Unplayed: stepping up from the track grey, so every piece keeps >= the track's 3:1. Played: darker
+ * and further apart. The untranscribed rest has no speaker: track unplayed, the lightest played tone.
+ */
+.tyto-timeline-replica[data-tone='filled'] {
+	background: color-mix(in srgb, var(--foreground) 40%, var(--tyto-track));
+}
+
+.tyto-timeline-replica[data-tone='outline'] {
+	background: color-mix(in srgb, var(--foreground) 20%, var(--tyto-track));
+}
+
 .tyto-timeline-played .tyto-timeline-replica[data-tone='filled'] {
 	background: var(--foreground);
 }
 
 .tyto-timeline-played .tyto-timeline-replica[data-tone='outline'] {
-	background: color-mix(in srgb, var(--foreground) 66%, var(--tyto-track));
+	background: color-mix(in srgb, var(--foreground) 75%, var(--tyto-track));
 }
 
-.tyto-timeline-played .tyto-timeline-replica[data-tone='grey'] {
-	background: color-mix(in srgb, var(--foreground) 33%, var(--tyto-track));
+.tyto-timeline-played .tyto-timeline-replica:is([data-tone='grey'], [data-tone='rest']) {
+	background: color-mix(in srgb, var(--foreground) 55%, var(--tyto-track));
 }
 
 .tyto-timeline-head {
