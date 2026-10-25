@@ -356,3 +356,119 @@ svg.lucide {
 		animation: none;
 	}
 }
+
+/*
+ * The walking owl of the first run (OwlWalk). One pass across the strip takes ~4 s (8 s there and
+ * back), one step 0.32 s. The track is the strip minus the owl's width, so translateX(100%) of the
+ * mover puts the owl flush with the right edge. The owl faces right on the way there and is mirrored
+ * with scaleX(-1) on the way back. Transform only.
+ */
+@keyframes tyto-owl-walk-x {
+	0%,
+	100% {
+		transform: translateX(0);
+	}
+	50% {
+		transform: translateX(100%);
+	}
+}
+
+@keyframes tyto-owl-walk-face {
+	0% {
+		transform: scaleX(1);
+	}
+	50%,
+	100% {
+		transform: scaleX(-1);
+	}
+}
+
+@keyframes tyto-owl-walk-bob {
+	0% {
+		transform: translateY(0);
+	}
+	100% {
+		transform: translateY(-14px);
+	}
+}
+
+@keyframes tyto-owl-walk-step-a {
+	0% {
+		transform: translate(-18px, 0) rotate(10deg);
+	}
+	100% {
+		transform: translate(22px, -22px) rotate(-12deg);
+	}
+}
+
+@keyframes tyto-owl-walk-step-b {
+	0% {
+		transform: translate(22px, -22px) rotate(-12deg);
+	}
+	100% {
+		transform: translate(-18px, 0) rotate(10deg);
+	}
+}
+
+.tyto-owl-walk {
+	position: relative;
+	height: 56px;
+	overflow: hidden;
+	color: var(--foreground);
+}
+
+.tyto-owl-walk-track {
+	position: absolute;
+	left: 0;
+	bottom: 4px;
+	width: calc(100% - 40px);
+	height: 48px;
+}
+
+.tyto-owl-walk-mover {
+	width: 100%;
+	height: 100%;
+	animation: tyto-owl-walk-x 8s ease-in-out infinite;
+}
+
+.tyto-owl-walk-owl {
+	display: block;
+	animation: tyto-owl-walk-face 8s step-end infinite;
+}
+
+.tyto-owl-walk-body {
+	animation: tyto-owl-walk-bob 0.32s ease-in-out infinite alternate;
+}
+
+.tyto-owl-walk-foot {
+	transform-box: view-box;
+}
+
+.tyto-owl-walk-foot-back {
+	transform-origin: 475px 795px;
+	animation: tyto-owl-walk-step-a 0.32s ease-in-out infinite alternate;
+}
+
+.tyto-owl-walk-foot-front {
+	transform-origin: 575px 795px;
+	animation: tyto-owl-walk-step-b 0.32s ease-in-out infinite alternate;
+}
+
+/* Stopped (no connection): the owl stands where it was, feet down, facing the way it walked. */
+.tyto-owl-walk[data-walking='false'] :is(.tyto-owl-walk-body, .tyto-owl-walk-foot) {
+	animation: none;
+}
+
+.tyto-owl-walk[data-walking='false'] :is(.tyto-owl-walk-mover, .tyto-owl-walk-owl) {
+	animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.tyto-owl-walk :is(.tyto-owl-walk-mover, .tyto-owl-walk-owl, .tyto-owl-walk-body, .tyto-owl-walk-foot) {
+		animation: none;
+	}
+
+	.tyto-owl-walk-mover {
+		transform: translateX(50%);
+	}
+}

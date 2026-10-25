@@ -16,6 +16,9 @@ export function viewModel() {
 	const location = useLocation()
 	const [downloadProgress, setDownloadProgress] = useState(0)
 	const [isOnline, setIsOnline] = useState<boolean | null>(null)
+	// Tyto: which model is downloading now and its raw [current, total] bytes, for lib/tyto/setup-steps.
+	const [step, setStep] = useState<'speech' | 'speakers'>('speech')
+	const [bytes, setBytes] = useState<[number, number] | null>(null)
 	const downloadProgressRef = useRef(0)
 	const cancelledRef = useRef(false)
 	const { setState: setErrorModal } = useContext(ErrorModalContext)
@@ -33,6 +36,7 @@ export function viewModel() {
 				// for some reason it jumps if not
 				setDownloadProgress(newDownloadProgress)
 				downloadProgressRef.current = newDownloadProgress
+				setBytes([current, total])
 			}
 		})
 	}
@@ -81,6 +85,8 @@ export function viewModel() {
 			// The first model finished at 100%; without a reset the bar would stay frozen there.
 			downloadProgressRef.current = 0
 			setDownloadProgress(0)
+			setBytes(null)
+			setStep('speakers')
 			const result = await utils.downloadModel({ url: config.diarizeModelUrl, ...config.diarizeModelIntegrity }, { replacePath: path })
 			// null means the user cancelled setup: cancelSetup already navigated away and nothing failed.
 			return Boolean(result)
@@ -184,5 +190,8 @@ export function viewModel() {
 		downloadProgressRef,
 		isOnline,
 		location,
+		step,
+		bytes,
+		speakersEnabled: Boolean(preference.diarizeEnabled),
 	}
 }
