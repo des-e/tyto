@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import { m } from '~/paraglide/messages.js'
 import type { TranscriptTab } from '~/pages/main/hooks/use-transcript-view'
 
@@ -10,36 +11,39 @@ interface TranscriptTabsProps {
 
 /**
  * «Текст / Сводка / Темы» as text tabs with a 2 px rule under the active one, at the start of the
- * document toolbar (theme.css `.tyto-tab`). «Темы» is a placeholder for topics with timecodes. The
- * trailing spacer pushes the toolbar's actions to the far edge.
+ * document toolbar (theme.css `.tyto-tab`). Stays visible while search is open. «Темы» is a
+ * placeholder for topics with timecodes: disabled tabs are drawn fainter than inactive ones, its hint is announced
+ * through aria-describedby and shown as a tooltip.
  */
 export function TranscriptTabs({ tab, setTab, summaryReady }: TranscriptTabsProps) {
-	const tabs: { value: TranscriptTab | 'topics'; label: string; disabled: boolean; title?: string }[] = [
+	const hintId = useId()
+	const tabs: { value: TranscriptTab | 'topics'; label: string; disabled: boolean; hint?: string }[] = [
 		{ value: 'transcript', label: m.segmentsTab(), disabled: false },
 		{ value: 'summary', label: m.summaryTab(), disabled: !summaryReady && tab !== 'summary' },
-		{ value: 'topics', label: m.topicsTab(), disabled: true, title: m.topicsComingSoon() },
+		{ value: 'topics', label: m.topicsTab(), disabled: true, hint: m.topicsComingSoon() },
 	]
 
 	return (
-		<>
-			<div role="tablist" aria-label={m.transcriptTabs()} className="tyto-tabs">
-				{tabs.map((item) => (
-					<button
-						key={item.value}
-						type="button"
-						role="tab"
-						aria-selected={tab === item.value}
-						disabled={item.disabled}
-						title={item.title}
-						onClick={() => {
-							if (item.value !== 'topics' && item.value !== tab) setTab(item.value)
-						}}
-						className="tyto-tab">
-						{item.label}
-					</button>
-				))}
-			</div>
-			<span aria-hidden className="flex-1" />
-		</>
+		<div role="tablist" aria-label={m.transcriptTabs()} className="tyto-tabs">
+			{tabs.map((item) => (
+				<button
+					key={item.value}
+					type="button"
+					role="tab"
+					aria-selected={tab === item.value}
+					disabled={item.disabled}
+					aria-describedby={item.hint ? hintId : undefined}
+					title={item.hint}
+					onClick={() => {
+						if (item.value !== 'topics' && item.value !== tab) setTab(item.value)
+					}}
+					className="tyto-tab">
+					{item.label}
+				</button>
+			))}
+			<span id={hintId} hidden>
+				{m.topicsComingSoon()}
+			</span>
+		</div>
 	)
 }

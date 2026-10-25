@@ -26,6 +26,7 @@ export function useTranscriptViewOptions(): TranscriptViewOptions {
 /** Type scale for the transcript body; the editor reuses it so swapping one for the other is invisible. */
 export const textSizeClass: Record<TranscriptTextSize, string> = {
 	sm: 'text-[13px] leading-[1.7]',
-	md: 'text-[15px] leading-[1.75]',
+	// Tyto: meeting text 15/1.65 (theme.css `.tyto-text-meeting`).
+	md: 'tyto-text-meeting text-[15px] leading-[1.65]',
 	lg: 'text-[17px] leading-[1.8]',
 }

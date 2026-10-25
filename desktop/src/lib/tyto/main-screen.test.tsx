@@ -133,6 +133,34 @@ describe('расшифровка как сценарий', () => {
 		expect(editor.value).toBe('Октябрь закрыли на 92 процента.')
 	})
 
+	it('правка текста с клавиатуры: Enter на строке открывает редактор', () => {
+		renderTranscript()
+		const line = screen.getByText('Давайте посмотрим, что можно дожать.').closest('[role="textbox"]')!
+		fireEvent.keyDown(line, { key: 'Enter' })
+		expect((screen.getByRole('textbox', { name: 'Изменить строку' }) as HTMLTextAreaElement).value).toBe('Давайте посмотрим, что можно дожать.')
+	})
+
+	it('строку внутри серии можно перенести к другому говорящему', () => {
+		const { container } = renderTranscript()
+		const second = rows(container)[1]
+		const chip = second.querySelector<HTMLButtonElement>('.tyto-script-aside button')!
+		expect(chip.textContent).toBe('ААнна')
+		fireEvent.click(chip)
+		const igor = [...document.querySelectorAll<HTMLButtonElement>('button[aria-pressed]')].find((button) => button.textContent === 'Игорь')!
+		fireEvent.click(igor)
+		expect(h.queue.setSegmentSpeaker).toHaveBeenCalledWith('j1', 1, 1)
+	})
+
+	it('заголовок документа 26/600 и текст встречи 15/1.65 (строка 3)', () => {
+		const { container } = renderTranscript()
+		expect(screen.getByRole('button', { name: 'Планерка отдела продаж' }).className).toContain('tyto-title-doc')
+		const line = container.querySelector('[role="textbox"]')!
+		expect(line.className).toContain('tyto-text-meeting')
+		expect(line.className).toContain('leading-[1.65]')
+		fireEvent.click(line)
+		expect(screen.getByRole('textbox', { name: 'Изменить строку' }).className).toContain('tyto-text-meeting')
+	})
+
 	it('поиск подсвечивает совпадения', () => {
 		const { container } = renderTranscript('план')
 		expect(rows(container)).toHaveLength(1)
@@ -141,7 +169,7 @@ describe('расшифровка как сценарий', () => {
 })
 
 describe('метка говорящего', () => {
-	const mark = (speaker: number, name: string) => {
+	const mark = (speaker: number, name?: string) => {
 		const { container } = render(<SpeakerMark speaker={speaker} name={name} />)
 		return container.querySelector<HTMLElement>('.tyto-speaker-mark')!
 	}
@@ -155,8 +183,23 @@ describe('метка говорящего', () => {
 		const fourth = mark(3, 'Олег')
 		expect(fourth.dataset.tone).toBe('filled')
 		expect(fourth.textContent).toBe('О2')
-		expect(mark(5, 'Говорящий 6').textContent).toBe('Г2')
 		expect(mark(6, 'Вера').textContent).toBe('В3')
+	})
+
+	it('без выбранного имени метка показывает номер говорящего', () => {
+		expect([mark(0), mark(1), mark(2), mark(3), mark(9, '  ')].map((node) => [node.dataset.tone, node.textContent])).toEqual([
+			['filled', '1'],
+			['outline', '2'],
+			['grey', '3'],
+			['filled', '4'],
+			['filled', '10'],
+		])
+	})
+
+	it('в расшифровке неназванный говорящий получает номер, названный букву', () => {
+		const job = { id: 'j2', name: 'x', status: 'done', hydrated: true, speakerNames: { 0: 'Анна' }, segments: [segments[0], segments[2]] }
+		const { container } = render(<TranscriptView job={job as never} query="" options={options} />)
+		expect([...container.querySelectorAll('.tyto-speaker-mark')].map((node) => node.textContent)).toEqual(['А', '2'])
 	})
 
 	it('метка декоративная: имя читается рядом', () => {
@@ -172,6 +215,8 @@ describe('вкладки «Текст / Сводка / Темы»', () => {
 		expect(tabs.map((tab) => tab.textContent)).toEqual(['Текст', 'Сводка', 'Темы'])
 		expect(tabs[0].getAttribute('aria-selected')).toBe('true')
 		expect((tabs[2] as HTMLButtonElement).disabled).toBe(true)
+		const hint = document.getElementById(tabs[2].getAttribute('aria-describedby')!)
+		expect(hint?.textContent).toBe('Темы с таймкодами появятся позже')
 		fireEvent.click(tabs[2])
 		fireEvent.click(tabs[1])
 		expect(setTab.mock.calls).toEqual([['summary']])

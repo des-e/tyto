@@ -47,7 +47,7 @@ export function SpeakerLabel({ speaker, speakers, speakerNames, editable, onRena
 	if (speaker != null && !editable)
 		return (
 			<span className={chipClass}>
-				<SpeakerMark speaker={speaker} name={speakerName(speaker, label, speakerNames)} />
+				<SpeakerMark speaker={speaker} name={current} />
 				{speakerName(speaker, label, speakerNames)}
 			</span>
 		)
@@ -77,7 +77,7 @@ export function SpeakerLabel({ speaker, speakers, speakerNames, editable, onRena
 			<PopoverTrigger asChild>
 				{speaker != null ? (
 					<button type="button" title={m.renameSpeaker()} className={cn(chipClass, interactiveChipClass)}>
-						<SpeakerMark speaker={speaker} name={speakerName(speaker, label, speakerNames)} />
+						<SpeakerMark speaker={speaker} name={current} />
 						{speakerName(speaker, label, speakerNames)}
 					</button>
 				) : (

@@ -59,6 +59,8 @@
 	--tyto-selected-tint: rgb(255 255 255 / 0.16);
 	--tyto-line2: #d4d4d4;
 	--tyto-disabled-fg: #6b6b6b;
+	/* Placeholder text (e.g. the «Темы» tab): fainter than muted, still 3.4:1 on the background. */
+	--tyto-faint: #8c8c8c;
 	--tyto-danger: #b4453c;
 }
 
@@ -111,6 +113,7 @@
 	--tyto-selected-tint: rgb(11 11 12 / 0.14);
 	--tyto-line2: #34343a;
 	--tyto-disabled-fg: #8a8a90;
+	--tyto-faint: #66666e;
 	/* Upstream's dark --destructive (#c4655c) gives white text only 3.9:1, so the button plate keeps the deeper red. */
 	--tyto-danger: #b4453c;
 }
@@ -691,8 +694,9 @@ svg.lucide {
 	background: var(--foreground);
 }
 
+/* Unavailable tabs read fainter than inactive ones (muted), still ≥3:1. */
 .tyto-tab:disabled {
-	color: var(--tyto-disabled-fg);
+	color: var(--tyto-faint);
 	cursor: not-allowed;
 }
 

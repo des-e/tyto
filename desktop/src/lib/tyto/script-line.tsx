@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { Play } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { m } from '~/paraglide/messages.js'
@@ -31,12 +31,13 @@ interface ScriptLineProps {
  * a 2 px rule at its start edge. No grey plates.
  */
 export function ScriptLine({ index, time, showTime, active, seriesStart, first, animate, onSeek, header, aside, children }: ScriptLineProps) {
+	const reduceMotion = useReducedMotion()
 	return (
 		<motion.div
 			data-segment-index={index}
 			data-series-start={seriesStart}
 			data-active={active}
-			initial={animate ? { opacity: 0, y: 4 } : false}
+			initial={animate && !reduceMotion ? { opacity: 0, y: 4 } : false}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.15, ease: 'easeOut' }}
 			className="tyto-script-line group"

@@ -280,6 +280,7 @@ export default function TranscriptToolbar({
 	return (
 		<>
 			<div className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-1 border-b border-border bg-background/85 px-4 backdrop-blur-md">
+				<TranscriptTabs tab={tab} setTab={setTab} summaryReady={Boolean(job?.summary)} />
 				<AnimatePresence initial={false} mode="wait">
 					{searching ? (
 						<motion.div
@@ -288,7 +289,7 @@ export default function TranscriptToolbar({
 							animate={{ opacity: 1, y: 0 }}
 							exit={{ opacity: 0, y: -4 }}
 							transition={{ duration: 0.15, ease: 'easeOut' }}
-							className="flex w-full items-center gap-2">
+							className="flex min-w-0 flex-1 items-center gap-2 ps-4">
 							<Search className="h-4 w-4 shrink-0 text-muted-foreground" />
 							<input
 								ref={searchRef}
@@ -314,8 +315,7 @@ export default function TranscriptToolbar({
 							animate={{ opacity: 1, y: 0 }}
 							exit={{ opacity: 0, y: -4 }}
 							transition={{ duration: 0.15, ease: 'easeOut' }}
-							className="flex w-full items-center gap-1">
-							<TranscriptTabs tab={tab} setTab={setTab} summaryReady={Boolean(job?.summary)} />
+							className="flex min-w-0 flex-1 items-center justify-end gap-1">
 							{queue.jobs.length > 1 ? (
 								/* A batch: the same word, with everything that writes files behind it. */
 								<DropdownMenu>
@@ -361,7 +361,7 @@ export default function TranscriptToolbar({
 
 							<ViewOptions options={options} />
 
-							<div className="ms-auto flex items-center gap-1">
+							<div className="flex items-center gap-1">
 								{queue.running && (
 									<Button
 										variant="ghost"
