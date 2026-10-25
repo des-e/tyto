@@ -9,6 +9,8 @@ import * as osExt from '@tauri-apps/plugin-os'
 import * as config from '~/lib/config'
 import { ask } from '@tauri-apps/plugin-dialog'
 import { join } from '@tauri-apps/api/path'
+import { toast } from 'sonner'
+import { m } from '~/paraglide/messages.js'
 
 export function viewModel() {
 	const location = useLocation()
@@ -64,6 +66,28 @@ export function viewModel() {
 		return true
 	}
 
+	/**
+	 * Speakers are on by default, so the first run fetches their model right after the main one, through
+	 * the same download as the settings toggle. A failure never blocks setup: speakers switch off and the
+	 * user can turn them on later, which offers the download again.
+	 */
+	async function ensureDiarizeModelOnSetup() {
+		if (!preference.diarizeEnabled) return true
+		try {
+			const modelsFolder = await invoke<string>('get_models_folder')
+			const path = await join(modelsFolder, config.diarizeModelFilename)
+			if (await utils.isModelFileUsable(path)) return true
+			const result = await utils.downloadModel({ url: config.diarizeModelUrl, ...config.diarizeModelIntegrity }, { replacePath: path })
+			if (!result) throw new Error('diarization model download cancelled')
+			return true
+		} catch (error) {
+			console.error('[model] Diarization model download failed:', error)
+			preference.setDiarizeEnabled(false)
+			toast.warning(m.diarizeDownloadFailed())
+			return false
+		}
+	}
+
 	async function downloadModel() {
 		handleProgressEvenets()
 
@@ -105,6 +129,7 @@ export function viewModel() {
 						navigate('/#settings', { replace: true })
 						return
 					}
+					await ensureDiarizeModelOnSetup()
 					navigate('/', { replace: true, state: { disableBack: true } })
 					return
 				} catch (err) {

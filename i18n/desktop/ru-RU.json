@@ -701,5 +701,7 @@
 	"phoneRevokeDevice": "Отозвать",
 	"phoneRevokeDeviceNamed": "Отозвать {name}",
 	"whatsNew": "Что нового",
-	"basedOnVibe": "Основано на Vibe (MIT) — спасибо автору"
+	"basedOnVibe": "Основано на Vibe (MIT) — спасибо автору",
+	"diarizeDownloadFailed": "Не удалось скачать модель для разделения по говорящим — включите их позже в настройках",
+	"diarizeModelMissing": "Модель для разделения по говорящим не найдена — включите их снова в настройках"
 }

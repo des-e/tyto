@@ -31,7 +31,7 @@ import {
 } from '~/lib/transcripts-store'
 import type { NamedPath, ProjectSource } from '~/lib/types'
 import { ErrorModalContext } from '~/providers/error-modal'
-import { withoutUnsupportedOptions } from '~/lib/model'
+import { isModelFileUsable, withoutUnsupportedOptions } from '~/lib/model'
 import { type Preference, usePreferenceProvider } from '~/providers/preference'
 
 export type JobStatus = 'queued' | 'running' | 'done' | 'error' | 'cancelled'
@@ -144,12 +144,20 @@ function nextJobId() {
 }
 
 /** Options shared by every file of a run (diarize / vad model paths). */
-async function buildSharedOptions(preference: Preference) {
+export async function buildSharedOptions(preference: Preference) {
 	const requiresVad = preference.modelMetadata?.capabilities.requires_vad ?? false
 	const needsFolder = preference.diarizeEnabled || preference.stableTimestampsEnabled || requiresVad
 	const modelsFolder = needsFolder ? await invoke<string>('get_models_folder') : null
+	const diarizePath = `${modelsFolder}/${config.diarizeModelFilename}`
+	// Speakers are on by default, but the model may never have downloaded (offline setup) or may be gone.
+	// Run without speakers instead of failing the whole transcription.
+	const diarize = preference.diarizeEnabled && (await isModelFileUsable(diarizePath))
+	if (preference.diarizeEnabled && !diarize) {
+		preference.setDiarizeEnabled(false)
+		toast.warning(m.diarizeModelMissing(), { position: 'bottom-center', duration: 8000 })
+	}
 	return {
-		...(preference.diarizeEnabled ? { diarize_model: `${modelsFolder}/${config.diarizeModelFilename}` } : {}),
+		...(diarize ? { diarize_model: diarizePath } : {}),
 		...(preference.stableTimestampsEnabled || requiresVad ? { vad_model: `${modelsFolder}/${config.vadModelFilename}` } : {}),
 		...(preference.stableTimestampsEnabled ? { stable_timestamps: true } : {}),
 	}

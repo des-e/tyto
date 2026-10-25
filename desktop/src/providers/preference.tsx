@@ -251,7 +251,7 @@ export function PreferenceProvider({ children }: { children: ReactNode }) {
 	})
 
 	const [recentLanguages, setRecentLanguages] = usePersisted<{ code: string; ts: number }[]>(CONFIG_KEYS.recentLanguages, [])
-	const [diarizeEnabled, setDiarizeEnabled] = usePersisted<boolean>(CONFIG_KEYS.diarizeEnabled, false)
+	const [diarizeEnabled, setDiarizeEnabled] = usePersisted<boolean>(CONFIG_KEYS.diarizeEnabled, true)
 	const [stableTimestampsEnabled, setStableTimestampsEnabled] = usePersisted<boolean>(CONFIG_KEYS.stableTimestampsEnabled, false)
 	const [storedExportOptions, setStoredExportOptions] = usePersisted<Partial<ExportOptions>>(CONFIG_KEYS.exportOptions, DEFAULT_EXPORT_OPTIONS)
 	// One key holding several settings can be half-written by an older build or a hand-edited
