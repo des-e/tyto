@@ -2,7 +2,8 @@ import { readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
-import { formats } from '~/pages/main/components/transcript-export-dialog'
+// The dialog's format list lives here (the dialog re-exports it); importing the dialog would pull in providers that need a window.
+import { EXPORT_FORMATS as formats } from './export-format-grid'
 
 const i18nDir = resolve(dirname(fileURLToPath(import.meta.url)), '../../../../i18n/desktop')
 const read = (locale: string): Record<string, string> => JSON.parse(readFileSync(resolve(i18nDir, `${locale}.json`), 'utf-8'))
