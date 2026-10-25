@@ -1,6 +1,7 @@
 import { migrateLegacyLocale } from './migrate-legacy-locale'
 import { migratePrefsToConfig } from './migrate-prefs-to-config'
 import { removeRecordingPathSettings } from './remove-recording-path-settings'
+import { migrateLangToAuto } from '~/lib/tyto/lang-auto-migration'
 
 /**
  * Local storage migration versioning
@@ -38,4 +39,6 @@ export function runMigrations() {
 		version = migration.version
 		localStorage.setItem(MIGRATION_VERSION_KEY, String(version))
 	}
+	// Tyto: one-time switch to language auto-detection, guarded by its own flag.
+	migrateLangToAuto()
 }
