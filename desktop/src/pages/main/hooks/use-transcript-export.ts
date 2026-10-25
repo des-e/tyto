@@ -11,6 +11,7 @@ import { toDocx } from '~/lib/docx'
 import { projectExportFilename } from '~/lib/project-name'
 import { transcriptToPdf } from '~/lib/pdf/transcript-pdf'
 import { serializeTranscriptExport, type TranscriptExportContent, type TranscriptExportOptions } from '~/lib/transcript-export'
+import { timestampsRequired } from '~/lib/tyto/export-format-grid'
 import type { Segment, SpeakerNames } from '~/lib/transcript'
 import type { NamedPath } from '~/lib/types'
 import { usePreferenceProvider } from '~/providers/preference'
@@ -46,7 +47,7 @@ export function useTranscriptExport({
 	const serializerOptions = useMemo<TranscriptExportOptions>(
 		() => ({
 			content,
-			showTimestamps,
+			showTimestamps: showTimestamps || timestampsRequired(format),
 			showSpeakers,
 			speakerLabel,
 			speakerNames,
@@ -58,6 +59,7 @@ export function useTranscriptExport({
 			content,
 			direction,
 			file?.name,
+			format,
 			preference.exportOptions.theme,
 			preference.textAreaDirection,
 			showSpeakers,

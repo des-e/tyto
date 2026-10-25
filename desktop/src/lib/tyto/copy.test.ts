@@ -10,7 +10,7 @@ const ru = read('ru-RU')
 const en = read('en-US')
 
 // Table "Тексты" of docs/design/2026-10-25-tyto-visual-language.md.
-// exportDialogDescription is not pinned: the spec removes it from the dialog (the key stays until the dialog is rebuilt).
+// exportDialogDescription is not pinned: the v2 dialog no longer shows it (the key stays in the locale files for upstream merges).
 const COPY: Array<[string, string]> = [
 	['setup', 'Первый запуск'],
 	['downloadingModel', 'Готовим Tyto к работе'],
@@ -42,6 +42,23 @@ const COPY: Array<[string, string]> = [
 	['exportContentTranscript', 'Расшифровку'],
 	['exportContentSummary', 'Сводку'],
 	['exportSave', 'Сохранить {format}'],
+	// Export dialog v2 (section «Диалог экспорта»).
+	['exportContentTranscriptDescription', 'Весь разговор с именами и временем'],
+	['exportContentSummaryDescription', 'Главное: решения и задачи'],
+	['exportSummaryUnavailable', 'Сначала создайте сводку'],
+	['exportFormatGroupDocument', 'Документ'],
+	['exportFormatGroupWeb', 'Субтитры и веб'],
+	['exportAppearance', 'Оформление'],
+	['exportDarkTheme', 'Темная тема документа'],
+	['exportRtl', 'Текст справа налево'],
+	['exportTimestampsRequired', 'нужно для субтитров'],
+	['exportCancel', 'Отмена'],
+	['exportFormatDocx', 'Word'],
+	['exportFormatText', 'Простой текст'],
+	['exportFormatHtml', 'Веб-страница'],
+	['exportFormatSrt', 'Субтитры'],
+	['exportFormatVtt', 'Веб-субтитры'],
+	['exportFormatJson', 'Данные'],
 	['exportCopy', 'Скопировать текст'],
 	['showTimestamps', 'Время каждой реплики'],
 	['showSpeakers', 'Имена говорящих'],

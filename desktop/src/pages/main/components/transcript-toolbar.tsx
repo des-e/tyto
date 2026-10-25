@@ -256,7 +256,11 @@ export default function TranscriptToolbar({
 	function openExport() {
 		// The dialog reopens on the choices it was left with; only a saved choice that this
 		// transcript cannot honour — a summary it does not have — is corrected.
-		if (!job?.summary && exportOptions.content !== 'transcript') updateExport({ content: 'transcript' })
+		// CSV is no longer offered in the dialog (Tyto), so a stored CSV choice falls back to plain text.
+		const fix: Partial<typeof exportOptions> = {}
+		if (!job?.summary && exportOptions.content !== 'transcript') fix.content = 'transcript'
+		if (exportOptions.format === 'csv') fix.format = 'normal'
+		if (Object.keys(fix).length > 0) updateExport(fix)
 		setExportOpen(true)
 	}
 
@@ -405,6 +409,8 @@ export default function TranscriptToolbar({
 				onThemeChange={(theme) => updateExport({ theme })}
 				onCopy={exporter.copy}
 				onSave={saveExport}
+				title={job?.name}
+				durationSeconds={(job?.segments[job.segments.length - 1]?.stop ?? 0) / 100}
 			/>
 		</>
 	)
