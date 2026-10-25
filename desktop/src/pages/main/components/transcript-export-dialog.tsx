@@ -40,7 +40,7 @@ export interface TranscriptExportDialogProps {
 	onSave: () => void | Promise<void>
 }
 
-const formats: Array<{
+export const formats: Array<{
 	value: TextFormat
 	extension: string
 	label: () => string
@@ -412,7 +412,7 @@ export default function TranscriptExportDialog({
 					)}
 					<Button type="button" onClick={() => void onSave()}>
 						<Download aria-hidden="true" />
-						{m.exportSave({ format: format.toUpperCase() })}
+						{m.exportSave({ format: selectedFormat?.extension ?? format.toUpperCase() })}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

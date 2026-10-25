@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
+import { formats } from '~/pages/main/components/transcript-export-dialog'
 
 const i18nDir = resolve(dirname(fileURLToPath(import.meta.url)), '../../../../i18n/desktop')
 const read = (locale: string): Record<string, string> => JSON.parse(readFileSync(resolve(i18nDir, `${locale}.json`), 'utf-8'))
@@ -49,7 +50,9 @@ const COPY: Array<[string, string]> = [
 	['modalErrorBody', 'Что-то пошло не так. Подробности ниже, их можно отправить нам.'],
 	['resetApp', 'Сбросить настройки Tyto'],
 	['crashedRecently', 'Tyto недавно закрылся с ошибкой, поэтому мы временно отключили видеокарту. Включить ее можно в настройках.'],
-	['gpuFallbackToCpu', 'Видеокарта не справилась, расшифровываем на процессоре. Это медленнее.'],
+	['gpuFallbackToCpu', 'Не удалось запустить на видеокарте, расшифровываем на процессоре. Это медленнее.'],
+	['updateAvailableOpenRecents', 'Доступно обновление: откройте недавние'],
+	['hotkeyActivationPushToTalkDescription', 'Удерживайте сочетание клавиш для записи, отпустите для расшифровки.'],
 	['updatingModalTitle', 'Обновляем Tyto'],
 	['diarizeDownloadFailed', 'Не получилось скачать модель говорящих. Включить их можно позже в настройках.'],
 	['closeToTray', 'Сворачивать в трей при закрытии'],
@@ -88,5 +91,14 @@ describe('tyto ru copy', () => {
 		for (const [key, value] of Object.entries(ru)) {
 			expect(value.toLowerCase(), key).not.toMatch(/транскрип|транскриб|саммари|суммариз/)
 		}
+	})
+})
+
+describe('export save button label', () => {
+	it('uses the display extension, not the internal format id', () => {
+		const ext = (id: string) => formats.find((f) => f.value === id)?.extension
+		expect(ext('normal')).toBe('TXT')
+		expect(ext('md')).toBe('MD')
+		expect(ru.exportSave.replace('{format}', ext('normal') ?? '')).toBe('Сохранить TXT')
 	})
 })
