@@ -24,7 +24,7 @@
 | 0. Форк и рабочее место | готово | см. git log «Tyto: спека, план, история» |
 | 1. Проверка качества (Денис) | ждёт Дениса | |
 | 2. Конфиг Tauri | готово | af68a25 |
-| 3. Ссылки, тексты, иконка | не начата | |
+| 3. Ссылки, тексты, иконка | готово | b29caa3, b81566f |
 | 4. Говорящие по умолчанию | не начата | |
 | 5. Скрыть телефон | не начата | |
 | 6. Workflow релиза | не начата | |
@@ -151,7 +151,7 @@ Expected: FAIL (файла `tauri.tyto.conf.json` нет).
 **Interfaces:**
 - Produces: `config.repoURL = 'https://github.com/des-e/tyto'`, `config.upstreamURL = 'https://github.com/thewh1teagle/vibe'` (новая константа), используется в «О программе».
 
-- [ ] **Step 1: Падающий тест** `rebrand.test.ts`:
+- [x] **Step 1: Падающий тест** `rebrand.test.ts`:
 
 ```ts
 // URL-константы
@@ -172,8 +172,8 @@ for (const loc of ['ru-RU','en-US']) {
 
 Название функции в `app.ts:86` взять из upstream; тест вызывает именно её.
 
-- [ ] **Step 2: Запустить, увидеть FAIL** — `pnpm vitest run src/lib/tyto/rebrand.test.ts`
-- [ ] **Step 3: URL-константы.**
+- [x] **Step 2: Запустить, увидеть FAIL** — `pnpm vitest run src/lib/tyto/rebrand.test.ts`
+- [x] **Step 3: URL-константы.**
   - `aboutURL` → `https://github.com/des-e/tyto#readme`;
   - `repoURL` → `https://github.com/des-e/tyto`;
   - `changelogURL(v)` → `https://github.com/des-e/tyto/releases` (с `/tag/v${v}`, если версия передана);
@@ -182,19 +182,19 @@ for (const loc of ['ru-RU','en-US']) {
   - `modelsDocURL` и URL моделей не трогать: модели качаем с тех же адресов, что и Vibe.
 
   В `app.ts:86` поменять репо на `des-e/tyto`. В `general.tsx` убрать кнопки Discord и «Поддержать Vibe». Оставить «О Tyto» и «Сообщить о проблеме», добавить строку `m.basedOnVibe()` со ссылкой на `upstreamURL`.
-- [ ] **Step 4: Скрипт `rebrand-i18n.mjs`**: во всех `i18n/desktop/*.json` заменяет в значениях `\bVibe\b` → `Tyto`. Ключи и плейсхолдеры не трогает. Строки про поддержку автора удаляются вместе с кнопкой: ключ остаётся неиспользуемым, это безопасно для слияний. Добавляет `basedOnVibe`:
+- [x] **Step 4: Скрипт `rebrand-i18n.mjs`**: во всех `i18n/desktop/*.json` заменяет в значениях `\bVibe\b` → `Tyto`. Ключи и плейсхолдеры не трогает. Строки про поддержку автора удаляются вместе с кнопкой: ключ остаётся неиспользуемым, это безопасно для слияний. Добавляет `basedOnVibe`:
   - ru: `Основано на Vibe (MIT) — спасибо автору`;
   - en: `Based on Vibe (MIT) — thanks to its author`.
 
   Скрипт идемпотентный, запуск: `node scripts/tyto/rebrand-i18n.mjs`. После каждого слияния с upstream скрипт запускается заново.
-- [ ] **Step 5: Иконка.** `design/tyto/icon.svg`: стилизованная морда сипухи (сердцевидный лицевой диск, два тёмных глаза), фон тёмно-синий `#1e3a8a`, морда светлая `#f5efe6`, без текста. Сгенерировать PNG 1024 и затем `pnpm tauri icon design/tyto/icon-1024.png`. `brand-glyph.tsx` рендерит ту же сову (inline SVG).
-- [ ] **Step 6: `PRIVACY.md`** на русском, 5–8 предложений:
+- [x] **Step 5: Иконка.** `design/tyto/icon.svg`: стилизованная морда сипухи (сердцевидный лицевой диск, два тёмных глаза), фон тёмно-синий `#1e3a8a`, морда светлая `#f5efe6`, без текста. Сгенерировать PNG 1024 и затем `pnpm tauri icon design/tyto/icon-1024.png`. `brand-glyph.tsx` рендерит ту же сову (inline SVG).
+- [x] **Step 6: `PRIVACY.md`** на русском, 5–8 предложений:
   - расшифровка всегда идёт на компьютере;
   - текст уходит наружу только для тем и сводки: провайдеру по своему ключу или на сервер Tyto по коду доступа;
   - сервер не хранит тексты дольше обработки запроса;
   - аналитики нет.
-- [ ] **Step 7: Тест зелёный + полный прогон** — `pnpm i18n:generate; pnpm test; pnpm build` → всё PASS, `tsc` без ошибок.
-- [ ] **Step 8: Commit** — `git commit -m "Tyto: ссылки, тексты, иконка, PRIVACY"`
+- [x] **Step 7: Тест зелёный + полный прогон** — `pnpm i18n:generate; pnpm test; pnpm build` → всё PASS, `tsc` без ошибок.
+- [x] **Step 8: Commit** — `git commit -m "Tyto: ссылки, тексты, иконка, PRIVACY"`
 
 ---
 
