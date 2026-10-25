@@ -3,7 +3,7 @@ import { invoke } from '@tauri-apps/api/core'
 import { AlertTriangle, Check, LoaderCircle } from 'lucide-react'
 import { useEffect, useLayoutEffect, useState } from 'react'
 import { m } from '~/paraglide/messages.js'
-import logoUrl from '../../../design/logo.svg?url'
+import { OwlMark } from '~/lib/tyto/owl-mark'
 import { getDictationIndicatorState, type DictationIndicatorState } from '~/lib/dictation-indicator'
 
 export default function DictationIndicatorWindow() {
@@ -45,7 +45,7 @@ export default function DictationIndicatorWindow() {
 	return (
 		<div className="flex h-screen w-screen items-center justify-center p-2">
 			<div className="flex h-12 min-w-56 max-w-full items-center gap-2.5 rounded-full border border-white/10 bg-zinc-950 px-3.5 text-sm font-medium text-zinc-50 shadow-[0_12px_35px_rgba(0,0,0,0.32),0_2px_8px_rgba(0,0,0,0.22)]">
-				<img src={logoUrl} alt="" className="h-6 w-6 shrink-0 rounded-full" />
+				<OwlMark className="h-6 w-6 shrink-0 text-zinc-50" />
 				<span className="h-5 w-px bg-white/12" />
 				<span className="shrink-0">{content.icon}</span>
 				<span className="truncate">{content.label}</span>

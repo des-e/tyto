@@ -18,7 +18,7 @@ import { supportedLanguages } from '~/lib/i18n'
 import { cn } from '~/lib/style'
 import { m } from '~/paraglide/messages.js'
 import { getLocale, getTextDirection, setLocale } from '~/paraglide/runtime.js'
-import logoUrl from '../../../design/logo.svg?url'
+import { OwlMark } from '~/lib/tyto/owl-mark'
 
 const serviceNames: Record<MeetingSource, string> = {
 	meet: 'Google Meet',
@@ -184,7 +184,9 @@ export default function MeetingPromptWindow() {
 				<div className="flex min-w-0 items-center gap-2.5">
 					<div className="relative flex h-9 w-12 shrink-0 items-center">
 						<ServiceIcon source={state.source} />
-						<img src={logoUrl} alt="" className="absolute end-0 h-5 w-5 rounded-full border-2 border-card" />
+						<span className="absolute end-0 flex h-5 w-5 items-center justify-center rounded-full border-2 border-card bg-card">
+							<OwlMark className="h-3 w-auto text-foreground" />
+						</span>
 					</div>
 					<div className="min-w-0">
 						<h1 className="truncate text-sm font-semibold leading-5">{m.meetingPromptTitle({ source: serviceNames[state.source] })}</h1>

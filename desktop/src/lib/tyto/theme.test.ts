@@ -19,6 +19,19 @@ function tokens(css: string, selector: string): Record<string, string> {
 	return result
 }
 
+/** WCAG 2 relative luminance contrast ratio of two #rrggbb colours. */
+function contrast(a: string, b: string) {
+	const luminance = (hex: string) => {
+		const [r, g, bl] = [1, 3, 5].map((i) => {
+			const v = parseInt(hex.slice(i, i + 2), 16) / 255
+			return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4
+		})
+		return 0.2126 * r + 0.7152 * g + 0.0722 * bl
+	}
+	const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x)
+	return (hi + 0.05) / (lo + 0.05)
+}
+
 const VIBE_BLUES = ['#2563eb', '#60a5fa', '#3b82f6', '#339cff', '37 99 235', '51 156 255', '#5b8def']
 
 describe('tyto theme tokens', () => {
@@ -33,8 +46,15 @@ describe('tyto theme tokens', () => {
 			sidebar: '#fafafa',
 			border: '#e5e5e5',
 			'sidebar-border': '#ededed',
-			'muted-foreground': '#a3a3a3',
+			'muted-foreground': '#737373',
 		})
+	})
+
+	it('muted text keeps WCAG AA contrast (>= 4.5:1) on the page and the sidebar', () => {
+		for (const theme of [light, dark]) {
+			expect(contrast(theme['muted-foreground'], theme.background)).toBeGreaterThanOrEqual(4.5)
+			expect(contrast(theme['muted-foreground'], theme.sidebar)).toBeGreaterThanOrEqual(4.5)
+		}
 	})
 
 	it('dark theme: light grey on near-black', () => {
@@ -44,7 +64,7 @@ describe('tyto theme tokens', () => {
 			sidebar: '#111113',
 			border: '#1f1f22',
 			input: '#2a2a2f',
-			'muted-foreground': '#6b6b72',
+			'muted-foreground': '#808088',
 		})
 	})
 
@@ -76,6 +96,20 @@ describe('tyto theme tokens', () => {
 		const theme = bootstrap.indexOf("import './lib/tyto/theme.css'")
 		expect(globals).toBeGreaterThanOrEqual(0)
 		expect(theme).toBeGreaterThan(globals)
+	})
+})
+
+describe('owl branding in secondary windows', () => {
+	it('the window title is Tyto', () => {
+		expect(read('../index.html')).toContain('<title>Tyto</title>')
+	})
+
+	it('meeting prompt and dictation indicator show the owl, not the Vibe logo', () => {
+		for (const file of ['windows/meeting-prompt-window.tsx', 'windows/dictation-indicator-window.tsx']) {
+			const source = read(file)
+			expect(source, file).not.toContain('design/logo.svg')
+			expect(source, file).toContain('<OwlMark')
+		}
 	})
 })
 
