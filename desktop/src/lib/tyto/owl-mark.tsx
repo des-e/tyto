@@ -4,8 +4,11 @@ import { useId, type SVGProps } from 'react'
  * The Tyto owl (concept D, design/tyto/icon.svg) as an inline mark. The body is `currentColor` and
  * the eyes and beak are cut out of it, so whatever is behind shows through: dark owl in the light
  * theme, light owl in the dark theme, no per-theme artwork.
+ *
+ * `blink` adds eyelids that close and open once on mount (theme.css `.tyto-owl-lid`, transform only,
+ * static under reduced motion). Flip it to true when a transcript is ready; remount (`key`) to repeat.
  */
-export function OwlMark({ title, ...props }: SVGProps<SVGSVGElement> & { title?: string }) {
+export function OwlMark({ title, blink = false, ...props }: SVGProps<SVGSVGElement> & { title?: string; blink?: boolean }) {
 	const mask = `tyto-owl-${useId().replace(/:/g, '')}`
 	return (
 		<svg
@@ -30,6 +33,12 @@ export function OwlMark({ title, ...props }: SVGProps<SVGSVGElement> & { title?:
 			/>
 			<circle cx="414" cy="448" r="44" />
 			<circle cx="610" cy="448" r="44" />
+			{blink && (
+				<>
+					<circle className="tyto-owl-lid" cx="414" cy="448" r="92" />
+					<circle className="tyto-owl-lid" cx="610" cy="448" r="92" />
+				</>
+			)}
 			<rect x="412" y="812" width="56" height="52" rx="18" />
 			<rect x="556" y="812" width="56" height="52" rx="18" />
 		</svg>

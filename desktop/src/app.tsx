@@ -63,7 +63,7 @@ function AppContent() {
 												<Route path="/setup" element={<SetupPage />} />
 											</Routes>
 										</FilesProvider>
-										<Toaster position="bottom-right" />
+										<Toaster />
 									</RecordingShortcutProvider>
 								</HotkeyProvider>
 							</ToastProvider>

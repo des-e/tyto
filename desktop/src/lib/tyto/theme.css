@@ -11,7 +11,7 @@
  */
 
 :root {
-	--radius: 0.75rem;
+	--radius: 0.5rem;
 
 	--background: #ffffff;
 	--foreground: #0a0a0a;
@@ -57,10 +57,13 @@
 
 	--tyto-selected-muted: rgb(255 255 255 / 0.62);
 	--tyto-selected-tint: rgb(255 255 255 / 0.16);
+	--tyto-line2: #d4d4d4;
+	--tyto-disabled-fg: #6b6b6b;
+	--tyto-danger: #b4453c;
 }
 
 .dark {
-	--radius: 0.75rem;
+	--radius: 0.5rem;
 
 	--background: #0b0b0c;
 	--foreground: #ededed;
@@ -106,6 +109,10 @@
 
 	--tyto-selected-muted: rgb(11 11 12 / 0.6);
 	--tyto-selected-tint: rgb(11 11 12 / 0.14);
+	--tyto-line2: #34343a;
+	--tyto-disabled-fg: #8a8a90;
+	/* Upstream's dark --destructive (#c4655c) gives white text only 3.9:1, so the button plate keeps the deeper red. */
+	--tyto-danger: #b4453c;
 }
 
 /* Sidebar surface. On macOS vibrancy the sidebar stays see-through, as upstream intends. */
@@ -171,4 +178,181 @@ html:not(.mac-vibrancy) .tyto-sidebar {
 
 ::selection {
 	background: color-mix(in srgb, var(--foreground) 14%, transparent);
+}
+
+/*
+ * Shape, spacing, type and motion tokens. Theme-independent, so they live outside the colour blocks
+ * above (which must stay symmetric). Values: docs/design/2026-10-25-tyto-visual-language.md, «Токены».
+ */
+html {
+	--tyto-r-xs: 4px;
+	--tyto-r-sm: 6px;
+	--tyto-r-md: 8px;
+	--tyto-r-lg: 12px;
+
+	--tyto-sp-2: 2px;
+	--tyto-sp-4: 4px;
+	--tyto-sp-8: 8px;
+	--tyto-sp-12: 12px;
+	--tyto-sp-16: 16px;
+	--tyto-sp-24: 24px;
+	--tyto-sp-32: 32px;
+	--tyto-sp-48: 48px;
+
+	/* Bottom bars: the sidebar footer and the player share this height and one top line. */
+	--tyto-bar-h: 56px;
+
+	--tyto-fs-screen: 28px;
+	--tyto-fs-doc: 26px;
+	--tyto-fs-settings: 22px;
+	--tyto-fs-dialog: 17px;
+	--tyto-fs-meeting: 15px;
+	--tyto-fs-ui: 14px;
+	--tyto-fs-meta: 13px;
+	--tyto-fs-eyebrow: 12px;
+
+	--tyto-ease: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Type scale. Titles are 600 with tight tracking; everything else is 400, buttons 500. */
+.tyto-title-screen {
+	font-size: 28px;
+	line-height: 1.15;
+	font-weight: 600;
+	letter-spacing: -0.03em;
+}
+
+.tyto-title-doc {
+	font-size: 26px;
+	line-height: 1.15;
+	font-weight: 600;
+	letter-spacing: -0.025em;
+}
+
+.tyto-title-settings {
+	font-size: 22px;
+	line-height: 1.2;
+	font-weight: 600;
+	letter-spacing: -0.025em;
+}
+
+.tyto-title-dialog {
+	font-size: 17px;
+	line-height: 1.2;
+	font-weight: 600;
+	letter-spacing: -0.015em;
+}
+
+.tyto-text-meeting {
+	font-size: 15px;
+	line-height: 1.65;
+	font-weight: 400;
+}
+
+.tyto-text-meta {
+	font-size: 13px;
+	line-height: 1.45;
+	color: var(--muted-foreground);
+}
+
+/*
+ * Group labels in normal case: 12px, 500, muted, no tracking. Also rewrites upstream's `.eyebrow` /
+ * `.app-kicker` and the inline 11px caps labels Vibe repeats across screens (`uppercase` +
+ * `tracking-[0.08em]`), so no upstream file needs editing. Colour is set only on the named classes:
+ * the inline labels keep their own (some change colour on hover).
+ */
+.tyto-eyebrow,
+.eyebrow,
+.app-kicker,
+.uppercase[class*='tracking-[0.'] {
+	text-transform: none;
+	letter-spacing: 0;
+	font-size: 12px;
+	line-height: 1.2;
+	font-weight: 500;
+}
+
+.tyto-eyebrow,
+.eyebrow,
+.app-kicker {
+	color: var(--muted-foreground);
+}
+
+/* Thin icons: lucide draws with stroke-width 2 as an attribute, which a CSS property overrides. */
+svg.lucide {
+	stroke-width: 1.5;
+}
+
+/*
+ * Toasts: one-line inverted plate with its action as bold text, bottom centre of the main area
+ * (the sidebar publishes half its width as --tyto-main-x), lifted above the player bar via the
+ * offset in sonner.tsx. Selectors are one step more specific than sonner's own injected styles.
+ */
+:root [data-sonner-toaster][data-x-position='center'] {
+	left: calc(50% + var(--tyto-main-x, 0px));
+}
+
+:root [data-sonner-toaster] [data-sonner-toast][data-styled='true'] {
+	gap: 12px;
+	padding: 8px 12px 8px 16px;
+	border: none;
+	border-radius: var(--tyto-r-md);
+	background: var(--foreground);
+	color: var(--background);
+	font-size: 13px;
+	box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
+}
+
+:root [data-sonner-toaster] [data-sonner-toast][data-styled='true'] [data-title] {
+	font-weight: 500;
+	line-height: 1.45;
+}
+
+:root [data-sonner-toaster] [data-sonner-toast][data-styled='true'] [data-description] {
+	color: var(--tyto-selected-muted);
+}
+
+:root [data-sonner-toaster] [data-sonner-toast][data-styled='true'] [data-button] {
+	height: auto;
+	padding: 0 4px;
+	border-radius: var(--tyto-r-xs);
+	background: transparent;
+	color: inherit;
+	font-size: 13px;
+	font-weight: 600;
+}
+
+:root [data-sonner-toaster] [data-sonner-toast][data-styled='true'] [data-button][data-cancel] {
+	color: var(--tyto-selected-muted);
+	font-weight: 500;
+}
+
+:root [data-sonner-toaster] [data-sonner-toast][data-styled='true'] [data-close-button] {
+	background: var(--foreground);
+	color: var(--background);
+	border-color: var(--tyto-selected-tint);
+}
+
+/* The owl blinks once (OwlMark `blink`): eyelids close from the middle and open again. */
+@keyframes tyto-owl-blink {
+	0%,
+	100% {
+		transform: scaleY(0);
+	}
+	50% {
+		transform: scaleY(1);
+	}
+}
+
+.tyto-owl-lid {
+	transform: scaleY(0);
+	transform-box: fill-box;
+	transform-origin: center;
+	animation: tyto-owl-blink 260ms var(--tyto-ease) 1 both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.tyto-owl-lid {
+		animation: none;
+	}
 }

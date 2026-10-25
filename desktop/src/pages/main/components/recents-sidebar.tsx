@@ -22,6 +22,7 @@ import {
 import { openSettingsSection } from '~/lib/app'
 import { FEATURES } from '~/lib/tyto/features'
 import { OwlMark } from '~/lib/tyto/owl-mark'
+import { useMainAreaOffset } from '~/lib/tyto/main-area'
 import { TOGGLE_SIDEBAR_EVENT } from '~/components/layout'
 import { getTextDirection } from '~/paraglide/runtime.js'
 import { UpdaterContext } from '~/providers/updater'
@@ -384,6 +385,7 @@ export default function RecentsSidebar() {
 	const { queue, startNew, preference } = useSession()
 	const { updateApp, availableUpdate } = useContext(UpdaterContext)
 	const { width, dragging, handleProps } = useResizableWidth()
+	useMainAreaOffset(width)
 	const [entries, setEntries] = useState<TranscriptEntry[]>([])
 	const [query, setQuery] = useState('')
 

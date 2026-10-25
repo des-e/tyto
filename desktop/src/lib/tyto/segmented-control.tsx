@@ -26,7 +26,7 @@ export function SegmentedControl<T extends string>({
 	className?: string
 }) {
 	return (
-		<div role="radiogroup" aria-label={ariaLabel} className={cn('inline-flex rounded-lg border border-border p-0.5', className)}>
+		<div role="radiogroup" aria-label={ariaLabel} className={cn('inline-flex rounded-[var(--tyto-r-md)] border border-border p-0.5', className)}>
 			{options.map((option) => {
 				const selected = option.value === value
 				return (
@@ -40,7 +40,7 @@ export function SegmentedControl<T extends string>({
 						data-selected={selected}
 						onClick={() => onChange(option.value)}
 						className={cn(
-							'flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-md px-3 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+							'flex h-8 cursor-pointer items-center justify-center gap-1 rounded-[var(--tyto-r-sm)] px-3 text-xs font-medium focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-foreground focus-visible:outline-offset-2',
 							selected ? 'tyto-selected' : 'text-muted-foreground hover:text-foreground',
 						)}>
 						{option.icon}

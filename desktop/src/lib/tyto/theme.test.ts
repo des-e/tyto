@@ -32,7 +32,32 @@ function contrast(a: string, b: string) {
 	return (hi + 0.05) / (lo + 0.05)
 }
 
-const VIBE_BLUES = ['#2563eb', '#60a5fa', '#3b82f6', '#339cff', '37 99 235', '51 156 255', '#5b8def']
+/** `rgb(r g b / a)` composited over an opaque #rrggbb, as #rrggbb. */
+function blend(rgba: string, under: string) {
+	const match = rgba.match(/rgb\(\s*(\d+)\s+(\d+)\s+(\d+)\s*\/\s*([\d.]+)\s*\)/)
+	if (!match) throw new Error(`not an rgb() colour: ${rgba}`)
+	const alpha = Number(match[4])
+	return (
+		'#' +
+		[1, 2, 3]
+			.map((i) => {
+				const base = parseInt(under.slice(2 * i - 1, 2 * i + 1), 16)
+				const value = Math.round(Number(match[i]) * alpha + base * (1 - alpha))
+				return value.toString(16).padStart(2, '0')
+			})
+			.join('')
+	)
+}
+
+/** Declarations of the first rule whose selector list contains `selector`. */
+function rule(css: string, selector: string) {
+	const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+	const match = css.match(new RegExp(`(?:^|\\n|,)\\s*${escaped}\\s*(?:,[^{]*)?\\{([^}]*)\\}`))
+	if (!match) throw new Error(`no ${selector} rule in theme.css`)
+	return match[1]
+}
+
+const VIBE_BLUES =['#2563eb', '#60a5fa', '#3b82f6', '#339cff', '37 99 235', '51 156 255', '#5b8def']
 
 describe('tyto theme tokens', () => {
 	const css = read('lib/tyto/theme.css')
@@ -90,12 +115,82 @@ describe('tyto theme tokens', () => {
 		expect(rule?.[1]).toContain('color: var(--background)')
 	})
 
+	it('selected text keeps WCAG AA contrast (>= 4.5:1) on the selected plate in both themes', () => {
+		for (const theme of [light, dark]) {
+			// Selected plate = foreground, selected text = background, secondary text = translucent background.
+			expect(contrast(theme.background, theme.foreground)).toBeGreaterThanOrEqual(4.5)
+			const muted = blend(theme['tyto-selected-muted'], theme.foreground)
+			expect(contrast(muted, theme.foreground)).toBeGreaterThanOrEqual(4.5)
+		}
+	})
+
+	it('disabled buttons keep readable text on their grey fill in both themes', () => {
+		for (const theme of [light, dark]) {
+			expect(contrast(theme['tyto-disabled-fg'], theme.muted)).toBeGreaterThanOrEqual(4.5)
+			expect(contrast('#ffffff', theme['tyto-danger'])).toBeGreaterThanOrEqual(4.5)
+		}
+	})
+
 	it('is loaded after the upstream globals so its tokens win', () => {
 		const bootstrap = read('bootstrap.tsx')
 		const globals = bootstrap.indexOf("import './globals.css'")
 		const theme = bootstrap.indexOf("import './lib/tyto/theme.css'")
 		expect(globals).toBeGreaterThanOrEqual(0)
 		expect(theme).toBeGreaterThan(globals)
+	})
+})
+
+describe('tyto shape tokens and type', () => {
+	const css = read('lib/tyto/theme.css')
+	const shape = tokens(css, 'html')
+
+	it('radii are 4/6/8/12 and shadcn --radius is 0.5rem in both themes', () => {
+		expect(shape).toMatchObject({ 'tyto-r-xs': '4px', 'tyto-r-sm': '6px', 'tyto-r-md': '8px', 'tyto-r-lg': '12px' })
+		expect(tokens(css, ':root').radius).toBe('0.5rem')
+		expect(tokens(css, '.dark').radius).toBe('0.5rem')
+	})
+
+	it('bottom bars share one height token of 56px', () => {
+		expect(shape['tyto-bar-h']).toBe('56px')
+	})
+
+	it('spacing scale is the 4px grid from the spec', () => {
+		for (const step of [2, 4, 8, 12, 16, 24, 32, 48]) expect(shape[`tyto-sp-${step}`]).toBe(`${step}px`)
+	})
+
+	it('type scale: titles 600 with tight tracking, meeting text 15/1.65', () => {
+		expect(rule(css, '.tyto-title-screen')).toMatch(/font-size: 28px/)
+		expect(rule(css, '.tyto-title-screen')).toMatch(/letter-spacing: -0\.03em/)
+		expect(rule(css, '.tyto-title-doc')).toMatch(/font-size: 26px/)
+		expect(rule(css, '.tyto-title-settings')).toMatch(/font-size: 22px/)
+		expect(rule(css, '.tyto-title-dialog')).toMatch(/font-size: 17px/)
+		const meeting = rule(css, '.tyto-text-meeting')
+		expect(meeting).toMatch(/font-size: 15px/)
+		expect(meeting).toMatch(/line-height: 1\.65/)
+	})
+
+	it('eyebrow labels are 12px, weight 500, muted, in normal case', () => {
+		const eyebrow = rule(css, '.tyto-eyebrow')
+		expect(eyebrow).not.toMatch(/text-transform:\s*uppercase/)
+		expect(eyebrow).toMatch(/text-transform: none/)
+		expect(eyebrow).toMatch(/font-size: 12px/)
+		expect(eyebrow).toMatch(/font-weight: 500/)
+		expect(eyebrow).toMatch(/letter-spacing: 0/)
+		expect(css).not.toMatch(/text-transform:\s*uppercase/)
+		// Upstream's `.eyebrow` and its inline 11px caps labels are covered by the same rule.
+		expect(css).toMatch(/\.eyebrow\s*,/)
+	})
+
+	it('lucide icons use a 1.5 stroke', () => {
+		expect(rule(css, 'svg.lucide')).toMatch(/stroke-width: 1\.5/)
+	})
+
+	it('toasts sit above the player bar, centred over the main area', () => {
+		const toaster = read('components/ui/sonner.tsx')
+		expect(toaster).toContain("position = 'bottom-center'")
+		expect(toaster).toContain('calc(var(--tyto-bar-h) + 12px)')
+		expect(read('app.tsx')).not.toContain('position="bottom-right"')
+		expect(css).toMatch(/\[data-sonner-toaster\]\[data-x-position='center'\][^{]*\{[^}]*var\(--tyto-main-x/)
 	})
 })
 
