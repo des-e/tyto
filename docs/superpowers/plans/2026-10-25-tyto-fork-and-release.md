@@ -25,7 +25,7 @@
 | 1. Проверка качества (Денис) | ждёт Дениса | |
 | 2. Конфиг Tauri | готово | af68a25 |
 | 3. Ссылки, тексты, иконка | готово | b29caa3, b81566f |
-| 4. Говорящие по умолчанию | не начата | |
+| 4. Говорящие по умолчанию | готово | e155c17, 8761c0d |
 | 5. Скрыть телефон | не начата | |
 | 6. Workflow релиза | не начата | |
 | 7. Установка, README, приёмка | не начата | |
@@ -210,7 +210,7 @@ for (const loc of ['ru-RU','en-US']) {
 - Consumes: `config.diarizeModelFilename`, `config.diarizeModelUrl`, `config.diarizeModelIntegrity` (`lib/config.ts:59-61`), `utils.downloadModel`, `utils.isModelFileUsable`, `preference.setDiarizeEnabled`.
 - Produces: `ensureDiarizeModelOnSetup(): Promise<boolean>` в `setup/view-model.ts`. Возвращает `false` при ошибке и тогда вызывает `setDiarizeEnabled(false)` и `toast.warning(m.diarizeDownloadFailed())`. Новый ключ i18n ru/en.
 
-- [ ] **Step 1: Падающие тесты** (моки как в соседних upstream-тестах, через `mock-tauri`):
+- [x] **Step 1: Падающие тесты** (моки как в соседних upstream-тестах, через `mock-tauri`):
 
 ```ts
 test('чистая установка: diarizeEnabled = true')
@@ -225,13 +225,13 @@ test('очередь: diarize включён, но файла модели не�
   // isModelFileUsable(diarizePath) = false → в параметрах нет diarize_model, setDiarizeEnabled(false)
 ```
 
-- [ ] **Step 2: Запустить, увидеть 5 FAIL** — `pnpm vitest run src/lib/tyto/diarize-default.test.tsx`
-- [ ] **Step 3: Реализация.**
+- [x] **Step 2: Запустить, увидеть 5 FAIL** — `pnpm vitest run src/lib/tyto/diarize-default.test.tsx`
+- [x] **Step 3: Реализация.**
   - Умолчание `true` в `preference.tsx:254`.
   - `ensureDiarizeModelOnSetup` вызывается в `downloadModel()` после успешной загрузки основной модели. Прогресс идёт через тот же `download_progress`, отдельного экрана нет.
   - В `use-transcribe-queue.ts` перед формированием параметров проверить `isModelFileUsable` для модели диаризации; при отсутствии файла выключить говорящих и показать toast `m.diarizeModelMissing()`. Новый ключ: ru `Модель для разделения по говорящим не найдена — включите их снова в настройках`.
-- [ ] **Step 4: Тесты зелёные + полный прогон** — `pnpm test` → PASS.
-- [ ] **Step 5: Commit** — `git commit -m "Tyto: говорящие по умолчанию, модель качается при первом запуске"`
+- [x] **Step 4: Тесты зелёные + полный прогон** — `pnpm test` → PASS.
+- [x] **Step 5: Commit** — `git commit -m "Tyto: говорящие по умолчанию, модель качается при первом запуске"`
 
 ---
 
