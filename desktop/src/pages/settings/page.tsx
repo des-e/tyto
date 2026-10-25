@@ -21,6 +21,7 @@ import { openUrl } from '@tauri-apps/plugin-opener'
 import * as config from '~/lib/config'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip'
 import { ModifyState } from '~/lib/types'
+import { FEATURES } from '~/lib/tyto/features'
 import { viewModel } from './view-model'
 import { Button } from '~/components/ui/button'
 import { AdvancedSection } from './sections/advanced'
@@ -74,7 +75,7 @@ export default function SettingsPage({ setVisible, scrollTo }: SettingsPageProps
 			{ id: 'recording', label: m.recordingSettings(), icon: <Mic className="h-4 w-4" /> },
 			{ id: 'dictation', label: m.navDictation(), icon: <Keyboard className="h-4 w-4" /> },
 			{ id: 'ai', label: m.aiSection(), icon: <Sparkles className="h-4 w-4" /> },
-			{ id: 'phone', label: m.phone(), icon: <Smartphone className="h-4 w-4" /> },
+			...(FEATURES.phone ? [{ id: 'phone' as const, label: m.phone(), icon: <Smartphone className="h-4 w-4" /> }] : []),
 		],
 		[
 			{ id: 'api', label: m.navAgents(), icon: <Terminal className="h-4 w-4" /> },
@@ -92,7 +93,8 @@ export default function SettingsPage({ setVisible, scrollTo }: SettingsPageProps
 		'ai-summary': { section: 'ai', title: m.aiSummaryTask() },
 		'ai-dictation': { section: 'ai', title: m.aiDictationTask() },
 	}
-	const isSubpage = (value: string | undefined): value is Subpage => value !== undefined && value in subpages
+	const isSubpage = (value: string | undefined): value is Subpage =>
+		value !== undefined && value in subpages && (FEATURES.phone || subpages[value as Subpage].section !== 'phone')
 	const [activeSection, setActiveSection] = useState<SectionId>(
 		isSubpage(scrollTo) ? subpages[scrollTo].section : sections.some((s) => s.id === scrollTo) ? (scrollTo as SectionId) : 'general',
 	)
@@ -242,7 +244,7 @@ export default function SettingsPage({ setVisible, scrollTo }: SettingsPageProps
 
 							{!subpage && activeSection === 'dictation' && <DictationSection vm={vm} onOpenCleanup={() => openSubpage('ai-dictation')} />}
 
-							{activeSection === 'phone' && (
+							{FEATURES.phone && activeSection === 'phone' && (
 								<PhoneSection
 									pairingOpen={subpage === 'phone-pairing'}
 									onPairingChange={(open) => navigateInside(open ? 'phone-pairing' : null)}

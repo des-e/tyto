@@ -20,6 +20,7 @@ import {
 } from '~/lib/transcripts-store'
 
 import { openSettingsSection } from '~/lib/app'
+import { FEATURES } from '~/lib/tyto/features'
 import { TOGGLE_SIDEBAR_EVENT } from '~/components/layout'
 import { getTextDirection } from '~/paraglide/runtime.js'
 import { UpdaterContext } from '~/providers/updater'
@@ -491,7 +492,7 @@ export default function RecentsSidebar() {
 						<Settings className="h-4 w-4 text-muted-foreground" strokeWidth={1.75} />
 						{m.settings()}
 					</button>
-					<Tooltip>
+					{FEATURES.phone && <Tooltip>
 						<TooltipTrigger asChild>
 							<button
 								type="button"
@@ -502,7 +503,7 @@ export default function RecentsSidebar() {
 							</button>
 						</TooltipTrigger>
 						<TooltipContent side="top">{m.phone()}</TooltipContent>
-					</Tooltip>
+					</Tooltip>}
 					{availableUpdate && (
 						<Tooltip>
 							<TooltipTrigger asChild>
