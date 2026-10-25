@@ -4,9 +4,9 @@ import { cleanup, fireEvent, render, renderHook, screen, within } from '@testing
 import { readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
-const h = vi.hoisted(() => ({ serialize: vi.fn((..._args: unknown[]) => 'preview') }))
+const h = vi.hoisted(() => ({ serialize: vi.fn((..._args: unknown[]) => 'preview'), appTheme: 'light' as 'light' | 'dark' }))
 
 vi.mock('@tauri-apps/api/path', () => ({ dirname: vi.fn(), downloadDir: vi.fn(), join: vi.fn() }))
 vi.mock('@tauri-apps/plugin-clipboard-manager', () => ({ writeText: vi.fn() }))
@@ -18,7 +18,7 @@ vi.mock('~/lib/docx', () => ({ toDocx: vi.fn() }))
 vi.mock('~/lib/pdf/transcript-pdf', () => ({ transcriptToPdf: vi.fn() }))
 vi.mock('~/lib/transcript-export', () => ({ serializeTranscriptExport: h.serialize }))
 vi.mock('~/providers/preference', () => ({
-	usePreferenceProvider: () => ({ textAreaDirection: 'ltr', theme: 'light', exportOptions: { theme: 'light' } }),
+	usePreferenceProvider: () => ({ textAreaDirection: 'ltr', theme: h.appTheme, exportOptions: { theme: 'light' } }),
 }))
 
 import { setLocale } from '~/paraglide/runtime.js'
@@ -33,6 +33,7 @@ beforeAll(() => {
 afterEach(() => {
 	cleanup()
 	h.serialize.mockClear()
+	h.appTheme = 'light'
 })
 
 function props(overrides: Partial<TranscriptExportDialogProps> = {}): TranscriptExportDialogProps {
@@ -242,14 +243,19 @@ describe('export dialog v2: header and footer', () => {
 	it('footer shows the future file name, truncated with the full name as a title', () => {
 		const long = 'Очень длинное название планерки отдела продаж за четвертый квартал с итогами и планами на следующий год'
 		mount({ format: 'pdf', title: long })
-		const name = screen.getByText(`${long}.pdf`)
-		expect(name.className).toContain('truncate')
+		const name = screen.getByTestId('tyto-export-filename')
+		expect(name.textContent).toBe(`${long}.pdf`)
 		expect(name.getAttribute('title')).toBe(`${long}.pdf`)
+		// Only the stem shortens; the extension stays on screen.
+		expect(screen.getByText(long).className).toContain('truncate')
+		const extension = screen.getByText('.pdf')
+		expect(extension.className).not.toContain('truncate')
+		expect(extension.className).toContain('shrink-0')
 	})
 
 	it('footer file name follows the format', () => {
 		mount({ format: 'normal' })
-		expect(screen.getByText('Планерка отдела продаж.txt')).toBeTruthy()
+		expect(screen.getByTestId('tyto-export-filename').textContent).toBe('Планерка отдела продаж.txt')
 	})
 })
 
@@ -272,6 +278,36 @@ function tokens(css: string, selector: string): Record<string, string> {
 	if (!match) throw new Error(`no ${selector} block`)
 	return Object.fromEntries([...match[1].matchAll(/--([\w-]+)\s*:\s*([^;]+);/g)].map(([, k, v]) => [k, v.trim().toLowerCase()]))
 }
+
+describe('export dialog v2: JSON preview colours', () => {
+	const JSON_PREVIEW = ['{', '  "a": 1', '}'].join('\n')
+	// jsdom lays nothing out, so the virtualized preview would render no rows: give elements a size.
+	beforeEach(() => {
+		vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(400)
+		vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockReturnValue(400)
+	})
+	afterEach(() => {
+		vi.restoreAllMocks()
+	})
+	// oneDark / oneLight base text colours of the prism styles.
+	const codeColour = () => {
+		const code = document.querySelector('[aria-label="Предпросмотр экспорта"] pre') as HTMLElement | null
+		expect(code).not.toBeNull()
+		return code?.style.color
+	}
+
+	it('dark app + light document theme: JSON is drawn with the dark highlighter', () => {
+		h.appTheme = 'dark'
+		mount({ format: 'json', theme: 'light', preview: JSON_PREVIEW })
+		expect(codeColour()).toBe('rgb(171, 178, 191)')
+	})
+
+	it('light app + dark document theme: JSON is drawn with the light highlighter', () => {
+		h.appTheme = 'light'
+		mount({ format: 'json', theme: 'dark', preview: JSON_PREVIEW })
+		expect(codeColour()).toBe('rgb(56, 58, 66)')
+	})
+})
 
 describe('export dialog v2: contrast of the cards', () => {
 	const css = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), 'theme.css'), 'utf-8')

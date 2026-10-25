@@ -11,6 +11,7 @@ import { Button } from '~/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '~/components/ui/dialog'
 import { projectExportFilename } from '~/lib/project-name'
 import { cn } from '~/lib/style'
+import { usePreferenceProvider } from '~/providers/preference'
 import type { TranscriptExportContent } from '~/lib/transcript-export'
 import {
 	EXPORT_FORMATS,
@@ -169,6 +170,11 @@ export default function TranscriptExportDialog({
 	const timesLocked = timestampsRequired(format)
 	const selectedFormat = formats.find((option) => option.value === format)
 	const fileName = projectExportFilename(title, formatExtensions[format].slice(1))
+	const dot = fileName.lastIndexOf('.')
+	const fileStem = fileName.slice(0, dot)
+	const fileExtension = fileName.slice(dot)
+	// JSON has no document theme (its toggle is hidden), so its code colours follow the app, like its surface.
+	const appTheme = usePreferenceProvider().theme
 	const subtitle = durationSeconds > 0 ? `${title} · ${durationLabel(durationSeconds)}` : title
 
 	const appearance = [
@@ -240,7 +246,7 @@ export default function TranscriptExportDialog({
 								renderRow={(line) => (
 									<SyntaxHighlighter
 										language="json"
-										style={theme === 'dark' ? oneDark : oneLight}
+										style={appTheme === 'dark' ? oneDark : oneLight}
 										customStyle={{
 											margin: 0,
 											padding: '0 1rem',
@@ -273,8 +279,10 @@ export default function TranscriptExportDialog({
 				<div className="flex shrink-0 items-center gap-2 border-t border-border px-6 py-3">
 					<span className="me-auto flex min-w-0 items-center gap-2 text-[13px] text-muted-foreground">
 						<FileText aria-hidden="true" className="size-4 shrink-0" />
-						<span className="truncate" title={fileName}>
-							{fileName}
+						{/* Only the stem shortens: the extension stays visible, the full name is the tooltip. */}
+						<span className="flex min-w-0" title={fileName} data-testid="tyto-export-filename">
+							<span className="truncate">{fileStem}</span>
+							<span className="shrink-0">{fileExtension}</span>
 						</span>
 					</span>
 					<Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
