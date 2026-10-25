@@ -55,7 +55,7 @@ function ViewOptions({ options }: { options: TranscriptViewOptions }) {
 									className={cn(
 										'flex-1 cursor-pointer rounded-full py-1 text-[12px] font-medium transition-colors duration-150',
 										options.textSize === size.value
-											? 'bg-background text-foreground shadow-sm'
+											? 'tyto-selected'
 											: 'text-muted-foreground hover:text-foreground',
 									)}>
 									{size.label()}
@@ -76,7 +76,7 @@ function ViewOptions({ options }: { options: TranscriptViewOptions }) {
 									className={cn(
 										'flex h-6 w-8 cursor-pointer items-center justify-center rounded-full transition-colors duration-150',
 										preference.textAreaDirection === value
-											? 'bg-background text-foreground shadow-sm'
+											? 'tyto-selected'
 											: 'text-muted-foreground hover:text-foreground',
 									)}>
 									{value === 'ltr' ? <PilcrowRight className="h-3.5 w-3.5" /> : <PilcrowLeft className="h-3.5 w-3.5" />}
@@ -159,7 +159,7 @@ function SummaryMenu({ job, tab, setTab }: { job: Job | null; tab: TranscriptTab
 										onClick={() => setTab(value)}
 										className={cn(
 											'flex-1 cursor-pointer rounded-full py-1 text-[12px] font-medium transition-colors duration-150',
-											tab === value ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+											tab === value ? 'tyto-selected' : 'text-muted-foreground hover:text-foreground',
 										)}>
 										{value === 'transcript' ? m.segmentsTab() : m.summaryTab()}
 									</button>

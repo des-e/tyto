@@ -10,6 +10,7 @@ import { Input } from '~/components/ui/input'
 import { Spinner } from '~/components/ui/spinner'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip'
 import { cn } from '~/lib/style'
+import { OwlMark } from '~/lib/tyto/owl-mark'
 import { parseMediaLinks } from '~/lib/ytdlp'
 import { useSession, type IdlePanel } from '../session'
 import QuietRow from './quiet-row'
@@ -92,7 +93,7 @@ function Segment({ active, label, onClick, children }: { active?: boolean; label
 					onClick={onClick}
 					className={cn(
 						'inline-flex h-10 w-14 cursor-pointer items-center justify-center rounded-full transition-colors duration-150',
-						active ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+						active ? 'tyto-selected' : 'text-muted-foreground hover:text-foreground',
 					)}>
 					{children}
 				</button>
@@ -331,6 +332,7 @@ export default function IdleHero() {
 		// One optical column: pills, active source and quiet row all span max-w-xl with a 20px rhythm.
 		// The extra bottom padding lifts the column above the true centre — optically centred reads better.
 		<div className="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center gap-5 px-6 pt-4 pb-[30vh]">
+			<OwlMark className="mx-auto h-16 w-auto text-foreground" />
 			{/* Joined source switcher: one control, three keys; the active source replaces the drop area. */}
 			<div className="mx-auto inline-flex items-center gap-1 rounded-full border border-border bg-muted/60 p-1">
 				<Segment active={panel === 'none'} label={m.fromFile()} onClick={() => selectPanel('none')}>

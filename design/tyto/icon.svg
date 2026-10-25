@@ -1,11 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
-  <rect width="1024" height="1024" rx="224" fill="#1e3a8a"/>
-  <path d="M512 400 C470 300 280 290 250 470 C225 640 360 800 512 860 C664 800 799 640 774 470 C744 290 554 300 512 400 Z" fill="#f5efe6"/>
-  <circle cx="386" cy="520" r="100" fill="#e3d5bd"/>
-  <circle cx="638" cy="520" r="100" fill="#e3d5bd"/>
-  <circle cx="386" cy="520" r="68" fill="#1e3a8a"/>
-  <circle cx="638" cy="520" r="68" fill="#1e3a8a"/>
-  <circle cx="408" cy="498" r="18" fill="#f5efe6"/>
-  <circle cx="660" cy="498" r="18" fill="#f5efe6"/>
-  <path d="M512 575 L474 665 L512 725 L550 665 Z" fill="#d9a441"/>
+  <rect x="100" y="100" width="824" height="824" rx="185" fill="#f5f5f3" stroke="#dcdcd8" stroke-width="4"/>
+  <!-- body: rounded block with pointed ear corners -->
+  <path d="M276 214 L396 296 Q512 336 628 296 L748 214 L748 620 C748 750 640 830 512 830 C384 830 276 750 276 620 Z" fill="#0e0e10"/>
+  <!-- eyes -->
+  <circle cx="414" cy="448" r="92" fill="#f5f5f3"/>
+  <circle cx="610" cy="448" r="92" fill="#f5f5f3"/>
+  <circle cx="414" cy="448" r="44" fill="#0e0e10"/>
+  <circle cx="610" cy="448" r="44" fill="#0e0e10"/>
+  <!-- beak -->
+  <path d="M480 556 L544 556 L512 612 Z" fill="#f5f5f3"/>
+  <!-- feet -->
+  <rect x="412" y="812" width="56" height="52" rx="18" fill="#0e0e10"/>
+  <rect x="556" y="812" width="56" height="52" rx="18" fill="#0e0e10"/>
 </svg>

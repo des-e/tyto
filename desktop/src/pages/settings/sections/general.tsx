@@ -9,6 +9,7 @@ import { ReactComponent as LinkIcon } from '~/icons/link.svg'
 import * as config from '~/lib/config'
 import { DisplayLanguageInput } from '~/components/display-language-input'
 import { Switch } from '~/components/ui/switch'
+import { SegmentedControl } from '~/lib/tyto/segmented-control'
 import { SettingsGroup, SettingsRow, type SettingsViewModel } from './shared'
 
 /**
@@ -70,28 +71,19 @@ export function GeneralSection({ vm }: { vm: SettingsViewModel }) {
 					<DisplayLanguageInput value={vm.preference.displayLanguage} onSelect={vm.preference.setDisplayLanguage} className="w-52" />
 				</SettingsRow>
 				<SettingsRow label={m.theme()}>
-					<div role="radiogroup" aria-label={m.theme()} className="inline-flex rounded-lg border border-border bg-muted/40 p-0.5">
-						{config.themes.map((theme) => {
+					<SegmentedControl
+						ariaLabel={m.theme()}
+						value={vm.preference.theme as 'light' | 'dark'}
+						onChange={vm.preference.setTheme}
+						options={config.themes.map((theme) => {
 							const Icon = themeIcons[theme as keyof typeof themeIcons]
-							const selected = vm.preference.theme === theme
-							return (
-								<button
-									key={theme}
-									type="button"
-									role="radio"
-									aria-checked={selected}
-									aria-label={themeLabels[theme as keyof typeof themeLabels]()}
-									title={themeLabels[theme as keyof typeof themeLabels]()}
-									onClick={() => vm.preference.setTheme(theme as 'light' | 'dark')}
-									className={`flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-md px-3 text-xs transition-colors ${
-										selected ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
-									}`}>
-									{Icon && <Icon className="h-3.5 w-3.5" />}
-									{themeLabels[theme as keyof typeof themeLabels]()}
-								</button>
-							)
+							return {
+								value: theme as 'light' | 'dark',
+								label: themeLabels[theme as keyof typeof themeLabels](),
+								icon: Icon && <Icon className="h-3.5 w-3.5" />,
+							}
 						})}
-					</div>
+					/>
 				</SettingsRow>
 			</SettingsGroup>
 

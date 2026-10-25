@@ -21,6 +21,7 @@ import {
 
 import { openSettingsSection } from '~/lib/app'
 import { FEATURES } from '~/lib/tyto/features'
+import { OwlMark } from '~/lib/tyto/owl-mark'
 import { TOGGLE_SIDEBAR_EVENT } from '~/components/layout'
 import { getTextDirection } from '~/paraglide/runtime.js'
 import { UpdaterContext } from '~/providers/updater'
@@ -242,7 +243,7 @@ function RecentRow({
 	}
 
 	return (
-		<div className={cn('group relative flex items-center rounded-xl transition-colors duration-150', active ? 'bg-muted' : 'hover:bg-muted/60')}>
+		<div className={cn('group relative flex items-center rounded-xl transition-colors duration-150', active ? 'tyto-selected' : 'hover:bg-muted/60')}>
 			<RetranscribeDialog open={retranscribing} onOpenChange={setRetranscribing} name={entry.name} onConfirm={retranscribe} />
 			<button
 				type="button"
@@ -305,7 +306,7 @@ function SessionRow({ job, active, onOpen }: { job: Job; active: boolean; onOpen
 						: ''
 
 	return (
-		<div className={cn('group relative flex items-center rounded-xl transition-colors duration-150', active ? 'bg-muted' : 'hover:bg-muted/60')}>
+		<div className={cn('group relative flex items-center rounded-xl transition-colors duration-150', active ? 'tyto-selected' : 'hover:bg-muted/60')}>
 			<button type="button" onClick={onOpen} title={job.name} className="min-w-0 flex-1 cursor-pointer px-3 py-2 text-start">
 				<p className="truncate text-[13px] font-medium text-foreground">{job.name}</p>
 				{status && (
@@ -420,11 +421,12 @@ export default function RecentsSidebar() {
 	}
 
 	return (
-		<aside className="relative flex h-full shrink-0 flex-col border-r border-border" style={{ width, direction: getTextDirection() }}>
+		<aside className="tyto-sidebar relative flex h-full shrink-0 flex-col border-r border-border" style={{ width, direction: getTextDirection() }}>
 			{/* Titlebar strip: hosts the toggle beside the macOS traffic lights (ChatGPT style). */}
 			<div data-tauri-drag-region className="h-14 shrink-0" />
 			{/* Codex-style: the wordmark gets its own row under the titlebar strip. */}
-			<div className="px-4 pt-0.5 pb-2">
+			<div className="flex items-center gap-2 px-4 pt-0.5 pb-2">
+				<OwlMark className="h-[18px] w-auto shrink-0 text-foreground" />
 				<span className="select-none text-[17px] font-semibold tracking-[-0.03em] text-foreground">{m.appTitle()}</span>
 			</div>
 			<div className="px-2">

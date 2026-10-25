@@ -1,0 +1,174 @@
+/*
+ * Tyto theme: strict minimalism over Vibe's layout.
+ *
+ * Loaded once from bootstrap.tsx right after the upstream globals.css, so these unlayered rules win
+ * over both the upstream tokens and Tailwind's layered utilities. Kept in its own file so upstream
+ * merges of globals.css stay conflict-free.
+ *
+ * The single accent IS the foreground colour: black in light, white in dark. No blue anywhere.
+ * Both blocks below must override exactly the same tokens (theme.test.ts checks it): the light block
+ * comes after upstream's `.dark`, so a token set only here would leak into the dark theme.
+ */
+
+:root {
+	--radius: 0.75rem;
+
+	--background: #ffffff;
+	--foreground: #0a0a0a;
+	--card: #ffffff;
+	--card-foreground: #0a0a0a;
+	--popover: #ffffff;
+	--popover-foreground: #0a0a0a;
+	--primary: #0a0a0a;
+	--primary-foreground: #ffffff;
+	--secondary: #f5f5f5;
+	--secondary-foreground: #0a0a0a;
+	--muted: #f5f5f5;
+	--muted-foreground: #a3a3a3;
+	--accent: #f5f5f5;
+	--accent-foreground: #0a0a0a;
+	--border: #e5e5e5;
+	--input: #e5e5e5;
+	--ring: rgb(10 10 10 / 0.35);
+
+	--aurora-1: #0a0a0a;
+	--aurora-2: #525252;
+	--aurora-3: #a3a3a3;
+	--aurora-4: #d4d4d4;
+	--chart-5: #737373;
+
+	--sidebar: #fafafa;
+	--sidebar-foreground: #0a0a0a;
+	--sidebar-primary: #0a0a0a;
+	--sidebar-primary-foreground: #ffffff;
+	--sidebar-accent: #f0f0f0;
+	--sidebar-accent-foreground: #0a0a0a;
+	--sidebar-border: #ededed;
+	--sidebar-ring: rgb(10 10 10 / 0.35);
+
+	--shadow-2xs: none;
+	--shadow-xs: none;
+	--shadow-sm: 0 1px 2px rgb(0 0 0 / 0.04);
+	--shadow: 0 1px 3px rgb(0 0 0 / 0.05);
+	--shadow-md: 0 4px 12px rgb(0 0 0 / 0.05);
+	--shadow-lg: 0 8px 24px rgb(0 0 0 / 0.07);
+	--shadow-xl: 0 12px 32px rgb(0 0 0 / 0.08);
+	--shadow-2xl: 0 16px 48px rgb(0 0 0 / 0.1);
+
+	--tyto-selected-muted: rgb(255 255 255 / 0.62);
+	--tyto-selected-tint: rgb(255 255 255 / 0.16);
+}
+
+.dark {
+	--radius: 0.75rem;
+
+	--background: #0b0b0c;
+	--foreground: #ededed;
+	--card: #111113;
+	--card-foreground: #ededed;
+	--popover: #141416;
+	--popover-foreground: #ededed;
+	--primary: #ededed;
+	--primary-foreground: #0b0b0c;
+	--secondary: #17171a;
+	--secondary-foreground: #ededed;
+	--muted: #17171a;
+	--muted-foreground: #6b6b72;
+	--accent: #1c1c20;
+	--accent-foreground: #ededed;
+	--border: #1f1f22;
+	--input: #2a2a2f;
+	--ring: rgb(237 237 237 / 0.4);
+
+	--aurora-1: #ededed;
+	--aurora-2: #a1a1aa;
+	--aurora-3: #6b6b72;
+	--aurora-4: #3f3f46;
+	--chart-5: #8a8a90;
+
+	--sidebar: #111113;
+	--sidebar-foreground: #ededed;
+	--sidebar-primary: #ededed;
+	--sidebar-primary-foreground: #0b0b0c;
+	--sidebar-accent: #1c1c20;
+	--sidebar-accent-foreground: #ededed;
+	--sidebar-border: #1f1f22;
+	--sidebar-ring: rgb(237 237 237 / 0.4);
+
+	--shadow-2xs: none;
+	--shadow-xs: none;
+	--shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
+	--shadow: 0 1px 3px rgb(0 0 0 / 0.35);
+	--shadow-md: 0 4px 12px rgb(0 0 0 / 0.4);
+	--shadow-lg: 0 8px 24px rgb(0 0 0 / 0.45);
+	--shadow-xl: 0 12px 32px rgb(0 0 0 / 0.5);
+	--shadow-2xl: 0 16px 48px rgb(0 0 0 / 0.55);
+
+	--tyto-selected-muted: rgb(11 11 12 / 0.6);
+	--tyto-selected-tint: rgb(11 11 12 / 0.14);
+}
+
+/* Sidebar surface. On macOS vibrancy the sidebar stays see-through, as upstream intends. */
+html:not(.mac-vibrancy) .tyto-sidebar {
+	background-color: var(--sidebar);
+}
+
+.tyto-sidebar {
+	border-color: var(--sidebar-border);
+}
+
+/*
+ * Selected state: always a solid foreground plate with inverted text. Covers the explicit class
+ * plus the selection markup upstream already uses (radio groups, Radix tabs), so screens need no edits.
+ */
+.tyto-selected,
+[role='radiogroup'] [role='radio'][aria-checked='true'],
+[role='tab'][data-state='active'] {
+	background-color: var(--foreground);
+	color: var(--background);
+	border-color: var(--foreground);
+	box-shadow: none;
+}
+
+:is(.tyto-selected, [role='radiogroup'] [role='radio'][aria-checked='true'], [role='tab'][data-state='active'])
+	:is(.text-foreground, .text-primary, .text-card-foreground) {
+	color: inherit;
+}
+
+:is(.tyto-selected, [role='radiogroup'] [role='radio'][aria-checked='true'], [role='tab'][data-state='active']) .text-muted-foreground {
+	color: var(--tyto-selected-muted);
+}
+
+:is(.tyto-selected, [role='radiogroup'] [role='radio'][aria-checked='true'], [role='tab'][data-state='active'])
+	:is([class*='bg-primary/'], [class*='bg-background/'], [class*='bg-muted']) {
+	background-color: var(--tyto-selected-tint);
+}
+
+/* Inter everywhere; numbers that must line up (timestamps, player times, percentages) are tabular Inter. */
+.tabular-nums,
+.font-mono.tabular-nums {
+	font-family: var(--font-sans);
+	font-variant-numeric: tabular-nums;
+}
+
+/* Aurora surfaces become monochrome: the drop-zone drag feedback is a quiet tint, bars are ink. */
+.aurora {
+	background-color: color-mix(in srgb, var(--foreground) 5%, transparent);
+	background-image: none;
+	filter: none;
+}
+
+.aurora::after {
+	display: none;
+}
+
+.aurora-bar,
+.progress-aurora > * {
+	background-color: var(--foreground);
+	background-image: none;
+	filter: none;
+}
+
+::selection {
+	background: color-mix(in srgb, var(--foreground) 14%, transparent);
+}

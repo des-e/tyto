@@ -160,7 +160,7 @@ export default function SettingsPage({ setVisible, scrollTo }: SettingsPageProps
 										onClick={() => goTo(section.id)}
 										className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left text-sm font-medium ${
 											activeSection === section.id
-												? 'bg-primary/10 text-primary'
+												? 'tyto-selected'
 												: 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
 										}`}>
 										<span className={activeSection === section.id ? 'text-primary' : 'text-muted-foreground'}>{section.icon}</span>

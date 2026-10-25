@@ -7,8 +7,9 @@ export const PDF_FONT = 'Rubik'
 
 /** The same palettes the HTML export uses, so the file matches the preview beside it. */
 const PALETTES = {
-	dark: { background: '#181818', ink: '#ececec', muted: '#a3a3a3', accent: '#60a5fa' },
-	light: { background: '#ffffff', ink: '#1a1c1f', muted: '#6e6e6e', accent: '#2563eb' },
+	// Tyto: monochrome — the title is set in the ink colour, no blue accent.
+	dark: { background: '#181818', ink: '#ececec', muted: '#a3a3a3', accent: '#ececec' },
+	light: { background: '#ffffff', ink: '#0a0a0a', muted: '#6e6e6e', accent: '#0a0a0a' },
 } as const
 
 type Palette = (typeof PALETTES)[keyof typeof PALETTES]

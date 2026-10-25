@@ -102,8 +102,8 @@ function htmlText(value: string) {
 function serializeHtml(segments: Segment[], summary: string, options: TranscriptExportOptions) {
 	const dark = options.theme === 'dark'
 	const palette = dark
-		? { background: '#181818', foreground: '#ececec', muted: '#a3a3a3', primary: '#60a5fa', border: '#303030' }
-		: { background: '#ffffff', foreground: '#1a1c1f', muted: '#6e6e6e', primary: '#2563eb', border: '#e6e6e6' }
+		? { background: '#181818', foreground: '#ececec', muted: '#a3a3a3', primary: '#ececec', border: '#303030' }
+		: { background: '#ffffff', foreground: '#0a0a0a', muted: '#6e6e6e', primary: '#0a0a0a', border: '#e6e6e6' }
 	const transcript = segments
 		.map((segment) => {
 			const metadata = segmentMetadata(segment, options)
