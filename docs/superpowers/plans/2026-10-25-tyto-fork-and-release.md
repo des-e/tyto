@@ -27,8 +27,8 @@
 | 3. Ссылки, тексты, иконка | готово | b29caa3, b81566f |
 | 4. Говорящие по умолчанию | готово | e155c17, 8761c0d |
 | 5. Скрыть телефон | готово | 62687f6 |
-| 6. Workflow релиза | не начата | |
-| 7. Установка, README, приёмка | не начата | |
+| 6. Workflow релиза | готово | 2c95065 (CI 40175825690, релиз v0.1.0 prerelease) |
+| 7. Установка, README, приёмка | ждёт Дениса (Steps 1–2) | |
 
 ## Global Constraints
 
@@ -264,11 +264,11 @@ test('очередь: diarize включён, но файла модели не�
 - Consumes: `tauri.tyto.conf.json` (Task 2), `chore setup <triple>` из upstream `chorefile`.
 - Produces: GitHub Release `v0.1.0` с `Tyto_0.1.0_x64-setup.exe`, `Tyto_0.1.0_universal.dmg`, `latest.json`, `.sig`-файлами и аттестациями провенанса.
 
-- [ ] **Step 1: Скрипт `make-universal-sidecars.sh <bin_dir>`.**
+- [x] **Step 1: Скрипт `make-universal-sidecars.sh <bin_dir>`.**
   - Для `vibe-server` и `ffmpeg` склеивает `-aarch64-apple-darwin` и `-x86_64-apple-darwin` через `lipo -create` в `-universal-apple-darwin`.
   - Если архив сайдкара содержит ещё dylib, склеивает каждый Mach-O с одинаковым именем.
   - В конце для каждого результата `lipo -info` и `exit 1`, если в выводе нет обеих архитектур `x86_64` и `arm64`.
-- [ ] **Step 2: `tyto-release.yml`** по образцу upstream `release.yml`. Запуск: `workflow_dispatch`. Права: `contents: write`, `id-token: write`, `attestations: write`. Матрица:
+- [x] **Step 2: `tyto-release.yml`** по образцу upstream `release.yml`. Запуск: `workflow_dispatch`. Права: `contents: write`, `id-token: write`, `attestations: write`. Матрица:
   - `windows-latest`: `--target x86_64-pc-windows-msvc`, `chore setup x86_64-pc-windows-msvc`;
   - `macos-latest`: rust targets `aarch64-apple-darwin,x86_64-apple-darwin`, `chore setup` для обоих triple, затем `bash scripts/tyto/make-universal-sidecars.sh desktop/src-tauri/binaries`, `--target universal-apple-darwin`.
 
@@ -279,13 +279,13 @@ test('очередь: diarize включён, но файла модели не�
   - `tagName: v__VERSION__`, `releaseName: Tyto v__VERSION__`, `prerelease: true`;
   - `releaseBody`: `Установка: https://github.com/des-e/tyto/blob/main/docs/install.md — программа не подписана, при первом запуске нужно разрешить её открыть.`;
   - после сборки `actions/attest-build-provenance@v2` с `subject-path` на `desktop/src-tauri/target/**/bundle/**/*.{exe,dmg}`.
-- [ ] **Step 3: Задать секреты и запустить (подтверждено Денисом 2026-10-25)**
+- [x] **Step 3: Задать секреты и запустить (подтверждено Денисом 2026-10-25)**
 
 Run: `gh secret set TAURI_PRIVATE_KEY -R des-e/tyto < $HOME/.tauri/tyto.key; gh secret set TAURI_KEY_PASSWORD -R des-e/tyto; gh workflow run tyto-release.yml -R des-e/tyto; gh run watch -R des-e/tyto`
 Expected: обе джобы зелёные. В шаге `make-universal-sidecars` для каждого файла напечатано `x86_64 arm64`. В релизе `v0.1.0` лежат exe, dmg, latest.json и .sig.
 
 - [ ] **Step 4: Если universal не собирается** (Tauri не находит сайдкары или lipo падает на файле, который не склеить): переключить mac на две отдельные сборки, `aarch64` и `x86_64`, как в upstream, и записать причину в `history.md`. Это допустимый запасной вариант, он не требует нового согласования, но в `docs/install.md` тогда объясняется, какой файл качать.
-- [ ] **Step 5: Commit** — `git commit -m "Tyto: workflow релиза (Win x64, mac universal, без подписи)"` + push.
+- [x] **Step 5: Commit** — `git commit -m "Tyto: workflow релиза (Win x64, mac universal, без подписи)"` + push.
 
 ---
 
