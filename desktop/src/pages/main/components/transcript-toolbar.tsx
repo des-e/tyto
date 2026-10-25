@@ -350,10 +350,15 @@ export default function TranscriptToolbar({
 										{queue.isAborting ? m.aborting() : m.cancel()}
 									</Button>
 								)}
-								<Button variant="ghost" size="sm" onClick={startNew}>
-									<Plus className="h-3.5 w-3.5" />
-									<span className="@max-[720px]:sr-only">{m.newSession()}</span>
-								</Button>
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<Button variant="ghost" size="sm" aria-label={m.newSession()} onClick={startNew}>
+											<Plus className="h-3.5 w-3.5" />
+											<span className="@max-[720px]:sr-only">{m.newSession()}</span>
+										</Button>
+									</TooltipTrigger>
+									<TooltipContent>{m.newSession()}</TooltipContent>
+								</Tooltip>
 							</div>
 						</motion.div>
 					)}

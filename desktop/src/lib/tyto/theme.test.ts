@@ -264,6 +264,21 @@ describe('no leftover Vibe look in the main screens', () => {
 		expect(toolbar).toContain('<span className="@max-[720px]:sr-only">{m.newSession()}</span>')
 	})
 
+	it('icon-only new-transcript button keeps a name and a tooltip, like the summary button', () => {
+		const toolbar = read('pages/main/components/transcript-toolbar.tsx')
+		expect(toolbar).toMatch(/<TooltipTrigger asChild>\s*<Button variant="ghost" size="sm" aria-label=\{m\.newSession\(\)\} onClick=\{startNew\}>/)
+		expect(toolbar).toContain('<TooltipContent>{m.newSession()}</TooltipContent>')
+	})
+
+	it('history rows land on the 4px grid: 8 + 18 title + 2 + 16 meta + 8 = 52px', () => {
+		expect(rule(css(), '.tyto-recent-title')).toMatch(/line-height: 18px/)
+		expect(rule(css(), '.tyto-recent-meta')).toMatch(/line-height: 16px/)
+	})
+
+	it('settings close button sticks at the scroller padding edge (top-0: sticky already insets by py-6) and masks the text scrolling under it', () => {
+		expect(read('pages/settings/page.tsx')).toMatch(/className="sticky top-0 z-10 float-end -me-3 bg-card"/)
+	})
+
 	it('sidebar toggle is a square 32px ghost icon button; banner and speaker chips are not pills', () => {
 		const layout = read('components/layout.tsx')
 		expect(layout).toMatch(/size="md"\s+iconOnly/)

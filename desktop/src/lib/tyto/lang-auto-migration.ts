@@ -12,10 +12,16 @@ export const LANG_AUTO_MIGRATED_KEY = 'tyto.langAutoMigrated'
  */
 export function migrateLangToAuto() {
 	if (readConfig(LANG_AUTO_MIGRATED_KEY, false)) return
-	const options = readConfig<{ lang?: string } | null>(CONFIG_KEYS.modelOptions, null)
-	const recent = readConfig<{ code: string }[]>(CONFIG_KEYS.recentLanguages, [])
-	if (options?.lang === 'en' && !recent.some((entry) => entry.code === 'en')) {
-		writeConfig(CONFIG_KEYS.modelOptions, { ...options, lang: 'auto' })
+	// Runs before the first render: a hand-edited config must never stop the app from starting.
+	try {
+		const options = readConfig<unknown>(CONFIG_KEYS.modelOptions, null)
+		const recent = readConfig<unknown>(CONFIG_KEYS.recentLanguages, [])
+		const pickedEn = Array.isArray(recent) && recent.some((entry) => typeof entry === 'object' && entry !== null && (entry as { code?: unknown }).code === 'en')
+		if (typeof options === 'object' && options !== null && (options as { lang?: unknown }).lang === 'en' && !pickedEn) {
+			writeConfig(CONFIG_KEYS.modelOptions, { ...options, lang: 'auto' })
+		}
+	} catch (error) {
+		console.error('tyto: language auto-detection migration skipped', error)
 	}
 	writeConfig(LANG_AUTO_MIGRATED_KEY, true)
 }

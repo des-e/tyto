@@ -57,6 +57,28 @@ describe('sidebar owl blinks when a transcription finishes (difference 12)', () 
 		expect(lids()).toBe(0)
 	})
 
+	it('a file job going from running to done blinks', () => {
+		const { rerender } = render(<FinishBlinkOwl jobs={[{ id: 'f', status: 'running' }] as J[]} />)
+		rerender(<FinishBlinkOwl jobs={[{ id: 'f', status: 'done' }] as J[]} />)
+		expect(lids()).toBe(2)
+	})
+
+	it('a hydrated job (recording or opened project) transcribed to done blinks', () => {
+		const { rerender } = render(<FinishBlinkOwl jobs={[{ id: 'r', status: 'cancelled', hydrated: true }] as J[]} />)
+		expect(lids()).toBe(0)
+		rerender(<FinishBlinkOwl jobs={[{ id: 'r', status: 'running', hydrated: true }] as J[]} />)
+		expect(lids()).toBe(0)
+		rerender(<FinishBlinkOwl jobs={[{ id: 'r', status: 'done', hydrated: true }] as J[]} />)
+		expect(lids()).toBe(2)
+	})
+
+	it('app start with already-done jobs, and jobs hydrated later as done, never blink', () => {
+		const { rerender } = render(<FinishBlinkOwl jobs={[{ id: 'a', status: 'done' }] as J[]} />)
+		rerender(<FinishBlinkOwl jobs={[{ id: 'a', status: 'done' }, { id: 'h', status: 'done', hydrated: true }] as J[]} />)
+		rerender(<FinishBlinkOwl jobs={[{ id: 'h', status: 'done', hydrated: true }] as J[]} />)
+		expect(lids()).toBe(0)
+	})
+
 	it('the sidebar header uses it', () => {
 		const sidebar = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), '../../pages/main/components/recents-sidebar.tsx'), 'utf-8')
 		expect(sidebar).toMatch(/<FinishBlinkOwl jobs=\{queue\.jobs\}/)

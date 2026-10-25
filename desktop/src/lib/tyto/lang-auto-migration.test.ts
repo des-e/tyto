@@ -38,6 +38,36 @@ describe('one-time switch of the 0.1.x stored English to auto-detection', () => 
 		expect(lang()).toBe('en')
 	})
 
+	it('a hand-edited recent languages value that is not an array does not throw and still switches', () => {
+		writeConfig(CONFIG_KEYS.modelOptions, { lang: 'en' })
+		writeConfig(CONFIG_KEYS.recentLanguages, { code: 'en' })
+		expect(() => runMigrations()).not.toThrow()
+		expect(lang()).toBe('auto')
+		expect(readConfig(LANG_AUTO_MIGRATED_KEY, false)).toBe(true)
+	})
+
+	it('null entries in recent languages are skipped, a real en entry still counts', () => {
+		writeConfig(CONFIG_KEYS.modelOptions, { lang: 'en' })
+		writeConfig(CONFIG_KEYS.recentLanguages, [null, { code: 'en', ts: 1 }])
+		expect(() => migrateLangToAuto()).not.toThrow()
+		expect(lang()).toBe('en')
+		expect(readConfig(LANG_AUTO_MIGRATED_KEY, false)).toBe(true)
+	})
+
+	it('entries without a code are ignored', () => {
+		writeConfig(CONFIG_KEYS.modelOptions, { lang: 'en' })
+		writeConfig(CONFIG_KEYS.recentLanguages, [{ ts: 1 }, 'en', 42])
+		expect(() => migrateLangToAuto()).not.toThrow()
+		expect(lang()).toBe('auto')
+	})
+
+	it('a broken stored options value never throws; the flag is still set', () => {
+		writeConfig(CONFIG_KEYS.modelOptions, 'en')
+		writeConfig(CONFIG_KEYS.recentLanguages, null)
+		expect(() => migrateLangToAuto()).not.toThrow()
+		expect(readConfig(LANG_AUTO_MIGRATED_KEY, false)).toBe(true)
+	})
+
 	it('runs as part of the startup migrations', () => {
 		writeConfig(CONFIG_KEYS.modelOptions, { lang: 'en' })
 		runMigrations()

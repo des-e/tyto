@@ -2,24 +2,22 @@ import { useEffect, useId, useRef, useState, type SVGProps } from 'react'
 
 type OwlProps = SVGProps<SVGSVGElement> & { title?: string }
 
-/** Jobs finished in this session (not transcripts reopened from history). */
-function freshlyDone(jobs: { status: string; hydrated?: boolean }[]) {
-	return jobs.filter((job) => job.status === 'done' && !job.hydrated).length
-}
+type BlinkJob = { id: string; status: string }
 
 /**
- * The owl that blinks once each time a transcription finishes (difference 12). Mounting never
- * blinks; each new finish remounts the mark so the one-shot animation runs again. Reduced motion
- * keeps it static (theme.css).
+ * The owl that blinks once each time a transcription finishes (difference 12): any job seen
+ * running that is now done, files and recordings or opened projects alike. Mounting and jobs that
+ * appear already done (history, reopened projects) never blink; each new finish remounts the mark
+ * so the one-shot animation runs again. Reduced motion keeps it static (theme.css).
  */
-export function FinishBlinkOwl({ jobs, ...props }: OwlProps & { jobs: { status: string; hydrated?: boolean }[] }) {
-	const done = freshlyDone(jobs)
-	const previous = useRef(done)
+export function FinishBlinkOwl({ jobs, ...props }: OwlProps & { jobs: BlinkJob[] }) {
+	const statuses = useRef(new Map(jobs.map((job) => [job.id, job.status])))
 	const [blinks, setBlinks] = useState(0)
 	useEffect(() => {
-		if (done > previous.current) setBlinks((count) => count + 1)
-		previous.current = done
-	}, [done])
+		const finished = jobs.some((job) => job.status === 'done' && statuses.current.get(job.id) === 'running')
+		statuses.current = new Map(jobs.map((job) => [job.id, job.status]))
+		if (finished) setBlinks((count) => count + 1)
+	}, [jobs])
 	return <OwlMark key={blinks} blink={blinks > 0} {...props} />
 }
 
