@@ -257,6 +257,13 @@ describe('no leftover Vibe look in the main screens', () => {
 		expect(toolbar.match(/<SegmentedControl/g)).toHaveLength(3)
 	})
 
+	it('toolbar fits the 800px window: in a narrow row the summary and new-transcript buttons keep only their icons', () => {
+		const toolbar = read('pages/main/components/transcript-toolbar.tsx')
+		expect(toolbar).toMatch(/className="@container sticky top-0/)
+		expect(toolbar).toContain('<span className="@max-[720px]:sr-only">{actionLabel}</span>')
+		expect(toolbar).toContain('<span className="@max-[720px]:sr-only">{m.newSession()}</span>')
+	})
+
 	it('sidebar toggle is a square 32px ghost icon button; banner and speaker chips are not pills', () => {
 		const layout = read('components/layout.tsx')
 		expect(layout).toMatch(/size="md"\s+iconOnly/)

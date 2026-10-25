@@ -194,7 +194,7 @@ export default function SettingsPage({ setVisible, scrollTo }: SettingsPageProps
 						size="sm"
 						iconOnly
 						aria-label={m.modalClose()}
-						className="sticky top-6 z-10 float-end -me-3">
+						className="sticky top-0 z-10 float-end -me-3">
 						<X className="h-4 w-4" />
 					</Button>
 					<div className="mb-6 flex h-7 items-center">

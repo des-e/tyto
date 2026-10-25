@@ -124,7 +124,7 @@ function SummaryMenu({ job, tab, setTab }: { job: Job | null; tab: TranscriptTab
 						<PopoverTrigger asChild>
 							<Button variant="ghost" size="sm" aria-label={actionLabel}>
 								{summarizing ? <Spinner className="h-3.5 w-3.5" /> : <NotebookPen className="h-3.5 w-3.5" />}
-								{actionLabel}
+								<span className="@max-[720px]:sr-only">{actionLabel}</span>
 							</Button>
 						</PopoverTrigger>
 					</TooltipTrigger>
@@ -258,7 +258,7 @@ export default function TranscriptToolbar({
 
 	return (
 		<>
-			<div className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-1 border-b border-border bg-background/85 px-4 backdrop-blur-md">
+			<div className="@container sticky top-0 z-10 flex h-14 shrink-0 items-center gap-1 border-b border-border bg-background/85 px-4 backdrop-blur-md">
 				<TranscriptTabs tab={tab} setTab={setTab} summaryReady={Boolean(job?.summary)} />
 				<AnimatePresence initial={false} mode="wait">
 					{searching ? (
@@ -352,7 +352,7 @@ export default function TranscriptToolbar({
 								)}
 								<Button variant="ghost" size="sm" onClick={startNew}>
 									<Plus className="h-3.5 w-3.5" />
-									{m.newSession()}
+									<span className="@max-[720px]:sr-only">{m.newSession()}</span>
 								</Button>
 							</div>
 						</motion.div>
