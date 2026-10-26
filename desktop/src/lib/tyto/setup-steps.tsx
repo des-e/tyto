@@ -4,7 +4,6 @@ import { Button } from '~/components/ui/button'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime.js'
 import { estimateEta, type DownloadSample } from './download-eta'
-import { OwlMark } from './owl-mark'
 import { OwlWalk } from './owl-walk'
 
 /** What the first-run screen needs from pages/setup/view-model. */
@@ -22,8 +21,8 @@ export interface SetupStepsModel {
 type StepState = 'waiting' | 'active' | 'done'
 
 /**
- * First run (docs/design/2026-10-25-tyto-visual-language.md, «Первый запуск»): owl, title, the
- * walking owl, what is being downloaded and why, two steps with size and time left, privacy line and
+ * First run (docs/design/2026-10-25-tyto-visual-language.md, «Первый запуск»): title, the
+ * walking owl (the only owl on this screen, owner's call 2026-10-26), what is being downloaded and why, two steps with size and time left, privacy line and
  * two labelled ways out. Without a connection the same column explains it in place of a modal.
  */
 export function SetupSteps({ vm }: { vm: SetupStepsModel }) {
@@ -34,8 +33,7 @@ export function SetupSteps({ vm }: { vm: SetupStepsModel }) {
 	return (
 		<div className="flex min-h-screen items-center justify-center px-4 py-12">
 			<div className="w-full max-w-[460px]">
-				<OwlMark className="h-[54px] w-10 text-foreground" />
-				<h1 className="tyto-title-screen mt-6 text-balance">{m.downloadingModel()}</h1>
+				<h1 className="tyto-title-screen text-balance">{m.downloadingModel()}</h1>
 				<OwlWalk walking={!offline} />
 
 				{offline ? (

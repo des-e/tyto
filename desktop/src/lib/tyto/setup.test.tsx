@@ -159,6 +159,12 @@ describe('SetupSteps', () => {
 		expect(screen.getByTestId('owl-walk').getAttribute('data-walking')).toBe('false')
 	})
 
+	it('на экране одна сова — идущая, неподвижной над заголовком нет', () => {
+		render(<SetupSteps vm={model()} />)
+		expect(screen.queryByTestId('owl-mark')).toBeNull()
+		expect(screen.getByTestId('owl-walk')).toBeTruthy()
+	})
+
 	it('кнопки загрузки: «Отменить загрузку» и «Указать файл модели вручную» ведут в настройки', () => {
 		const vm = model()
 		render(<SetupSteps vm={vm} />)
