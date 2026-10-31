@@ -2,7 +2,7 @@
 
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const h = vi.hoisted(() => ({ storeEntries: [] as [string, unknown][] }))
 
@@ -18,6 +18,10 @@ vi.mock('@tauri-apps/plugin-os', () => ({ locale: async () => 'ru-RU' }))
 import { CONFIG_KEYS } from '~/lib/config-keys'
 
 afterEach(cleanup)
+// Warm the module graph so the first test does not pay the cold vite transform cost (see renderPreference).
+beforeAll(async () => {
+	await import('~/providers/preference')
+}, 30_000)
 beforeEach(() => {
 	h.storeEntries = []
 	// The previous test's locale switch is kept by paraglide's localStorage strategy.
@@ -41,7 +45,7 @@ describe('язык расшифровки по умолчанию', () => {
 		const { result, real } = await renderPreference([])
 		expect(real.DEFAULT_MODEL_OPTIONS.lang).toBe('auto')
 		expect(result.current.modelOptions.lang).toBe('auto')
-	})
+	}, 30_000)
 
 	it('сохранённый выбор переживает перезапуск', async () => {
 		const saved = { ...(await import('~/providers/preference')).DEFAULT_MODEL_OPTIONS, lang: 'ru' }
