@@ -1,132 +1,41 @@
-# Tyto
-
-Tyto расшифровывает звонки и видео на вашем компьютере, звук и видео остаются у вас. Если включить ИИ-сводку, текст расшифровки уходит в выбранный вами ИИ-сервис. Реплики подписаны по говорящим, результат можно выгрузить в файл.
-
-- [Как установить](docs/install.md)
-- [Скачать последнюю версию](https://github.com/des-e/tyto/releases/latest)
-
-Основано на [Vibe](https://github.com/thewh1teagle/vibe) (MIT)
-
----
-
-# Upstream: Vibe
-
 <p align="center">
-  <a target="blank" href="https://github.com/thewh1teagle/vibe">
-    <img
-        width="96px"
-        alt="Vibe logo"
-        src="./design/logo.png"
-    />
-  </a>
+  <img src="./design/tyto/icon-1024.png" alt="Tyto" width="128" />
 </p>
 
-<h1 align="center">Vibe - Transcribe on your own!</h1>
+<h1 align="center">Tyto</h1>
 
 <p align="center">
-  <strong>⌨️ Transcribe audio and video right on your device</strong>
-  <br/>
+  Расшифровка звонков и видео прямо на вашем компьютере.
 </p>
 
-<p align="center">
-  <a target="_blank" href="https://thewh1teagle.github.io/vibe/">
-    🔗 Download Vibe
-  </a>
-    &nbsp; | &nbsp; Give it a Star ⭐ | &nbsp;
-    <a target="_blank" href="https://thewh1teagle.github.io/vibe/?action=support-vibe">Support the project 🤝</a>
-</p>
+<!-- скриншот главного окна -->
 
-<hr />
+## Что умеет
 
-## Screenshots
+- Расшифровывает аудио и видео локально, с помощью Whisper. Файлы не покидают компьютер.
+- Подписывает реплики по говорящим: «Говорящий 1», «Говорящий 2» и так далее.
+- Встроенный плеер: нажали на реплику и сразу перешли к этому месту записи.
+- Текст расшифровки можно править прямо в окне.
+- Выгружает результат в TXT, MD, SRT, VTT, HTML, JSON, DOCX и PDF.
+- Делает ИИ-сводку через ваш собственный ключ или прокси.
+- Обновляется сам.
+- Работает на Windows (x64) и macOS (универсальная сборка для Intel и Apple Silicon).
 
-<p align="center">
-	<a target="_blank" href="https://thewh1teagle.github.io/vibe/">
-    	<img width=720 src="./design/app-preview-light.png">
-	</a>
-</p>
+## Скачать
 
-# Features 🌟
+- [Последняя версия](https://github.com/des-e/tyto/releases/latest)
+- [Как установить](docs/install.md). Программа пока не подписана платным сертификатом, при первом запуске система покажет предупреждение. В инструкции есть шаги, как его пройти.
 
-- 🌍 Transcribe almost every language
-- 🔒 Ultimate privacy: fully offline transcription, no data ever leaves your device
-- 🎨 User friendly design
-- 🎙️ Transcribe audio / video
-- 🎶 Option to transcribe audio from popular websites (YouTube, Vimeo, Facebook, Twitter and more!)
-- 📂 Batch transcribe multiple files!
-- 📝 Support `SRT`, `VTT`, `TXT`, `HTML`, `PDF`, `JSON`, `DOCX` formats
-- 👀 Realtime preview
-- 🤖 Supports Whisper, Nemotron 3.5, and Parakeet TDT v3 models
-- ✨ Summarize transcripts: Get quick, multilingual summaries using the Claude API
-- 🧠 Ollama support: Do local AI analysis and batch summaries with Ollama
-- 🌐 Translate to English from any language
-- 🖨️ Print transcript directly to any printer
-- 🔄 Automatic updates
-- 💻 Optimized for `GPU` (`macOS`, `Windows`, `Linux`)
-- 🎮 Optimized for `Nvidia` / `AMD` / `Intel` GPUs! (`Vulkan`/`CoreML`)
-- 🔧 Total Freedom: Customize Models Easily via Settings
-- ⚙️ Model arguments for advanced users
-- ⏳ Transcribe system audio
-- 🎤 Transcribe from microphone
-- 🖥️ CLI support: Use Vibe directly from the command line interface! (see `--help`)
-- 👥 Speaker diarization
-- 🎬 Stable timestamps mode for subtitle/movie-grade timing (VAD-backed, slower)
-- 📱 Record from your phone: scan a QR code once, then your computer does the transcribing and sends the text straight back — works on iOS and Android with nothing to install from an app store
-- 📥 Integrate custom models from your own site: Use `vibe://download/?url=<model url>`
-- 📹 Choose caption length optimized for videos / reels
-- ⚡ HTTP API with Swagger docs and agent skills
+## Приватность
 
-# Supported platforms 🖥️
+Записи остаются на вашем компьютере. Единственное исключение: если вы включили ИИ-сводку, текст расшифровки отправляется в выбранный вами сервис. Звук и видео не отправляются никогда. Подробнее в [PRIVACY.md](PRIVACY.md).
 
-`MacOS`
-`Windows`
-`Linux`
+## Для разработчиков
 
-# Contribute 🤝
+Как собрать и запустить проект, описано в [docs/BUILDING.md](docs/BUILDING.md). Устройство приложения: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-## Developers
+## Лицензия и благодарности
 
-Get started with local development [here](docs/BUILDING.md).
+Tyto основан на Vibe (https://github.com/thewh1teagle/vibe) от thewh1teagle, лицензия MIT. Спасибо автору.
 
-PRs are welcomed!
-In addition, you're welcome to add translations.
-
-# Community
-
-[![Discord](https://img.shields.io/badge/chat-discord-7289da.svg)](https://discord.gg/EcxWSstQN8)
-
-# Roadmap 🛣️
-
-You can see the roadmap in [Vibe-Roadmap](https://github.com/users/thewh1teagle/projects/5/views/1)
-
-# Add translation 🌐
-
-See the [translation guide](docs/TRANSLATIONS.md).
-
-# Docs 📄
-
-see [Vibe Docs](https://github.com/thewh1teagle/vibe/tree/main/docs)
-
-# I want to know more!
-
-Medium [post](https://medium.com/@thewh1teagle/creating-vibe-multilingual-audio-transcription-872ab6d9dbb0)
-
-# Issue report
-
-You can open [new issue](https://github.com/thewh1teagle/vibe/issues/new?assignees=octocat&labels=bug&projects=&template=bug_report.yaml&title=[Short+title]) and it's recommend to check [DEBUG.md](docs/DEBUG.md) first.
-
-# Privacy Policy 🔒
-
-Your privacy is important to us. Please review our [Privacy Policy](http://thewh1teagle.github.io/vibe/?action=open-privacy-policy) to understand how we handle your data.
-
-# Credits
-
-Thanks for [tauri.app](https://tauri.app/) for making the best apps framework I ever seen
-
-Thanks for [github.com/whisper.cpp](https://github.com/ggerganov/whisper.cpp) for outstanding interface for the AI model.
-
-Thanks for [openai.com](https://openai.com/) for their amazing [Whisper model](https://openai.com/research/whisper)
-
-Thanks for [github.com](https://github.com/) for their support in open source projects, providing infastructure completely free.
-
-And for all the amazing open source frameworks and libraries which this project uses...
+Текст лицензии и исходное уведомление об авторских правах лежат в файле [LICENSE](LICENSE).
