@@ -33,7 +33,8 @@ const DialogContent = React.forwardRef<React.ElementRef<typeof DialogPrimitive.C
 			<DialogPrimitive.Content
 				ref={ref}
 				className={cn(
-					'fixed start-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] rtl:-translate-x-[-50%] translate-y-[-50%] gap-4 border border-border/70 bg-card/98 p-6 text-foreground shadow-xl duration-200 data-[state=open]:animate-in-dialog data-[state=closed]:animate-out-dialog sm:rounded-xl max-h-[85vh] overflow-y-auto',
+					// Tyto: `tyto-dialog` lets theme.css push the dialog below the macOS traffic lights.
+					'tyto-dialog fixed start-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] rtl:-translate-x-[-50%] translate-y-[-50%] gap-4 border border-border/70 bg-card/98 p-6 text-foreground shadow-xl duration-200 data-[state=open]:animate-in-dialog data-[state=closed]:animate-out-dialog sm:rounded-xl max-h-[85vh] overflow-y-auto',
 					className,
 				)}
 				{...props}>

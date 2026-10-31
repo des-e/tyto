@@ -136,10 +136,11 @@ export default function SettingsPage({ setVisible, scrollTo }: SettingsPageProps
 	const openPrompt = (task: AiTaskId) => openSubpage(task === 'summary' ? 'ai-summary' : 'ai-dictation')
 
 	return (
-		<div className="flex min-h-screen items-center justify-center p-6">
+		// Tyto: tyto-settings-frame/card keep the card below the macOS traffic lights (theme.css).
+		<div className="tyto-settings-frame flex min-h-screen items-center justify-center p-6">
 			<div
 				onMouseDown={(event) => event.stopPropagation()}
-				className="flex h-[640px] max-h-[calc(100dvh-3rem)] w-full max-w-3xl overflow-hidden rounded-[var(--tyto-r-lg)] border border-border/60 bg-card shadow-2xl">
+				className="tyto-settings-card flex h-[640px] max-h-[calc(100dvh-3rem)] w-full max-w-3xl overflow-hidden rounded-[var(--tyto-r-lg)] border border-border/60 bg-card shadow-2xl">
 				<div className="tyto-sidebar flex w-[220px] shrink-0 flex-col border-r border-border bg-sidebar px-2 py-6">
 					<div className="mb-3 flex h-7 items-center px-2">
 						<span className="text-[15px] leading-7 font-semibold tracking-[-0.015em]">{m.settings()}</span>

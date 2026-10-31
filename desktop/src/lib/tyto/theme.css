@@ -1455,3 +1455,27 @@ svg.lucide {
 	outline: 2px solid var(--foreground);
 	outline-offset: 2px;
 }
+
+/*
+ * macOS overlay titlebar: the traffic lights float over the web content at x 16..~68, y ~22..34
+ * (traffic_light_position 16,28 in setup.rs). Modals keep their full-window backdrop, but the
+ * dialog itself must start below the lights, so it never touches or sits under them.
+ * Windows/Linux never get .mac-vibrancy and keep the original layout.
+ */
+html.mac-vibrancy {
+	--tyto-titlebar-inset: 44px;
+}
+
+html.mac-vibrancy .tyto-settings-frame {
+	padding-top: var(--tyto-titlebar-inset);
+}
+
+html.mac-vibrancy .tyto-settings-card {
+	max-height: calc(100dvh - var(--tyto-titlebar-inset) - 1.5rem);
+}
+
+/* Radix dialogs are centered in the space below the inset, not in the whole window. */
+html.mac-vibrancy .tyto-dialog {
+	top: calc(var(--tyto-titlebar-inset) + (100dvh - var(--tyto-titlebar-inset)) / 2);
+	max-height: calc(100dvh - var(--tyto-titlebar-inset) - 1.5rem);
+}
