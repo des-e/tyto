@@ -1,3 +1,16 @@
+# Tyto
+
+Tyto расшифровывает звонки и видео прямо на вашем компьютере. Реплики подписаны по говорящим, результат можно выгрузить в файл.
+
+- [Как установить](docs/install.md)
+- [Скачать последнюю версию](https://github.com/des-e/tyto/releases/latest)
+
+Основано на [Vibe](https://github.com/thewh1teagle/vibe) (MIT)
+
+---
+
+# Upstream: Vibe
+
 <p align="center">
   <a target="blank" href="https://github.com/thewh1teagle/vibe">
     <img
