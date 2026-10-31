@@ -51,7 +51,7 @@ pub struct TranscribeOptions {
     pub vad_model: Option<String>,
 }
 
-pub(crate) const SERVER_DIED: &str = "vibe-server process died during transcription";
+pub(crate) const SERVER_DIED: &str = "tyto-engine process died during transcription";
 
 /// Turn a transcription failure into something diagnosable: a send failure or a
 /// mid-stream decode error is usually the sidecar dying, and only the child
@@ -72,7 +72,7 @@ async fn transcribe_error(server_state: &State<'_, Mutex<ServerState>>, error: e
             let mut command_error = CommandError::from(error);
             let stderr = crate::server::recent_stderr(server_state).await;
             if !stderr.is_empty() {
-                command_error.message.push_str(&format!("\n\nvibe-server stderr: {stderr}"));
+                command_error.message.push_str(&format!("\n\ntyto-engine stderr: {stderr}"));
             }
             command_error
         }
@@ -161,7 +161,7 @@ pub async fn transcribe(
                     completed = true;
                 }
                 ServerEvent::Error { code, message } => {
-                    tracing::error!("vibe-server transcription error: {}", message);
+                    tracing::error!("tyto-engine transcription error: {}", message);
                     let _ = set_progress_bar(&app_handle, None);
                     return Err(CommandError {
                         code: code.unwrap_or_else(|| "internal_error".to_string()),
@@ -184,7 +184,7 @@ pub async fn transcribe(
         // say how it died rather than reporting a truncated stream.
         let message = crate::server::death_report(&server_state, SERVER_DIED)
             .await
-            .unwrap_or_else(|| "vibe-server transcription stream ended before completion".to_string());
+            .unwrap_or_else(|| "tyto-engine transcription stream ended before completion".to_string());
         return Err(CommandError {
             code: "internal_error".to_string(),
             message,

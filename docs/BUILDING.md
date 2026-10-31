@@ -53,7 +53,7 @@ relaunches it.
 
 ## Build the server locally (dev)
 
-The engine lives in `server/` and ships as the `vibe-server` sidecar. To run the
+The engine lives in `server/` and ships as the `tyto-engine` sidecar (`tyto-engine` is the upstream `vibe-server` binary, renamed when bundled). To run the
 app against a build of the tree instead of the pinned release:
 
 ```console
@@ -61,7 +61,7 @@ chore setup            # ffmpeg and the released server, once
 chore server-build     # fetch the ggml libraries, build server/, stage it as the sidecar
 ```
 
-`server-build` puts `vibe-server-<triple>` where `setup` put the release, so
+`server-build` puts `tyto-engine-<triple>` where `setup` put the release, so
 `tauri dev` and `tauri build` pick it up unchanged. See `server/docs/BUILDING.md`
 for the engine on its own.
 

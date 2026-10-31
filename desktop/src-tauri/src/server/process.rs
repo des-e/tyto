@@ -48,7 +48,7 @@ pub(super) fn describe_exit(status: ExitStatus) -> String {
 
 /// An illegal instruction from a binary that runs everywhere else means the CPU is
 /// missing an instruction set the build assumes. Naming it here is what turns these
-/// reports from a bare "vibe-server process died" into something identifiable.
+/// reports from a bare "tyto-engine process died" into something identifiable.
 fn illegal_instruction_hint(status: ExitStatus) -> Option<&'static str> {
     const MESSAGE: &str = "This looks like a CPU without AVX support, or one that advertises AVX2 it cannot run (a Hackintosh with spoofed CPUID does this): the server picks an AVX2 or an AVX build of its CPU backend at startup from what the CPU reports, so it stops on the first instruction it cannot run. Choose the baseline CPU build in Settings → Advanced.";
     is_illegal_instruction(status).then_some(MESSAGE)
@@ -193,7 +193,7 @@ impl ServerProcess {
                     match reader.read_line(&mut line) {
                         Ok(0) => break,
                         Ok(_) => {
-                            tracing::debug!("vibe-server stderr: {}", line.trim());
+                            tracing::debug!("tyto-engine stderr: {}", line.trim());
                             if let Ok(mut buf) = buf_clone.lock() {
                                 buf.push(&line);
                             }
@@ -229,7 +229,7 @@ impl ServerProcess {
             }
             let mut line = String::new();
             while reader.read_line(&mut line).unwrap_or(0) > 0 {
-                tracing::trace!("vibe-server stdout: {}", line.trim());
+                tracing::trace!("tyto-engine stdout: {}", line.trim());
                 line.clear();
             }
         });
@@ -251,7 +251,7 @@ impl ServerProcess {
         // An empty first line means stdout hit EOF: the child is already gone.
         if line.trim().is_empty() {
             let detail = kill_and_describe(&mut child, &stderr_buf);
-            bail!("vibe-server exited before reporting it was ready{detail}");
+            bail!("tyto-engine exited before reporting it was ready{detail}");
         }
 
         let signal: ReadySignal = match serde_json::from_str(line.trim()) {
@@ -261,7 +261,7 @@ impl ServerProcess {
                 bail!("failed to parse server ready signal: {error}{detail}");
             }
         };
-        tracing::debug!("vibe-server ready on port {}", signal.port);
+        tracing::debug!("tyto-engine ready on port {}", signal.port);
 
         Ok(Self {
             port: signal.port,
@@ -348,7 +348,7 @@ impl ServerProcess {
             message.push_str(&format!("\n\n{hint}"));
         }
         if !stderr.is_empty() {
-            message.push_str(&format!("\n\nvibe-server stderr: {stderr}"));
+            message.push_str(&format!("\n\ntyto-engine stderr: {stderr}"));
         }
         Some(message)
     }
@@ -366,7 +366,7 @@ impl ServerProcess {
         let mut last_error = None;
         for attempt in 0..3 {
             if attempt > 0 {
-                if let Some(report) = self.death_report("vibe-server process died during model loading").await {
+                if let Some(report) = self.death_report("tyto-engine process died during model loading").await {
                     bail!("{report}");
                 }
                 tracing::debug!("retrying load_model (attempt {})", attempt + 1);
@@ -374,15 +374,15 @@ impl ServerProcess {
             }
             match self.client.post(&url).json(&body).send().await {
                 Ok(response) if response.status().is_success() => {
-                    tracing::debug!("vibe-server model loaded: {path}");
+                    tracing::debug!("tyto-engine model loaded: {path}");
                     return Ok(());
                 }
-                Ok(response) => bail!("vibe-server load_model failed: {}", response.text().await.unwrap_or_default()),
+                Ok(response) => bail!("tyto-engine load_model failed: {}", response.text().await.unwrap_or_default()),
                 Err(error) => last_error = Some(error),
             }
         }
 
-        if let Some(report) = self.death_report("vibe-server process died during model loading").await {
+        if let Some(report) = self.death_report("tyto-engine process died during model loading").await {
             bail!("{report}");
         }
         let error = Err(last_error.unwrap()).context("failed to send load_model request to server after 3 attempts");
@@ -390,7 +390,7 @@ impl ServerProcess {
         if stderr.is_empty() {
             error
         } else {
-            error.context(format!("vibe-server stderr: {stderr}"))
+            error.context(format!("tyto-engine stderr: {stderr}"))
         }
     }
 
@@ -424,7 +424,7 @@ fn kill_and_describe(child: &mut Child, stderr_buf: &Arc<Mutex<StderrTail>>) -> 
     }
     let stderr = wait_for_stderr_blocking(stderr_buf);
     if !stderr.is_empty() {
-        detail.push_str(&format!("\n\nvibe-server stderr: {stderr}"));
+        detail.push_str(&format!("\n\ntyto-engine stderr: {stderr}"));
     }
     detail
 }

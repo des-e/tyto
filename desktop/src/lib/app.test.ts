@@ -3,8 +3,8 @@ import { issueTitleFrom } from './app'
 
 describe('issueTitleFrom', () => {
 	it('takes the message out of a tracing json line', () => {
-		const log = '{"timestamp":"2026-08-22T11:05:32Z","level":"ERROR","fields":{"message":"vibe-server process died while loading a model"}}'
-		expect(issueTitleFrom(log)).toBe('vibe-server process died while loading a model')
+		const log = '{"timestamp":"2026-08-22T11:05:32Z","level":"ERROR","fields":{"message":"tyto-engine process died while loading a model"}}'
+		expect(issueTitleFrom(log)).toBe('tyto-engine process died while loading a model')
 	})
 
 	it('strips the timestamp and level from a plain line', () => {

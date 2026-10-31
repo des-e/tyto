@@ -21,6 +21,9 @@
 
 !macro NSIS_HOOK_PREINSTALL
     ; Keep one entry per bundled sidecar that can outlive the main application.
+    !insertmacro StopSidecarBeforeInstall "tyto-engine.exe"
+    ; Tyto 0.1.0-0.1.3 shipped the engine as vibe-server.exe; an upgrade must stop
+    ; and delete it so it does not linger in the install folder.
     !insertmacro StopSidecarBeforeInstall "vibe-server.exe"
     ; Installs before 3.1.11 shipped the engine as sona.exe; an upgrade must stop it too.
     !insertmacro StopSidecarBeforeInstall "sona.exe"

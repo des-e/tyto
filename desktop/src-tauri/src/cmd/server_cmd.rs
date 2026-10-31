@@ -10,9 +10,9 @@ pub fn resolve_server_binary(app_handle: &tauri::AppHandle) -> Result<PathBuf> {
     let resource_dir = app_handle.path().resource_dir().context("get resource dir")?;
 
     #[cfg(target_os = "windows")]
-    let binary_name = "vibe-server.exe";
+    let binary_name = "tyto-engine.exe";
     #[cfg(not(target_os = "windows"))]
-    let binary_name = "vibe-server";
+    let binary_name = "tyto-engine";
 
     // Check resource dir (Tauri externalBin places them here)
     let sidecar_path = resource_dir.join(binary_name);
@@ -51,7 +51,7 @@ pub fn resolve_server_binary(app_handle: &tauri::AppHandle) -> Result<PathBuf> {
         return Ok(path);
     }
 
-    bail!("vibe-server binary not found")
+    bail!("tyto-engine binary not found")
 }
 
 pub fn resolve_ffmpeg_path(app_handle: &tauri::AppHandle) -> Option<PathBuf> {

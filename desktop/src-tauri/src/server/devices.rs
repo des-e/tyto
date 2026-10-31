@@ -16,7 +16,7 @@ pub fn list_gpu_devices(binary_path: &Path) -> Result<Vec<GpuDevice>> {
     let output = cmd.output().context("failed to run server devices")?;
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
-        bail!("vibe-server devices failed: {}", stderr.trim());
+        bail!("tyto-engine devices failed: {}", stderr.trim());
     }
 
     serde_json::from_slice(&output.stdout).context("failed to parse server devices output")

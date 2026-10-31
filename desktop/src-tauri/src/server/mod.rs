@@ -214,7 +214,7 @@ impl ServerProcess {
             .context("failed to request model metadata")?;
         if !response.status().is_success() {
             bail!(
-                "vibe-server model metadata failed: {}",
+                "tyto-engine model metadata failed: {}",
                 response.text().await.unwrap_or_default()
             );
         }
@@ -328,7 +328,7 @@ impl ServerProcess {
                     message: parsed.error.message,
                 }));
             }
-            bail!("vibe-server transcribe failed: {}", body);
+            bail!("tyto-engine transcribe failed: {}", body);
         }
 
         let byte_stream = response.bytes_stream().map(|result| result.map_err(std::io::Error::other));

@@ -18,7 +18,7 @@ Vibe is a desktop transcription app built with **Tauri** (Rust + TypeScript fron
 - **Language**: Rust on ggml (`whisper-rs`, `parakeet-rs`, `nemotron-rs`, `vad-rs`, `diarize-rs`)
 - **Location**: `server/` in this repository, its own Cargo workspace; crate and binary `vibe-server`
 - **Purpose**: single local process for audio transcription, model loading, streaming, and diarization, behind an OpenAI-compatible HTTP API
-- Bundled as the `vibe-server` sidecar with the desktop app
+- Bundled as the `tyto-engine` sidecar with the desktop app (`tyto-engine` is the upstream `vibe-server` binary, renamed when bundled)
 - Diarization is in-process via `diarize-rs`; Vibe does not bundle or spawn a separate binary
 - **Build**: `server-libs.yml` publishes the prebuilt ggml libraries (`libraries-ggml-<version>-r<revision>`, inputs under `server/libs/`); `server-release.yml` publishes `server-v*` prereleases; `server-test.yml` runs a release across platforms
 - **Distribution**: the app downloads the release named by `.server-version` at build time (`setup` task in the root `chorefile`); `chore server-build` stages an in-tree build instead
@@ -32,8 +32,8 @@ Vibe is a desktop transcription app built with **Tauri** (Rust + TypeScript fron
 
 1. Vibe CI runs `chore setup <target-triple>`
 2. It downloads the prebuilt `vibe-server` from the `server-v*` release in `.server-version`
-3. Binaries placed in `desktop/src-tauri/binaries/`
-4. Tauri bundles `vibe-server` and, where configured, `ffmpeg` into the final app
+3. Binaries placed in `desktop/src-tauri/binaries/` (the server as `tyto-engine-<triple>`)
+4. Tauri bundles `tyto-engine` and, where configured, `ffmpeg` into the final app
 
 ## Key Point for Agents
 

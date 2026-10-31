@@ -24,7 +24,7 @@ export function isUserError(code: string): code is UserErrorCode {
  * it — the backend reports `internal_error` — so the prose is the only marker, kept here rather
  * than at each call site (see `src-tauri/src/cmd/transcribe.rs`, `SERVER_DIED`).
  */
-const SERVER_DIED_PREFIX = 'vibe-server process died'
+const SERVER_DIED_PREFIX = 'tyto-engine process died'
 
 export type FatalRunError = 'no_model' | 'engine_died'
 

@@ -264,7 +264,7 @@ impl HandoffHandler {
                 // the sidecar dying, so report how it died when it did.
                 let message = crate::server::death_report(&server_state, crate::cmd::transcribe::SERVER_DIED)
                     .await
-                    .unwrap_or_else(|| "vibe-server transcription stream ended before completion".to_string());
+                    .unwrap_or_else(|| "tyto-engine transcription stream ended before completion".to_string());
                 return Err(TransferError::new("internal_error", message));
             }
         };

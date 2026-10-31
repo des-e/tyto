@@ -7,7 +7,7 @@
 # `<name>-aarch64-apple-darwin` and `<name>-x86_64-apple-darwin` into <bin_dir>.
 # Tauri building `--target universal-apple-darwin` looks for
 # `<name>-universal-apple-darwin`, so every Mach-O pair with the same name is
-# merged with `lipo -create`. vibe-server and ffmpeg are required; any other
+# merged with `lipo -create`. tyto-engine and ffmpeg are required; any other
 # pair (e.g. a dylib shipped next to them) is merged too. macOS runners only.
 set -eu
 
@@ -26,7 +26,7 @@ if [ ! -d "$bin_dir" ]; then
     exit 1
 fi
 
-for required in vibe-server ffmpeg; do
+for required in tyto-engine ffmpeg; do
     for triple in "$arm" "$x86"; do
         if [ ! -f "$bin_dir/$required-$triple" ]; then
             echo "error: $bin_dir/$required-$triple is missing (run chore setup $triple)" >&2

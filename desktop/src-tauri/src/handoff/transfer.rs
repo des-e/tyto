@@ -89,7 +89,7 @@ pub(super) async fn server_transfer_error(
             if stderr.is_empty() {
                 TransferError::from(error)
             } else {
-                TransferError::new("internal_error", format!("{error:#}\n\nvibe-server stderr: {stderr}"))
+                TransferError::new("internal_error", format!("{error:#}\n\ntyto-engine stderr: {stderr}"))
             }
         }
     }
