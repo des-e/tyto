@@ -4,6 +4,7 @@ import { act, cleanup, render, screen, waitFor, within } from '@testing-library/
 import { readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import postcss from 'postcss'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -192,18 +193,28 @@ describe('OwlWalk: движение', () => {
 		expect(block('\\.tyto-owl-walk-mover')).toMatch(/\b40s linear\b/)
 	})
 
-	it('на остановках лапы и корпус в покое, шаги только на ходу', () => {
-		const stepA = css.match(/@keyframes tyto-owl-walk-step-a\s*\{([\s\S]*?)\n\}/)?.[1] ?? ''
-		const rest = stepA.match(/([^{}]*)\{\s*transform: translate\(0, 0\) rotate\(0deg\)/)?.[1] ?? ''
-		// 0-2.5%, 47.5-52.5% and 97.5-100% are the stands: rest poses at their edges.
-		for (const edge of ['0%', '2.5%', '47.5%', '52.5%', '97.5%', '100%']) expect(rest).toContain(edge)
-		// 45 steps per walking segment, none inside the stands.
-		const steps = [...stepA.matchAll(/(\d+(?:\.\d+)?)%/g)].map((m) => Number(m[1]))
-		const walking = steps.filter((p) => p > 2.5 && p < 47.5 || p > 52.5 && p < 97.5)
-		expect(walking.length).toBe(88)
-		expect(steps.filter((p) => p > 47.5 && p < 52.5 || p > 97.5 && p < 100)).toEqual([])
+	it('на остановках лапы и корпус в покое, шаги только на ходу (разбор настоящим CSS-парсером)', () => {
+		const root = postcss.parse(css)
+		const rules = (name: string) => {
+			const at = root.nodes.find((node) => node.type === 'atrule' && node.name === 'keyframes' && node.params === name) as postcss.AtRule
+			expect(at, name).toBeTruthy()
+			return (at.nodes ?? []) as postcss.Rule[]
+		}
+		// 6 rest stops (0, 2.5, 47.5, 52.5, 97.5, 100) + 88 pose stops (2 walking segments x 44).
+		for (const name of ['tyto-owl-walk-bob', 'tyto-owl-walk-step-a', 'tyto-owl-walk-step-b']) {
+			const stops = rules(name).flatMap((rule) => rule.selector.split(',').map((s) => s.trim()))
+			// Every stop is a valid keyframe selector: no comma decimals (they would drop the whole rule).
+			for (const stop of stops) expect(stop, name).toMatch(/^\d+(\.\d+)?%$/)
+			expect(stops.length, name).toBe(94)
+			expect(new Set(stops).size, name).toBe(94)
+			for (const rule of rules(name)) expect(rule.toString(), name).toContain('transform:')
+			const values = stops.map((s) => parseFloat(s))
+			expect(values.filter((p) => (p > 47.5 && p < 52.5) || (p > 97.5 && p < 100))).toEqual([])
+			expect(values.filter((p) => (p > 2.5 && p < 47.5) || (p > 52.5 && p < 97.5)).length).toBe(88)
+		}
+		const rest = rules('tyto-owl-walk-step-a').find((rule) => rule.toString().includes('translate(0, 0) rotate(0deg)'))
+		expect(rest?.selector.split(',').map((s) => s.trim())).toEqual(['0%', '2.5%', '47.5%', '52.5%', '97.5%', '100%'])
 	})
-
 	it('при prefers-reduced-motion сова без анимации', () => {
 		const reduced = css.match(/@media \(prefers-reduced-motion: reduce\)\s*\{([\s\S]*?)\n\}/g)?.join('\n') ?? ''
 		expect(reduced).toMatch(/\.tyto-owl-walk[^{]*\{[^}]*animation: none/)
