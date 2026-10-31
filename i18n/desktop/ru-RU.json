@@ -562,7 +562,7 @@
 	"trayHide": "Скрыть Tyto",
 	"trayQuit": "Выйти из Tyto",
 	"launchAtStartup": "Запускать вместе с системой",
-	"launchAtStartupInfo": "Tyto откроется сам, когда вы войдете в Windows.",
+	"launchAtStartupInfo": "Tyto откроется сам, когда вы войдете в систему.",
 	"couldNotEnableLaunchAtStartup": "Не удалось включить запуск при входе в систему: {error}",
 	"couldNotDisableLaunchAtStartup": "Не удалось отключить запуск при входе в систему: {error}",
 	"preventSleep": "Не давать компьютеру засыпать",
