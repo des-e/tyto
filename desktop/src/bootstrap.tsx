@@ -5,6 +5,7 @@ import './globals.css'
 import './lib/tyto/theme.css'
 import { loadConfigStore } from './lib/config-store'
 import { runMigrations } from './lib/migrations'
+import { applySystemLocale } from './lib/tyto/system-locale'
 import Root from './root'
 
 /**
@@ -15,6 +16,8 @@ import Root from './root'
 async function start() {
 	await loadConfigStore()
 	runMigrations()
+	// Tyto: first run takes the interface language from the system (before the first render).
+	await applySystemLocale()
 	// Native registrations outlive a webview reload, including their dead JS callbacks.
 	// Clear them before either shortcut provider mounts. Auxiliary windows must never
 	// clear the main window's live shortcuts when their own webviews start.
