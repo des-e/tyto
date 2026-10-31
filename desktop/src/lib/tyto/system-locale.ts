@@ -1,5 +1,7 @@
 import * as osExt from '@tauri-apps/plugin-os'
-import { baseLocale, isLocale, locales, localStorageKey, setLocale } from '~/paraglide/runtime.js'
+import { CONFIG_KEYS } from '~/lib/config-keys'
+import { readConfig, writeConfig } from '~/lib/config-store'
+import { baseLocale, getLocale, isLocale, locales, localStorageKey, setLocale } from '~/paraglide/runtime.js'
 
 function normalize(tag: string) {
 	return tag.trim().replace('_', '-').toLowerCase()
@@ -43,10 +45,19 @@ async function systemLocaleTags(): Promise<string[]> {
  */
 export async function applySystemLocale() {
 	try {
+		// An explicit choice in the config (what Settings writes) wins and is never overwritten.
+		const configured = readConfig<unknown>(CONFIG_KEYS.displayLanguage, null)
+		if (typeof configured === 'string' && isLocale(configured)) {
+			if (getLocale() !== configured) setLocale(configured, { reload: false })
+			return
+		}
 		const saved = localStorage.getItem(localStorageKey)
 		if (saved !== null && isLocale(saved)) return
 		const locale = pickSupportedLocale(await systemLocaleTags())
 		setLocale(locale as typeof baseLocale, { reload: false })
+		// Preference state, tray, text direction and the meeting-prompt window read the config value,
+		// and PreferenceProvider initialises from it on this same run.
+		writeConfig(CONFIG_KEYS.displayLanguage, locale)
 	} catch (error) {
 		console.error('tyto: system language detection skipped', error)
 	}

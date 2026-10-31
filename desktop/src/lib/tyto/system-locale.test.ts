@@ -10,7 +10,9 @@ vi.mock('@tauri-apps/plugin-os', () => ({
 	},
 }))
 
-import { localStorageKey, getLocale } from '~/paraglide/runtime.js'
+import { CONFIG_KEYS } from '~/lib/config-keys'
+import { deleteConfig, readConfig, writeConfig } from '~/lib/config-store'
+import { localStorageKey, getLocale, setLocale } from '~/paraglide/runtime.js'
 import { applySystemLocale, pickSupportedLocale } from './system-locale'
 
 describe('pickSupportedLocale', () => {
@@ -39,6 +41,9 @@ describe('pickSupportedLocale', () => {
 describe('applySystemLocale', () => {
 	beforeEach(() => {
 		localStorage.clear()
+		deleteConfig(CONFIG_KEYS.displayLanguage)
+		setLocale('en-US', { reload: false })
+		localStorage.clear()
 		h.os = 'ru-RU'
 	})
 
@@ -46,6 +51,19 @@ describe('applySystemLocale', () => {
 		await applySystemLocale()
 		expect(getLocale()).toBe('ru-RU')
 		expect(localStorage.getItem(localStorageKey)).toBe('ru-RU')
+	})
+
+	it('первый запуск: язык пишется и в конфиг displayLanguage', async () => {
+		await applySystemLocale()
+		expect(readConfig(CONFIG_KEYS.displayLanguage, null)).toBe('ru-RU')
+	})
+
+	it('явный displayLanguage в конфиге не перезаписывается', async () => {
+		writeConfig(CONFIG_KEYS.displayLanguage, 'de-DE')
+		await applySystemLocale()
+		expect(readConfig(CONFIG_KEYS.displayLanguage, null)).toBe('de-DE')
+		expect(getLocale()).toBe('de-DE')
+		expect(localStorage.getItem(localStorageKey)).toBe('de-DE')
 	})
 
 	it('сохранённый язык есть: определение пропускается', async () => {

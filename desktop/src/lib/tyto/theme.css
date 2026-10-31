@@ -379,7 +379,10 @@ svg.lucide {
  * relative to the body, and the body must move forward at the same 20 px/s.
  * On a ~400 px strip the track is ~360 px (400 - 40): one pass = 360 / 20 = 18 s.
  * The mover is linear (constant speed) and stands still 2 s at each edge (turning in the middle):
- * cycle = 2 * (18 s + 2 s) = 40 s. Percentages: stand 0-2.5%, walk 2.5-47.5% (45% = 18 s),
+ * cycle = 2 * (18 s + 2 s) = 40 s.
+ * The legs and the bob run on the same 40 s timeline: one step = 1% of it, keyframes alternate
+ * the two foot poses only inside the walking segments (45 steps each) and sit at rest (feet down,
+ * body level) during the stands. Percentages: stand 0-2.5%, walk 2.5-47.5% (45% = 18 s),
  * stand 47.5-52.5%, walk back 52.5-97.5%, stand 97.5-100%. On a wider/narrower strip the speed
  * changes with the width (a fixed 40 s cycle), within roughly +-25% for 300-500 px.
  */
@@ -409,28 +412,316 @@ svg.lucide {
 }
 
 @keyframes tyto-owl-walk-bob {
-	0% {
+	0%,
+	2.5%,
+	47.5%,
+	52.5%,
+	97.5%,
+	100% {
 		transform: translateY(0);
 	}
-	100% {
+
+	3,5%,
+	5,5%,
+	7,5%,
+	9,5%,
+	11,5%,
+	13,5%,
+	15,5%,
+	17,5%,
+	19,5%,
+	21,5%,
+	23,5%,
+	25,5%,
+	27,5%,
+	29,5%,
+	31,5%,
+	33,5%,
+	35,5%,
+	37,5%,
+	39,5%,
+	41,5%,
+	43,5%,
+	45,5%,
+	53,5%,
+	55,5%,
+	57,5%,
+	59,5%,
+	61,5%,
+	63,5%,
+	65,5%,
+	67,5%,
+	69,5%,
+	71,5%,
+	73,5%,
+	75,5%,
+	77,5%,
+	79,5%,
+	81,5%,
+	83,5%,
+	85,5%,
+	87,5%,
+	89,5%,
+	91,5%,
+	93,5%,
+	95,5% {
+		transform: translateY(0);
+	}
+
+	4,5%,
+	6,5%,
+	8,5%,
+	10,5%,
+	12,5%,
+	14,5%,
+	16,5%,
+	18,5%,
+	20,5%,
+	22,5%,
+	24,5%,
+	26,5%,
+	28,5%,
+	30,5%,
+	32,5%,
+	34,5%,
+	36,5%,
+	38,5%,
+	40,5%,
+	42,5%,
+	44,5%,
+	46,5%,
+	54,5%,
+	56,5%,
+	58,5%,
+	60,5%,
+	62,5%,
+	64,5%,
+	66,5%,
+	68,5%,
+	70,5%,
+	72,5%,
+	74,5%,
+	76,5%,
+	78,5%,
+	80,5%,
+	82,5%,
+	84,5%,
+	86,5%,
+	88,5%,
+	90,5%,
+	92,5%,
+	94,5%,
+	96,5% {
 		transform: translateY(-14px);
 	}
 }
 
 @keyframes tyto-owl-walk-step-a {
-	0% {
+	0%,
+	2.5%,
+	47.5%,
+	52.5%,
+	97.5%,
+	100% {
+		transform: translate(0, 0) rotate(0deg);
+	}
+
+	3,5%,
+	5,5%,
+	7,5%,
+	9,5%,
+	11,5%,
+	13,5%,
+	15,5%,
+	17,5%,
+	19,5%,
+	21,5%,
+	23,5%,
+	25,5%,
+	27,5%,
+	29,5%,
+	31,5%,
+	33,5%,
+	35,5%,
+	37,5%,
+	39,5%,
+	41,5%,
+	43,5%,
+	45,5%,
+	53,5%,
+	55,5%,
+	57,5%,
+	59,5%,
+	61,5%,
+	63,5%,
+	65,5%,
+	67,5%,
+	69,5%,
+	71,5%,
+	73,5%,
+	75,5%,
+	77,5%,
+	79,5%,
+	81,5%,
+	83,5%,
+	85,5%,
+	87,5%,
+	89,5%,
+	91,5%,
+	93,5%,
+	95,5% {
 		transform: translate(-40px, 0) rotate(10deg);
 	}
-	100% {
+
+	4,5%,
+	6,5%,
+	8,5%,
+	10,5%,
+	12,5%,
+	14,5%,
+	16,5%,
+	18,5%,
+	20,5%,
+	22,5%,
+	24,5%,
+	26,5%,
+	28,5%,
+	30,5%,
+	32,5%,
+	34,5%,
+	36,5%,
+	38,5%,
+	40,5%,
+	42,5%,
+	44,5%,
+	46,5%,
+	54,5%,
+	56,5%,
+	58,5%,
+	60,5%,
+	62,5%,
+	64,5%,
+	66,5%,
+	68,5%,
+	70,5%,
+	72,5%,
+	74,5%,
+	76,5%,
+	78,5%,
+	80,5%,
+	82,5%,
+	84,5%,
+	86,5%,
+	88,5%,
+	90,5%,
+	92,5%,
+	94,5%,
+	96,5% {
 		transform: translate(80px, -22px) rotate(-12deg);
 	}
 }
 
 @keyframes tyto-owl-walk-step-b {
-	0% {
+	0%,
+	2.5%,
+	47.5%,
+	52.5%,
+	97.5%,
+	100% {
+		transform: translate(0, 0) rotate(0deg);
+	}
+
+	3,5%,
+	5,5%,
+	7,5%,
+	9,5%,
+	11,5%,
+	13,5%,
+	15,5%,
+	17,5%,
+	19,5%,
+	21,5%,
+	23,5%,
+	25,5%,
+	27,5%,
+	29,5%,
+	31,5%,
+	33,5%,
+	35,5%,
+	37,5%,
+	39,5%,
+	41,5%,
+	43,5%,
+	45,5%,
+	53,5%,
+	55,5%,
+	57,5%,
+	59,5%,
+	61,5%,
+	63,5%,
+	65,5%,
+	67,5%,
+	69,5%,
+	71,5%,
+	73,5%,
+	75,5%,
+	77,5%,
+	79,5%,
+	81,5%,
+	83,5%,
+	85,5%,
+	87,5%,
+	89,5%,
+	91,5%,
+	93,5%,
+	95,5% {
 		transform: translate(80px, -22px) rotate(-12deg);
 	}
-	100% {
+
+	4,5%,
+	6,5%,
+	8,5%,
+	10,5%,
+	12,5%,
+	14,5%,
+	16,5%,
+	18,5%,
+	20,5%,
+	22,5%,
+	24,5%,
+	26,5%,
+	28,5%,
+	30,5%,
+	32,5%,
+	34,5%,
+	36,5%,
+	38,5%,
+	40,5%,
+	42,5%,
+	44,5%,
+	46,5%,
+	54,5%,
+	56,5%,
+	58,5%,
+	60,5%,
+	62,5%,
+	64,5%,
+	66,5%,
+	68,5%,
+	70,5%,
+	72,5%,
+	74,5%,
+	76,5%,
+	78,5%,
+	80,5%,
+	82,5%,
+	84,5%,
+	86,5%,
+	88,5%,
+	90,5%,
+	92,5%,
+	94,5%,
+	96,5% {
 		transform: translate(-40px, 0) rotate(10deg);
 	}
 }
@@ -462,7 +753,7 @@ svg.lucide {
 }
 
 .tyto-owl-walk-body {
-	animation: tyto-owl-walk-bob 0.4s ease-in-out infinite alternate;
+	animation: tyto-owl-walk-bob 40s ease-in-out infinite;
 }
 
 .tyto-owl-walk-foot {
@@ -471,12 +762,12 @@ svg.lucide {
 
 .tyto-owl-walk-foot-back {
 	transform-origin: 475px 795px;
-	animation: tyto-owl-walk-step-a 0.4s ease-in-out infinite alternate;
+	animation: tyto-owl-walk-step-a 40s ease-in-out infinite;
 }
 
 .tyto-owl-walk-foot-front {
 	transform-origin: 575px 795px;
-	animation: tyto-owl-walk-step-b 0.4s ease-in-out infinite alternate;
+	animation: tyto-owl-walk-step-b 40s ease-in-out infinite;
 }
 
 /* Stopped (no connection): the owl stands where it was, feet down, facing the way it walked. */

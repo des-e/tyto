@@ -188,8 +188,20 @@ describe('OwlWalk: движение', () => {
 	})
 
 	it('шаг 0.4 с, цикл туда и обратно 40 с, ход линейный', () => {
-		expect(block('\\.tyto-owl-walk-body')).toMatch(/0\.4s/)
+		expect(block('\\.tyto-owl-walk-body')).toMatch(/\b40s\b/)
 		expect(block('\\.tyto-owl-walk-mover')).toMatch(/\b40s linear\b/)
+	})
+
+	it('на остановках лапы и корпус в покое, шаги только на ходу', () => {
+		const stepA = css.match(/@keyframes tyto-owl-walk-step-a\s*\{([\s\S]*?)\n\}/)?.[1] ?? ''
+		const rest = stepA.match(/([^{}]*)\{\s*transform: translate\(0, 0\) rotate\(0deg\)/)?.[1] ?? ''
+		// 0-2.5%, 47.5-52.5% and 97.5-100% are the stands: rest poses at their edges.
+		for (const edge of ['0%', '2.5%', '47.5%', '52.5%', '97.5%', '100%']) expect(rest).toContain(edge)
+		// 45 steps per walking segment, none inside the stands.
+		const steps = [...stepA.matchAll(/(\d+(?:\.\d+)?)%/g)].map((m) => Number(m[1]))
+		const walking = steps.filter((p) => p > 2.5 && p < 47.5 || p > 52.5 && p < 97.5)
+		expect(walking.length).toBe(88)
+		expect(steps.filter((p) => p > 47.5 && p < 52.5 || p > 97.5 && p < 100)).toEqual([])
 	})
 
 	it('при prefers-reduced-motion сова без анимации', () => {
