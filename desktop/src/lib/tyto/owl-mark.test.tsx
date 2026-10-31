@@ -81,6 +81,6 @@ describe('sidebar owl blinks when a transcription finishes (difference 12)', () 
 
 	it('the sidebar header uses it', () => {
 		const sidebar = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), '../../pages/main/components/recents-sidebar.tsx'), 'utf-8')
-		expect(sidebar).toMatch(/<FinishBlinkOwl jobs=\{queue\.jobs\}/)
+		expect(sidebar).toMatch(/<FinishBlinkWordmark jobs=\{queue\.jobs\}/)
 	})
 })

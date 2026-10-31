@@ -10,7 +10,7 @@ type BlinkJob = { id: string; status: string }
  * appear already done (history, reopened projects) never blink; each new finish remounts the mark
  * so the one-shot animation runs again. Reduced motion keeps it static (theme.css).
  */
-export function FinishBlinkOwl({ jobs, ...props }: OwlProps & { jobs: BlinkJob[] }) {
+export function useFinishBlinks(jobs: BlinkJob[]): number {
 	const statuses = useRef(new Map(jobs.map((job) => [job.id, job.status])))
 	const [blinks, setBlinks] = useState(0)
 	useEffect(() => {
@@ -18,6 +18,11 @@ export function FinishBlinkOwl({ jobs, ...props }: OwlProps & { jobs: BlinkJob[]
 		statuses.current = new Map(jobs.map((job) => [job.id, job.status]))
 		if (finished) setBlinks((count) => count + 1)
 	}, [jobs])
+	return blinks
+}
+
+export function FinishBlinkOwl({ jobs, ...props }: OwlProps & { jobs: BlinkJob[] }) {
+	const blinks = useFinishBlinks(jobs)
 	return <OwlMark key={blinks} blink={blinks > 0} {...props} />
 }
 

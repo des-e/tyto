@@ -1,8 +1,9 @@
 <p align="center">
-  <img src="./design/tyto/icon-1024.png" alt="Tyto" width="128" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./design/tyto/logo/lockup-horizontal-dark.png" />
+    <img src="./design/tyto/logo/lockup-horizontal-light.png" alt="Tyto" width="480" />
+  </picture>
 </p>
-
-<h1 align="center">Tyto</h1>
 
 <p align="center">
   Расшифровка звонков и видео прямо на вашем компьютере.
