@@ -369,27 +369,41 @@ svg.lucide {
 }
 
 /*
- * The walking owl of the first run (OwlWalk). One pass across the strip takes ~4 s (8 s there and
- * back), one step 0.32 s. The track is the strip minus the owl's width, so translateX(100%) of the
- * mover puts the owl flush with the right edge. The owl faces right on the way there and is mirrored
- * with scaleX(-1) on the way back. Transform only.
+ * The walking owl of the first run (OwlWalk). The track is the strip minus the owl's width, so
+ * translateX(100%) of the mover puts the owl flush with the right edge. The owl faces right on the
+ * way there and is mirrored with scaleX(-1) on the way back. Transform only.
+ *
+ * Ground speed = stride (no sliding). The owl is drawn 40 px wide from a 600-unit viewBox, so
+ * 1 unit = 40 / 600 = 0.0667 px. A foot swings from translateX(-40) to translateX(80) in one step:
+ * 120 units = 8 px. A step lasts 0.4 s, so the planted foot moves back 8 px / 0.4 s = 20 px/s
+ * relative to the body, and the body must move forward at the same 20 px/s.
+ * On a ~400 px strip the track is ~360 px (400 - 40): one pass = 360 / 20 = 18 s.
+ * The mover is linear (constant speed) and stands still 2 s at each edge (turning in the middle):
+ * cycle = 2 * (18 s + 2 s) = 40 s. Percentages: stand 0-2.5%, walk 2.5-47.5% (45% = 18 s),
+ * stand 47.5-52.5%, walk back 52.5-97.5%, stand 97.5-100%. On a wider/narrower strip the speed
+ * changes with the width (a fixed 40 s cycle), within roughly +-25% for 300-500 px.
  */
 @keyframes tyto-owl-walk-x {
 	0%,
+	2.5% {
+		transform: translateX(0);
+	}
+	47.5%,
+	52.5% {
+		transform: translateX(100%);
+	}
+	97.5%,
 	100% {
 		transform: translateX(0);
 	}
-	50% {
-		transform: translateX(100%);
-	}
 }
 
+/* The flip happens at 50%, in the middle of the stand at the right edge, and at 0% on the left. */
 @keyframes tyto-owl-walk-face {
 	0% {
 		transform: scaleX(1);
 	}
-	50%,
-	100% {
+	50% {
 		transform: scaleX(-1);
 	}
 }
@@ -405,19 +419,19 @@ svg.lucide {
 
 @keyframes tyto-owl-walk-step-a {
 	0% {
-		transform: translate(-18px, 0) rotate(10deg);
+		transform: translate(-40px, 0) rotate(10deg);
 	}
 	100% {
-		transform: translate(22px, -22px) rotate(-12deg);
+		transform: translate(80px, -22px) rotate(-12deg);
 	}
 }
 
 @keyframes tyto-owl-walk-step-b {
 	0% {
-		transform: translate(22px, -22px) rotate(-12deg);
+		transform: translate(80px, -22px) rotate(-12deg);
 	}
 	100% {
-		transform: translate(-18px, 0) rotate(10deg);
+		transform: translate(-40px, 0) rotate(10deg);
 	}
 }
 
@@ -439,16 +453,16 @@ svg.lucide {
 .tyto-owl-walk-mover {
 	width: 100%;
 	height: 100%;
-	animation: tyto-owl-walk-x 8s ease-in-out infinite;
+	animation: tyto-owl-walk-x 40s linear infinite;
 }
 
 .tyto-owl-walk-owl {
 	display: block;
-	animation: tyto-owl-walk-face 8s step-end infinite;
+	animation: tyto-owl-walk-face 40s step-end infinite;
 }
 
 .tyto-owl-walk-body {
-	animation: tyto-owl-walk-bob 0.32s ease-in-out infinite alternate;
+	animation: tyto-owl-walk-bob 0.4s ease-in-out infinite alternate;
 }
 
 .tyto-owl-walk-foot {
@@ -457,12 +471,12 @@ svg.lucide {
 
 .tyto-owl-walk-foot-back {
 	transform-origin: 475px 795px;
-	animation: tyto-owl-walk-step-a 0.32s ease-in-out infinite alternate;
+	animation: tyto-owl-walk-step-a 0.4s ease-in-out infinite alternate;
 }
 
 .tyto-owl-walk-foot-front {
 	transform-origin: 575px 795px;
-	animation: tyto-owl-walk-step-b 0.32s ease-in-out infinite alternate;
+	animation: tyto-owl-walk-step-b 0.4s ease-in-out infinite alternate;
 }
 
 /* Stopped (no connection): the owl stands where it was, feet down, facing the way it walked. */

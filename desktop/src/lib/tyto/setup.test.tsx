@@ -187,9 +187,9 @@ describe('OwlWalk: движение', () => {
 		}
 	})
 
-	it('шаг 0.32 с, проход около 4 с', () => {
-		expect(block('\\.tyto-owl-walk-body')).toMatch(/0\.32s/)
-		expect(block('\\.tyto-owl-walk-mover')).toMatch(/\b8s\b/)
+	it('шаг 0.4 с, цикл туда и обратно 40 с, ход линейный', () => {
+		expect(block('\\.tyto-owl-walk-body')).toMatch(/0\.4s/)
+		expect(block('\\.tyto-owl-walk-mover')).toMatch(/\b40s linear\b/)
 	})
 
 	it('при prefers-reduced-motion сова без анимации', () => {
